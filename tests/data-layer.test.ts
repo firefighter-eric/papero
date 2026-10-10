@@ -212,7 +212,11 @@ describe('processed data export', () => {
     try {
       await mkdir(path.join(paperDir, 'assets'), { recursive: true })
       await writeFile(path.join(dataDir, 'catalog.json'), JSON.stringify({ schemaVersion: 1, papers: [entry] }))
-      await writeFile(path.join(paperDir, 'paper.json'), JSON.stringify({ ...paper(), assets: [{ filename: 'figure.png', bytes: 10, sha256: createHash('sha256').update('test image').digest('hex') }] }))
+      const source = paper()
+      const image = '<img src="assets/figure.png" alt="Architecture">'
+      source.blocks[0].en += image
+      source.blocks[0].zh = `${source.blocks[0].zh ?? ''}${image}`
+      await writeFile(path.join(paperDir, 'paper.json'), JSON.stringify({ ...source, assets: [{ filename: 'figure.png', bytes: 10, sha256: createHash('sha256').update('test image').digest('hex') }] }))
       await writeFile(path.join(paperDir, 'source.html'), '<html>raw source</html>')
       await writeFile(path.join(paperDir, 'translation-checkpoint.json'), '{"private":"checkpoint"}')
       await writeFile(path.join(paperDir, 'assets', 'figure.png'), 'test image')

@@ -20,6 +20,7 @@ export function Sidebar({ papers, selectedId, sections, activeSection, mobile, o
   const [query, setQuery] = useState('')
   const aside = useRef<HTMLElement>(null)
   const search = query.trim().toLocaleLowerCase()
+  const sourceOnlySelected = papers.find((paper) => paper.id === selectedId)?.access === 'source-only'
   const matches = papers.filter((paper) => [paper.title, paper.titleZh, ...paper.authors, ...paper.tags, paper.arxivId, paper.year]
     .filter(Boolean).join(' ').toLocaleLowerCase().includes(search))
 
@@ -61,7 +62,8 @@ export function Sidebar({ papers, selectedId, sections, activeSection, mobile, o
           onClick={() => { onSelect(paper.id); if (mobile) onClose() }}>
           <span className="paper-card-title">{paper.title}</span>
           <span className="paper-card-meta">{paper.arxivId === null && <>官方文章<span aria-hidden="true"> · </span></>}
-            {paper.authors[0]?.split(' ').at(-1) || (paper.arxivId === null ? 'Qwen' : 'arXiv')}{paper.authors.length > 1 ? ' et al.' : ''}<span aria-hidden="true"> · </span>{paper.year}</span>
+            {paper.authors[0]?.split(' ').at(-1) || (paper.arxivId === null ? '官方来源' : 'arXiv')}{paper.authors.length > 1 ? ' et al.' : ''}<span aria-hidden="true"> · </span>{paper.year}
+            {paper.access === 'source-only' && <><span aria-hidden="true"> · </span>来源条目</>}</span>
         </button>)}
         {!loading && matches.length === 0 && <p className="sidebar-hint">{query ? '没有找到相关论文。' : '论文库暂无内容。'}</p>}
       </nav>
@@ -75,7 +77,7 @@ export function Sidebar({ papers, selectedId, sections, activeSection, mobile, o
             onClick={() => { onNavigate(section.id); if (mobile) onClose() }}>
             {section.titleZh || section.title}
           </button>)}
-          {sections.length === 0 && <p className="sidebar-hint">选择论文后显示目录。</p>}
+          {sections.length === 0 && <p className="sidebar-hint">{sourceOnlySelected ? '全文保留在本地，本站展示来源信息。' : '选择论文后显示目录。'}</p>}
         </nav>
       </div>
       <div className="data-status"><Database size={16} strokeWidth={1.4} aria-hidden="true" />

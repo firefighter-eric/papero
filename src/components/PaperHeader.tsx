@@ -24,7 +24,7 @@ export function PaperHeader({ entry, paper }: { entry: CatalogPaper; paper: Pape
     </div> : <p className="paper-authors" lang="en">{authorNames}</p>}
     <p className="paper-metadata"><span>{paper?.year || entry.year}</span><span aria-hidden="true">·</span>
       <span>{entry.arxivId === null ? '官方文章' : `arXiv:${entry.arxivId}`}</span><span aria-hidden="true">·</span>
-      <span>{complete ? '机器翻译' : translated > 0 ? `机器翻译 · ${Math.round(translated / Math.max(1, total) * 100)}% 已完成` : '中文翻译待生成'}</span>
+      <span>{entry.access === 'source-only' ? '来源条目' : complete ? '机器翻译' : translated > 0 ? `机器翻译 · ${Math.round(translated / Math.max(1, total) * 100)}% 已完成` : '中文翻译待生成'}</span>
     </p>
   </header>
 }

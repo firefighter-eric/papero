@@ -11,7 +11,7 @@ export type PaperBlockKind =
   | 'list'
   | 'code'
 
-export interface CatalogPaper {
+interface CatalogPaperMetadata {
   id: string
   arxivId: string | null
   sourceKind?: SourceKind
@@ -27,9 +27,28 @@ export interface CatalogPaper {
   translationStatus: TranslationStatus
   blockCount: number
   sectionCount: number
+}
+
+export interface FullTextCatalogPaper extends CatalogPaperMetadata {
+  access?: undefined
   /** A path relative to VITE_PAPER_DATA_URL, never an absolute URL. */
   dataPath: string
 }
+
+/** A bibliographic entry whose full text is retained outside the public library. */
+export interface SourceOnlyCatalogPaper extends CatalogPaperMetadata {
+  access: 'source-only'
+  sourceKind: SourceKind
+  titleZh: null
+  dataPath: null
+  translationStatus: 'pending'
+  blockCount: 0
+  sectionCount: 0
+  abstract: ''
+  abstractZh: ''
+}
+
+export type CatalogPaper = FullTextCatalogPaper | SourceOnlyCatalogPaper
 
 export interface PaperCatalog {
   schemaVersion: 1

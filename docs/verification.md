@@ -70,12 +70,13 @@ Splash 测试后使用 2 路共享队列。4 路的总吞吐量提升很小，�
 
 首次新模型测试遇到空正文响应。实际 JSON 被 LM Studio 放到了 `reasoning_content`，与其公开问题 [#1971](https://github.com/lmstudio-ai/lmstudio-bug-tracker/issues/1971) 相同。兼容处理限定为这个确切模型、正常完成、空正文且没有工具调用；该字段必须整体是只包含全部请求 ID 的译文 JSON，然后继续执行数字、术语和结构校验，不能把一般思考文字作为译文接收。API 在三组测速中分别把 609、604、600 个 token 记为 reasoning token；这属于实际观察，不能写成零思考。`reasoning_effort:none` 和 `/no_think` 表示请求设置，当前模型没有公开的 reasoning 开关，不能据此证明推理已关闭。原始统计位于被 Git 忽略的 `.cache/qa/lm-studio-moe-concurrency-validated.jsonl`。
 
-可复现检查命令：
+首批验证使用了以下命令；当前新增报告的本地全文单独导出到被忽略目录，公共库只使用已审查的 `paper-data/`：
 
 ```sh
 npm run check
 DATA_DIR=data npm run paper:verify -- --strict-translation --require-data
-node scripts/prepare-data.mjs --include --data-dir data --out-dir .
+node scripts/prepare-data.mjs --include --data-dir data --out-dir .cache/local-library
+node scripts/verify-release-data.mjs --data-dir .cache/local-library/paper-data
 node scripts/verify-release-data.mjs --data-dir paper-data
 PAPERO_INCLUDE_LOCAL_DATA=0 npm run build
 npm run build:library
@@ -89,3 +90,29 @@ node scripts/verify-release-data.mjs --data-dir dist/paper-data
 Attention 早期 138 个段落的提示词指纹从保存的原始完整检查点恢复。恢复前逐块核对中英文、来源、模型及翻译时间完全一致；检查点指纹为 `1c0b185cf9ffb400b41c7e66259f15efeca693d8be8e4a0b5114a1a0185bf3fa`，真实初始提示词指纹为 `9f88bfc4382ae3b317ac1d23719948ca22b3efce47ee6feb86032dec10ea81f9`。恢复没有改写正文或把后续提示词冒充初始记录。
 
 控制标签使用可逆的独立占位传输，严格核对节点归属、顺序和次数，再恢复原文；语言代码表保留确切源码。源码、数学、代码、引用、数字、实际模型记录、辅助草稿记录及 HTML 完整性均有对应校验与失败用例。独立首轮质量比较的具体结果和限制见 [翻译质量比较](translation-comparison.md)。
+
+## 新增七个来源的本轮验证快照
+
+日期：2026-10-11。本轮最终 `npm run check` 通过 TypeScript 检查、88 项前端测试和 132 项 Node 测试，共 220 项，失败数为 0；记录见被 Git 忽略的 `.cache/qa/library-expansion-20261011/final-check-4.log`。默认无论文构建通过，实际核对产物没有 `paper-data/`，记录见 `final-default-build-3.log`。以上是本轮结果，前面的 145 项首次发布历史记录继续保留。
+
+本地 14 篇、5209 个正文块均已有机器译文。新增来源的实际主译模型如下；覆盖齐全表示已生成正文，语义修正仍按各自范围继续进行。
+
+| 新增来源 | 正文块数 | 实际主译模型 |
+| --- | ---: | --- |
+| DeepSeek-V3 Technical Report | 396 | GPT-6 Luna，Codex 子任务，`reasoning_effort: low` |
+| DeepSeek-R1 | 446 | Qwen3.6 35B A3B，LM Studio，MLX 4bit |
+| DeepSeek-V4 | 447 | Qwen3.6 35B A3B，LM Studio，MLX 4bit |
+| Kimi K2 | 415 | Qwen3.6 35B A3B，LM Studio，MLX 4bit |
+| Kimi K2.5 | 334 | GPT-6 Luna，Codex 子任务，`reasoning_effort: low` |
+| Kimi K3 | 593 | Qwen3.6 35B A3B，LM Studio，MLX 4bit |
+| MiniMax Sparse Attention | 251 | GPT-6 Luna，Codex 子任务，`reasoning_effort: low` |
+
+部分限定正文节点采用真实 GPT-6 Luna 辅助修正，保存实际草稿、修正单元、前后中文哈希、原文哈希及对应回执；主译模型的原有记录保留。Qwen 请求使用 `reasoning_effort: none`，仍按实际响应通道记录运行结果；这个请求设置不证明模型没有产生推理输出。译文和独立 AI 复核均保持 `humanReviewed=false`。
+
+本轮新增保护经相应回归测试验证：LaTeXML 代码块（`.ltx_listing.ltx_lstlisting`）、已观察到的聊天模板协议与字段、完整等宽 JSON 对象或数组 span、完整 Markdown 或已观察到的 LaTeXML SQL 围栏 span 保留源码；周围正文、图注和代码说明继续翻译。翻译单元提取、模型上下文、可见正文校验和科学内容签名使用一致的代码边界。原文不存在的公式、代码占位或节点边界标记不能混入译文，原文真实存在的标记须保留原值和次数。派生中文摘要只取实际摘要段落，排除前置信息和图；可见公式保留一份，不重复显示 LaTeX 注释，原始来源与 MathML 保留。
+
+独立 AI 语义复核按冻结的完整中英文块开展，检查公式定义、引用衔接、比较方向和数量关系。R1 的最终限定复核已通过：15 个含 MathML 的正文块加实际摘要 block-004，共 16 块；六块中的八个真实 Luna 修正单元已解决，其余十块与先前冻结复核保持一致。K3 的限定复核范围为 100 个含 MathML 的正文块，前半、后半及尾部中发现的已知问题均经实际修正和独立组装复核解决，未修正块保持冻结指纹。V3、K2、K2.5 和 MiniMax 的限定复核发现，以及 V4 与 Attention 的具体修正也分别完成复核。该记录不代表 5209 个块已经全部完成语义 QA。详细机器复核与哈希记录保存在被忽略的 `.cache/qa/library-expansion-20261011/`。
+
+完整本地原始工作数据严格验证通过，随后独立导出并验证本地 HTML 库：14 篇、5209 块、191 个实际引用素材、234 个文件。记录为 `final-raw-strict-2.log`、`final-private-export-3.log` 和 `final-private-strict-3.log`。MiniMax block-061 的修正回执索引从 `[13,1]` 规范为递增 `[1,13]`，单元集合、真实草稿、应用时间、所有正文与原文未改变，独立核对记录保留在本地。本机阅读器实际打开 R1 和 K3，分别显示每栏 446 和 593 个块、129 和 642 个 MathML，缺失译文与可见公式注释均为零，浏览器没有错误；这些是实际渲染检查，不等于全文语义审校。
+
+公开发布库保持 14 个目录条目：七篇全文、七篇仅来源信息，公开正文仍为 2327 块、78 个素材、100 个文件。新增七篇的本地完整译文尚未加入公开正文。`npm run build:library` 及 `dist/paper-data` 严格验证均通过，记录分别见 `final-library-build-3.log` 和 `final-dist-strict-3.log`。原始下载清单中有三个未被最终正文引用的图片，raw 导出会先核对全部素材，再只输出正文引用闭包及其元数据；原始下载保留，已发布 HTML 输入按原字节复制。新增 fixture 验证了输出闭包、源字节不变及缺失或损坏素材的拒绝行为。这些日志验证本地构建和公开快照；本轮 PR 与 Production 交付结果另行核验记录。

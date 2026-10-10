@@ -87,3 +87,48 @@ npm run library:translate -- --concurrency 2
 命令使用 `.env` 中明确指定的 LM Studio 模型，不自动替换模型。导入只在本地 `DATA_DIR` 中保存数据；重复导入相同来源时保留已有译文，翻译支持从已有进度继续。原始工作目录中的论文数据、原始 HTML、图片及翻译检查点均被 Git 忽略，默认前端构建也不包含这些文件。经验证的处理后 HTML、元数据和图片单独导出到 `paper-data/`，通过 Git LFS 发布。
 
 `paper:verify --strict-translation` 只有在目录内所有论文都翻译完整时通过。需要发布数据时，另行使用 [独立存储与导出说明](data-storage.md) 的显式流程。
+
+## DeepSeek、Kimi 与 MiniMax 扩充批次
+
+核验日期：2026-10-11。这一批下载固定版本的 arXiv HTML，采用同样的来源、正文结构与资产指纹校验；保留原始标题，不以相近模型或后续版本替换用户指定的系列。
+
+| 用户指定系列 | 报告原题 | 固定版本 | 本地论文 ID | 正文块 / 资产 |
+| --- | --- | --- | --- | --- |
+| DeepSeek V3 | DeepSeek-V3 Technical Report | [2412.19437v2](https://arxiv.org/html/2412.19437v2) | `deepseek-v3-technical-report` | 396 / 15 |
+| DeepSeek R1 | DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning | [2501.12948v2](https://arxiv.org/html/2501.12948v2) | `deepseek-r1-technical-report` | 446 / 20 |
+| DeepSeek V4 | DeepSeek-V4: Towards Highly Efficient Million-Token Context Intelligence | [2606.19348v1](https://arxiv.org/html/2606.19348v1) | `deepseek-v4-technical-report` | 447 / 16 |
+| Kimi K2 | Kimi K2: Open Agentic Intelligence | [2507.20534v2](https://arxiv.org/html/2507.20534v2) | `kimi-k2-technical-report` | 415 / 19 |
+| Kimi K2.5 | Kimi K2.5: Visual Agentic Intelligence | [2602.02276v2](https://arxiv.org/html/2602.02276v2) | `kimi-k2-5-technical-report` | 334 / 13 |
+| Kimi K3 | Kimi K3: Open Frontier Intelligence | [2607.24653v2](https://arxiv.org/html/2607.24653v2) | `kimi-k3-technical-report` | 593 / 16 |
+| MiniMax M3 关联架构论文 | MiniMax Sparse Attention | [2606.13392v2](https://arxiv.org/html/2606.13392v2) | `minimax-m3-technical-report` | 251 / 17 |
+
+MiniMax M3 的 [官方仓库](https://github.com/MiniMax-AI/MiniMax-M3)和[模型卡](https://huggingface.co/MiniMaxAI/MiniMax-M3)将 technical report 链接到 *MiniMax Sparse Attention*。这篇报告主要介绍稀疏注意力架构与 109B 实验，不能将其原标题改成完整 M3 模型训练报告。目录使用 `MiniMax M3`、`MiniMax-M3` 和 `M3 关联架构论文` 标签，检索 M3 能找到它。完整模型的官方发布介绍另见 [MiniMax M3 发布文章](https://www.minimax.io/blog/minimax-m3)。
+
+DeepSeek V4 的[官方模型卡](https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro)链接到上述固定报告。[arXiv 摘要页](https://arxiv.org/abs/2606.19348v1)的提交历史、`citation_date` 与 HTML 页头显示 2026-04-26，与编号 `2606` 的月份不一致；本地保存实际源 HTML，不从编号推断或改写具体发布日期。
+
+三份 Kimi HTML 明确标注 **CC BY-NC-ND 4.0**。该许可中的 ND 条款限制公开分发改编内容，见 [Creative Commons 许可原文](https://creativecommons.org/licenses/by-nc-nd/4.0/)。本地导入和公开发布分开处理；代码、权重许可不自动替代论文自身许可。在获得适用的译文公开授权前，译文保留在被 Git 忽略的本地工作目录。
+
+可重复的固定版本导入：
+
+```sh
+npm run paper:import -- 2412.19437v2 --id deepseek-v3-technical-report
+npm run paper:import -- 2501.12948v2 --id deepseek-r1-technical-report
+npm run paper:import -- 2606.19348v1 --id deepseek-v4-technical-report
+npm run paper:import -- 2507.20534v2 --id kimi-k2-technical-report
+npm run paper:import -- 2602.02276v2 --id kimi-k2-5-technical-report
+npm run paper:import -- 2607.24653v2 --id kimi-k3-technical-report
+npm run paper:import -- 2606.13392v2 --id minimax-m3-technical-report
+```
+
+本次 DeepSeek V3、Kimi K2.5 和 MiniMax Sparse Attention 全文由实际 GPT-6 Luna 子任务生成；DeepSeek R1／V4 和 Kimi K2／K3 使用本机 Qwen3.6，并对发现的具体片段采用 Luna 校正。来源记录分别保留主译模型与辅助片段，不把不同模型的贡献合并改标。Luna 使用 `reasoning_effort: low`，未提供的 API token 用量保持未知。
+
+续跑本地模型处理的报告时，显式指定论文 ID 与已安装的精确模型：
+
+```sh
+npm run library:translate -- \
+  kimi-k3-technical-report deepseek-v4-technical-report \
+  deepseek-r1-technical-report kimi-k2-technical-report \
+  --model qwen3.6-35b-a3b --concurrency 4 --batch-characters 3000
+```
+
+本批核验的本地实例为 `mlx-community` 的 MLX `4bit`、35B/A3B MoE，API ID 为 `qwen3.6-35b-a3b`，上下文 8192 token、服务并发 4。请求和纠错共享 4 个请求槽，实际输出预算由已确认上下文设为 4096 token；返回模型身份、参数、用量与响应通道照实记入每篇来源记录。最终可阅读正文仍导出为 HTML，公式保留原 MathML。

@@ -19,7 +19,7 @@ function lastSelectedPaper(): string | null {
 export function usePaperLibrary() {
   const [catalog, setCatalog] = useState<Resource<PaperCatalog>>(loading)
   const [selectedId, setSelectedId] = useState<string | null>(lastSelectedPaper)
-  const [document, setDocument] = useState<Resource<PaperDocument>>(loading)
+  const [document, setDocument] = useState<Resource<PaperDocument> | { status: 'source-only'; value: null; error: null }>(loading)
   const [catalogRevision, setCatalogRevision] = useState(0)
   const [paperRevision, setPaperRevision] = useState(0)
 
@@ -41,12 +41,16 @@ export function usePaperLibrary() {
   useEffect(() => {
     if (!selected) return
     const controller = new AbortController()
-    setDocument(loading)
-    loadPaper(selected, { signal: controller.signal }).then((value) => {
-      if (!controller.signal.aborted) setDocument({ status: 'ready', value, error: null })
-    }).catch((error: unknown) => {
-      if (!controller.signal.aborted) setDocument({ status: 'error', value: null, error: error instanceof Error ? error : new Error('无法读取论文。') })
-    })
+    if (selected.access === 'source-only') {
+      setDocument({ status: 'source-only', value: null, error: null })
+    } else {
+      setDocument(loading)
+      loadPaper(selected, { signal: controller.signal }).then((value) => {
+        if (!controller.signal.aborted) setDocument({ status: 'ready', value, error: null })
+      }).catch((error: unknown) => {
+        if (!controller.signal.aborted) setDocument({ status: 'error', value: null, error: error instanceof Error ? error : new Error('无法读取论文。') })
+      })
+    }
     const url = new URL(window.location.href)
     url.searchParams.set('paper', selected.id)
     history.replaceState(null, '', url)

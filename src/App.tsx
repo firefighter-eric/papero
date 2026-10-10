@@ -3,6 +3,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 import { Sidebar } from './components/Sidebar'
 import { PaperHeader } from './components/PaperHeader'
 import { PaperReader } from './components/PaperReader'
+import { PaperSource } from './components/PaperSource'
 import type { PaperReaderHandle, ReadingPosition } from './components/PaperReader'
 import { ReaderToolbar } from './components/ReaderToolbar'
 import { ReaderState } from './components/ReaderState'
@@ -65,8 +66,8 @@ export default function App() {
         <div className="topbar-actions">
           <ThemeControl theme={preferences.theme} onChange={(theme) => setPreferences((current) => ({ ...current, theme }))} />
           {library.selected && <a className="source-link" href={library.selected.sourceHtmlUrl} target="_blank" rel="noopener noreferrer"
-            title={library.selected.arxivId === null ? '在 Qwen 打开官方发布文章' : '在 arXiv 打开英文 HTML 原文'}>
-            {library.selected.arxivId === null ? 'Qwen' : 'arXiv'} <ArrowUpRight size={16} aria-hidden="true" /></a>}
+            title={library.selected.arxivId === null ? '打开官方发布文章' : '在 arXiv 打开英文 HTML 原文'}>
+            {library.selected.arxivId === null ? '原文' : 'arXiv'} <ArrowUpRight size={16} aria-hidden="true" /></a>}
         </div>
       </div>
       {library.catalog.status === 'loading' ? <ReaderState kind="loading" />
@@ -74,18 +75,22 @@ export default function App() {
           : catalogEmpty || !library.selected ? <ReaderState kind="empty" onRetry={library.reloadCatalog} />
             : <div className="paper-workspace">
               <PaperHeader entry={library.selected} paper={paper} />
-              <ReaderToolbar preferences={preferences} onChange={(patch) => setPreferences((current) => ({ ...current, ...patch }))} />
-              {library.document.status === 'error' ? <ReaderState kind="error" scope="paper" error={library.document.error} onRetry={library.reloadPaper} />
-                : paper ? <PaperReader key={paper.id} ref={reader} paper={paper} entry={library.selected} preferences={preferences} onPosition={onPosition} />
-                  : <ReaderState kind="loading" scope="paper" />}
+              {library.selected.access === 'source-only' ? <PaperSource entry={library.selected} /> : <>
+                <ReaderToolbar preferences={preferences} onChange={(patch) => setPreferences((current) => ({ ...current, ...patch }))} />
+                {library.document.status === 'error' ? <ReaderState kind="error" scope="paper" error={library.document.error} onRetry={library.reloadPaper} />
+                  : paper ? <PaperReader key={paper.id} ref={reader} paper={paper} entry={library.selected} preferences={preferences} onPosition={onPosition} />
+                    : <ReaderState kind="loading" scope="paper" />}
+              </>}
             </div>}
       <footer className="reading-footer">
-        <div className="reading-progress"><span>阅读进度</span><span className="progress-number">{Math.round(position.progress)}%</span>
-          <div className="progress-track" role="progressbar" aria-label="论文阅读进度" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(position.progress)}>
-            <span style={{ width: `${position.progress}%` }} />
+        {library.selected?.access === 'source-only' ? <span>来源信息 · 全文保留在本地</span> : <>
+          <div className="reading-progress"><span>阅读进度</span><span className="progress-number">{Math.round(position.progress)}%</span>
+            <div className="progress-track" role="progressbar" aria-label="论文阅读进度" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(position.progress)}>
+              <span style={{ width: `${position.progress}%` }} />
+            </div>
           </div>
-        </div>
-        <span className="reading-note">{paper?.translation.status === 'machine' ? '中文机器翻译 · 以英文原文为准' : paper ? '英文原文已就绪 · 中文译文待生成' : '中英段落对齐阅读'}</span>
+          <span className="reading-note">{paper?.translation.status === 'machine' ? '中文机器翻译 · 以英文原文为准' : paper ? '英文原文已就绪 · 中文译文待生成' : '中英段落对齐阅读'}</span>
+        </>}
       </footer>
     </main>
   </div>
