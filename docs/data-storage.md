@@ -1,6 +1,8 @@
 # 论文数据与前端分离
 
-Papero 是静态前端。浏览器读取目录 `catalog.json`，打开一篇论文时才读取该篇的轻量 `paper.json` 元数据，以及独立的 `en.html`、`zh.html` 正文；LM Studio 只参与本机导入与翻译，线上读者无需连接本机模型。
+Papero 是静态前端。浏览器读取目录 `catalog.json`，打开全文条目时才读取该篇的轻量 `paper.json` 元数据，以及独立的 `en.html`、`zh.html` 正文；仅来源条目提供固定版本的官方 HTML 与摘要页链接，不发送正文请求。LM Studio 只参与本机导入与翻译，线上读者无需连接本机模型。
+
+公共论文库有 14 个目录条目：首批 7 篇完整机器译文，其中 Attention 的六处公式或引用相邻片段已定向校正，DeepSeek V3／R1／V4、Kimi K2／K2.5／K3 和 MiniMax M3 关联架构论文 *MiniMax Sparse Attention* 为 7 篇仅来源条目。本地库已完成 14 篇机器译文，共 5209 个对齐内容块；新增七篇共 2882 块。本地完成状态与公开范围分别维护。固定版本与报告原题见 [论文来源记录](paper-sources.md)。
 
 ## 本地目录
 
@@ -16,18 +18,41 @@ data/                                # 整体被 Git 忽略
 
 `DATA_DIR` 可以覆盖本机数据位置；例如 `DATA_DIR=/Volumes/Papers/papero npm run dev`。开发服务器在 `/paper-data` 提供处理后的 JSON、固定文件名 `en.html`/`zh.html` 和图片，检查实际文件路径，不提供原始来源 HTML、检查点或任意目录文件。
 
-用户已明确允许初版使用 Git LFS。仓库中的 `paper-data/` 是经过验证后生成的公开发布快照，整体由 `.gitattributes` 的 LFS 规则管理；它与持续导入、翻译的本机 `data/` 分开。`data/` 和 `.cache/` 继续被 Git 忽略。只有完整翻译和本地来源验证结束后才生成、提交发布快照，不提交翻译过程中的中间版本。
+用户已明确允许初版使用 Git LFS。仓库中的 `paper-data/` 是经过验证后生成的公开发布快照，整体由 `.gitattributes` 的 LFS 规则管理；它与持续导入、翻译的本机 `data/` 分开。`data/`、原始来源与 `.cache/` 继续被 Git 忽略。全文公开前须完成翻译、来源验证和当前固定版本的译文公开许可核对；翻译检查点与中间版本留在本地。
 
 自定义数据目录优先放在代码仓库之外。如果使用仓库内的其他目录，应先将该目录加入 `.gitignore`；默认忽略规则覆盖 `data/` 与 `.cache/`。
 
-目录记录 `dataPath: "papers/attention-is-all-you-need/paper.json"`。发布正文与元数据位于同一目录；HTML 中 `assets/figure.png` 之类的相对路径也以此目录为基准。浏览器在显示前对两种语言都进行 DOMPurify 清理，保留表格、图片、MathML 公式，移除脚本、样式、表单及危险 URL。本机开发读取旧的检查点 JSON 时仍可直接阅读。
+全文条目记录 `dataPath: "papers/attention-is-all-you-need/paper.json"`。发布正文与元数据位于同一目录；HTML 中 `assets/figure.png` 之类的相对路径也以此目录为基准。浏览器在显示前对两种语言都进行 DOMPurify 清理，保留表格、图片、MathML 公式，移除脚本、样式、表单及危险 URL。本机开发读取旧的检查点 JSON 时仍可直接阅读。
+
+## 仅来源条目
+
+七篇新增报告只公开原题、作者、年份、检索标签与官方固定版本链接；不公开摘要、中文标题、正文或素材。三个 Kimi 固定版本明确使用 CC BY-NC-ND 4.0，尚未收到译文公开授权回复。七篇新增报告均待确认当前版本的译文公开许可覆盖，本地全文与公共目录分别维护。
+
+目录中的仅来源条目使用以下固定值：
+
+```json
+{
+  "access": "source-only",
+  "dataPath": null,
+  "titleZh": null,
+  "abstract": "",
+  "abstractZh": "",
+  "translationStatus": "pending",
+  "blockCount": 0,
+  "sectionCount": 0
+}
+```
+
+其余书目字段包含 `id`、`arxivId`、`sourceKind`、`title`、`authors`、`year`、`tags`、`sourceUrl` 和 `sourceHtmlUrl`。本批 `sourceKind` 为 `arxiv`，两条 URL 必须分别为相同固定 `arxivId` 的 `https://arxiv.org/abs/<id>` 与 `https://arxiv.org/html/<id>`。`pending` 只表示未公开译文，不用于报告本地进度。
+
+读取端在加载正文前拒绝 `source-only` 条目。导出器只复制其目录记录，不读取本地 `paper.json`、正文或图片；严格发布校验拒绝此类条目对应的任何 `papers/<id>/` 目录，包括空目录。
 
 ## 最终正文采用 HTML
 
 ```text
 paper-data/                         # 经过验证的公开发布快照，可由 Git LFS 管理
-  catalog.json                      # 列表元数据
-  papers/<id>/
+  catalog.json                      # 全文与仅来源条目的列表元数据
+  papers/<全文条目 id>/
     paper.json                      # 文档、段落索引与来源信息，不含正文 HTML 字符串
     en.html                         # 完整英文阅读文档
     zh.html                         # 完整中文阅读文档
@@ -38,18 +63,26 @@ paper-data/                         # 经过验证的公开发布快照，可由
 
 发布元数据使用 `schemaVersion: 1` 和 `content.format: "html"`。`content.en`、`content.zh` 分别记录固定文件名 `en.html`、`zh.html` 及完整文件的 SHA-256/UTF-8 字节数；`blocks` 只保存段落索引、翻译来源记录、`contentSha256` 和 `contentOffsets`，不保存 `en`、`zh` 正文字符串。每种语言的 `{start,end}` 是正文在完整 HTML 文件中的 UTF-8 字节位置，包含起点、排除终点。浏览器直接读取这些原始字节、核对哈希后再显示，避免浏览器重新序列化 MathML 时改变公式标记。位置同时绑定到对应块容器的边界，不能挪用相同文本的另一个段落。
 
-用户已确认模型临时响应仍可采用 JSON；本机 `data/` 中的 JSON 检查点也继续保留。导出时才生成公开 HTML，已经发布的 HTML 再构建时按字节复制，避免重编码改变公式或指纹。部分翻译可导出供本地调试，空中文容器和 `null` 哈希表示缺失译文；生产发布仍要求完整翻译。
+用户已确认模型临时响应仍可采用 JSON；本机 `data/` 中的 JSON 检查点也继续保留。导出时生成 HTML，已经发布的 HTML 再构建时按字节复制，避免重编码改变公式或指纹。原始工作数据中的全部声明素材仍检查指纹，HTML 导出只包含最终正文实际引用的素材与相应元数据；未引用的下载保留在原始目录。部分翻译可导出供本地调试，空中文容器和 `null` 哈希表示缺失译文；生产公开的全文条目仍要求完整翻译。
 
-## 初版通过 Git LFS 部署
+本地库单独导出、阅读：
 
-发布前先对本机完整数据执行来源及翻译检查，再导出处理文件：
+```sh
+node scripts/prepare-data.mjs --include --data-dir data --out-dir .cache/local-library
+DATA_DIR=.cache/local-library/paper-data npm run dev
+```
+
+输出为被 Git 忽略的 `.cache/local-library/paper-data/`。导出会核对输入快照；若翻译正在写入导致数据变化，等待写入结束后重试。本地全部译文完成后再运行：
 
 ```sh
 npm run paper:verify -- --strict-translation --require-data
-npm run data:export
 ```
 
-导出目录是 `.cache/export/paper-data/`。最终发布流程将这个目录作为仓库中的 `paper-data/` 快照；它只含 `catalog.json`、每篇的元数据 `paper.json`、`en.html`、`zh.html` 和 `assets/` 图片。`source.html`、`source-assets/`、模型响应、检查点、锁和缓存不进入快照。先检查 `.gitattributes` 已覆盖 `paper-data/**`，再提交快照；LFS 在 Git 历史中存储指针，在 LFS 服务中保存实际内容。
+## 通过 Git LFS 部署公共快照
+
+本轮公共快照保留首批 7 篇已公开全文，只给新 7 篇加入仅来源目录记录。组装公共目录时使用的元数据暂存目录是被 Git 忽略的临时材料，不是公开存储，也不是把 `data/` 全库自动发布的流程。核对公开范围后维护 `paper-data/`，再对该快照与构建产物执行严格校验。
+
+公共快照只含 `catalog.json`、全文条目的轻量 `paper.json`、`en.html`、`zh.html` 和 `assets/` 图片。`source.html`、`source-assets/`、模型响应、检查点、锁和缓存不进入快照。`.gitattributes` 覆盖 `paper-data/**`；LFS 在 Git 历史中存储指针，在 LFS 服务中保存实际内容。
 
 从 GitHub 克隆后，用 `git lfs pull` 取得真实文件。仅下载 ZIP 或仅有 LFS 指针不能作为已下载的论文数据。需要在克隆目录本地阅读时：
 
@@ -64,7 +97,7 @@ node scripts/verify-release-data.mjs --data-dir paper-data
 npm run build:library
 ```
 
-`build:library` 先检查快照，再执行 `DATA_DIR=paper-data PAPERO_INCLUDE_LOCAL_DATA=1 npm run build`。严格检查要求独立 HTML 正文、全部段落已翻译、标题存在，核对 HTML 文件和段落指纹、容器身份与顺序、目录与文档身份及计数、机器翻译来源元数据、段落英文 SHA-256、公式/代码/引用与原文锚点不变，两种语言分别验证内部链接目标，并检查图片引用闭包和所有图片的 SHA-256/字节数。机器翻译继续明确标记 `humanReviewed: false`，通过自动检查不能宣称人工审校完成。快照中出现正文 JSON、原始来源、调试材料、未知文件或符号链接时会被拒绝。
+`build:library` 先检查快照，再执行 `DATA_DIR=paper-data PAPERO_INCLUDE_LOCAL_DATA=1 npm run build`。严格检查对全文条目要求独立 HTML 正文、全部段落已翻译、标题存在，核对 HTML 文件和段落指纹、容器身份与顺序、目录与文档身份及计数、机器翻译来源元数据、段落英文 SHA-256、公式/代码/引用与原文锚点不变，两种语言分别验证内部链接目标，并检查图片引用闭包和所有图片的 SHA-256/字节数。仅来源条目须满足「仅来源条目」一节的书目约束且没有正文目录。机器翻译继续明确标记 `humanReviewed: false`，通过自动检查不能宣称人工审校完成。快照中出现正文 JSON、原始来源、调试材料、未知文件或符号链接时会被拒绝。
 
 此检查验证的是**处理后的发布快照**，只保留原始 HTML 的来源哈希及抓取记录，不会重新验证被排除的原始 HTML。完整来源哈希验证仍由前面的 `paper:verify` 在本机 `data/` 上执行。
 
@@ -84,7 +117,7 @@ Git LFS 每个修改版本存储整份文件，Vercel 构建和 CI 下载会计�
 VITE_PAPER_DATA_URL=https://papers.example.com/papero
 ```
 
-这个地址下应有 `catalog.json`、`papers/<id>/paper.json`、同目录的 `en.html`、`zh.html` 和论文图片。环境变量是构建时配置，修改后要重新构建前端。URL 公开出现在浏览器中，不在其中放密钥或带签名的凭证；目前阅读器支持公开读取的数据，不包含私有论文鉴权。
+这个地址下应有 `catalog.json`，以及全文条目的 `papers/<id>/paper.json`、同目录的 `en.html`、`zh.html` 和论文图片；仅来源条目只有目录记录。环境变量是构建时配置，修改后要重新构建前端。URL 公开出现在浏览器中，不在其中放密钥或带签名的凭证；目前阅读器支持公开读取的数据，不包含私有论文鉴权。
 
 跨域存储需要允许前端域名读取：
 
@@ -103,25 +136,27 @@ Access-Control-Allow-Methods: GET, HEAD
 
 默认 `npm run build` **不包含本地论文数据**，即使开发电脑存在完整 `data/`。这样初始化 GitHub、部署代码时不会顺带上传论文。目录不可用时，阅读器显示数据配置说明。
 
-需要明确将处理后的论文一起部署时：
+需要将本地处理数据放入本机构建产物供预览时：
 
 ```sh
 PAPERO_INCLUDE_LOCAL_DATA=1 npm run build
 ```
 
-构建后的 `dist/paper-data/` 仅包含目录、轻量元数据、最终双语正文 HTML 与论文图片（PNG、JPEG、GIF、WebP、AVIF、经过导入器清理的 SVG），原始来源 HTML、日志及翻译检查点不会被复制。这个开关只改变本机构建产物，不会自动提交 Git 或上传任何服务。
+构建后的 `dist/paper-data/` 仅包含目录、全文条目的轻量元数据、双语正文 HTML 与论文图片（PNG、JPEG、GIF、WebP、AVIF、经过导入器清理的 SVG），原始来源 HTML、日志及翻译检查点不会被复制。这个开关只改变本机构建产物，不会自动提交 Git 或上传任何服务。公共部署使用前面的 `build:library`，以经过范围审查和严格校验的 `paper-data/` 为输入。
 
-准备独立存储的上传目录：
+准备独立公共存储的上传目录，显式使用已审查的公开快照：
 
 ```sh
-node scripts/prepare-data.mjs --include --out-dir .cache/export
+node scripts/verify-release-data.mjs --data-dir paper-data
+node scripts/prepare-data.mjs --include --data-dir paper-data --out-dir .cache/export
+node scripts/verify-release-data.mjs --data-dir .cache/export/paper-data
 ```
 
-把 `.cache/export/paper-data/` 的**内容**上传到数据地址的对应目录。此命令同样只生成本地文件；用户确认发布范围后再上传。
+把 `.cache/export/paper-data/` 的**内容**上传到数据地址的对应目录。这些命令只生成并检查本地文件。`npm run data:export` 默认读取本地 `DATA_DIR` 并导出到 `.cache/export/paper-data/`，不能据此将本地新批全文视为已获准公开。
 
 ## 来源与翻译质量
 
-每篇 `paper.json` 保留来源页面 URL、HTML 来源 URL、抓取时间和原始 HTML 的 SHA-256；段落可保留源锚点 `sourceId`。arXiv 论文使用 `source.kind: "arxiv"` 与固定版本 `arxivId`。用户明确选入的官方发布文章使用 `source.kind: "official-article"`、`arxivId: null`，阅读器明确显示“官方文章”；目录中的 `sourceKind` 对应这个类型。旧的 arXiv 数据未填写 `kind` 时仍按 arXiv 读取。
+全文条目的 `paper.json` 保留来源页面 URL、HTML 来源 URL、抓取时间和原始 HTML 的 SHA-256；段落可保留源锚点 `sourceId`。arXiv 论文使用 `source.kind: "arxiv"` 与固定版本 `arxivId`。用户明确选入的官方发布文章使用 `source.kind: "official-article"`、`arxivId: null`，阅读器明确显示“官方文章”；目录中的 `sourceKind` 对应这个类型。旧的 arXiv 数据未填写 `kind` 时仍按 arXiv 读取。
 
 官方 Qwen3.5 文章的公开 API 地址、精确发布时间、原文语言与视频外链记录保存在来源元数据中。原始 HTML、公开字段组成的来源记录以及下载图片暂存于 `.cache/staging/`；默认 `article:import` 不更改 `data/catalog.json`，只有显式 `--publish-local` 才注册本地文章。暂存与注册目录均被 Git 忽略，导出规则与论文一致：仅元数据 JSON、最终中英文正文 HTML 与图片进入发布产物。视频和 PDF 示例保留官方外链，不能离线播放，也不打包到 Vercel。详见 [来源核验与导入命令](paper-sources.md)。
 
@@ -130,3 +165,5 @@ node scripts/prepare-data.mjs --include --out-dir .cache/export
 用户明确允许用另一个模型继续未完成的翻译时，已经完成的段落继续保留原模型、参数、模型身份与翻译时间，不能把旧译文统一改标为新模型。文档通过 `modelHistory` 保存每次运行的模型、身份、参数、提示词哈希、开始时间与起始覆盖数；`modelsUsed`、`modelIdentities` 声明实际模型，`usageByModel` 分别累计调用计量。文档顶层的模型信息描述当前运行，发布校验按段落检查它所属的历史运行，核对模型身份、参数、时间与原文哈希，并要求总计量与各模型计量之和一致。历史接口未返回推理 token 数时保持未知，不补造零值。`reasoning_effort: "none"` 记录请求参数，不能据此断言后端关闭了推理；接口实际报告的推理 token 数照实保留。未发生模型切换的旧单模型完整数据仍可发布。
 
 当前 JSON 的 `schemaVersion` 为 `1`。读取端核对数据结构、论文身份、目录计数与章节引用，对缺失文件、格式不兼容、网络失败和超时给出可区分的错误。论文越多时，可以继续保留轻量目录并按篇加载；需要搜索全部正文时，再增加独立搜索索引或服务。
+
+本轮对尚未开始的部分报告使用真实 GPT-6 Luna Codex 子任务生成译文。其来源记录明确为 `provider: Codex subagent`、`model: gpt-6-luna`，只记录已知的 `reasoning_effort: low`；不补造温度、seed、API token 计量或本地模型身份。`createCodexTranslationManifest` 冻结原文、DOM 片段、标题、素材与提示词指纹；`applyCodexTranslations` 核对草稿的精确 ID、来源哈希与片段数字/标识，只接受完整段落，保持原 MathML、代码与引用，检查点加锁并原子写入。已有译文或模型记录不能被该导入器覆盖。这个流程只写本地工作数据，不会自动公开论文。

@@ -3,7 +3,7 @@ import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { load } from 'cheerio'
 import { inspectPublicData } from './prepare-data.mjs'
-import { assertTranslationFidelity, catalogEntry, sanitizeHtml, sanitizeSvg, sha256, translationUnits, validArxivId } from './paper-lib.mjs'
+import { assertTranslationFidelity, catalogEntry, sanitizeHtml, sanitizeSvg, sha256, translationUnits, validArxivId, visibleProseText, scientificSignature } from './paper-lib.mjs'
 
 const fingerprint = value => typeof value === 'string' && /^[a-f0-9]{64}$/.test(value)
 const nonempty = value => typeof value === 'string' && !!value.trim()
@@ -64,11 +64,21 @@ function validBudget(budget, parameters) {
     && budgetKeys.every(key => Number.isSafeInteger(budget[key]) && budget[key] > 0) && budget.maxTokens === parameters.max_tokens)
 }
 
-function validParameters(parameters) {
+function validLocalParameters(parameters) {
   return record(parameters) && Number.isFinite(parameters.temperature) && parameters.temperature >= 0 && parameters.temperature <= 2
     && Number.isFinite(parameters.top_p) && parameters.top_p > 0 && parameters.top_p <= 1
     && Number.isSafeInteger(parameters.max_tokens) && parameters.max_tokens > 0 && Number.isSafeInteger(parameters.seed)
     && parameters.reasoning_effort === 'none' && parameters.stream === false
+}
+
+function validParameters(parameters, provider, model) {
+  return provider === 'Codex subagent'
+    ? model === 'gpt-6-luna' && same(parameters, { reasoning_effort: 'low' })
+    : validLocalParameters(parameters)
+}
+
+function validProviderIdentity(identity, model, provider) {
+  return provider === 'Codex subagent' ? model === 'gpt-6-luna' && same(identity, { apiModelId: model }) : validIdentity(identity, model)
 }
 
 function validIdentity(identity, model) {
@@ -112,10 +122,17 @@ function assertTranslationMetadata(paper) {
   if (t?.status !== 'machine' || !nonempty(paper.titleZh) || t.coverage?.complete !== paper.blocks.length || t.coverage?.total !== paper.blocks.length
     || paper.blocks.some(block => !nonempty(block.zh))) throw new Error(`Release translation incomplete: ${paper.id}.`)
   if (t.humanReviewed !== false) throw new Error(`Machine translation must remain marked humanReviewed=false: ${paper.id}.`)
-  if (!nonempty(t.model) || !validIdentity(t.modelIdentity, t.model) || !nonempty(t.provider) || !nonempty(t.method)
+  if (!nonempty(t.model) || !validProviderIdentity(t.modelIdentity, t.model, t.provider) || !nonempty(t.provider) || !nonempty(t.method)
     || !fingerprint(t.promptSha256) || !timestamp(t.createdAt) || !timestamp(t.updatedAt) || !timestamp(t.completedAt)
-    || !validParameters(t.parameters) || !validBudget(t.requestBudget, t.parameters)) throw new Error(`Invalid translation provenance metadata: ${paper.id}.`)
+    || !validParameters(t.parameters, t.provider, t.model) || !validBudget(t.requestBudget, t.parameters)) throw new Error(`Invalid translation provenance metadata: ${paper.id}.`)
   if (t.literalTransport !== undefined && !literalTransports.has(t.literalTransport)) throw new Error(`Invalid recorded literal transport: ${paper.id}.`)
+
+  // A declared history cannot supply API counters that Codex subagent runs do not expose.
+  const codexHistory = Array.isArray(t.modelHistory) ? t.modelHistory.filter(run => run?.provider === 'Codex subagent') : []
+  if (((t.provider === 'Codex subagent' || codexHistory.length) && (t.usage !== undefined || t.usageByModel !== undefined))
+    || codexHistory.some(run => run.usage !== undefined || run.usageByModel !== undefined)) {
+    throw new Error(`Codex translation cannot claim unobserved API token usage: ${paper.id}.`)
+  }
 
   const declared = ['modelHistory', 'modelsUsed', 'modelIdentities', 'usageByModel'].some(key => t[key] !== undefined)
   if (!declared) return null
@@ -148,7 +165,8 @@ function assertTranslationMetadata(paper) {
     const coverage = entry?.coverageAtStart
     if (!record(entry) || !models.has(entry.model) || !validIdentity(entry.modelIdentity, entry.model)
       || !same(physicalIdentityFacts(entry.modelIdentity), physicalIdentityFacts(t.modelIdentities[entry.model]))
-      || !nonempty(entry.provider) || !validParameters(entry.parameters) || !validBudget(entry.requestBudget, entry.parameters) || !fingerprint(entry.promptSha256)
+      || !nonempty(entry.provider) || !validProviderIdentity(entry.modelIdentity, entry.model, entry.provider)
+      || !validParameters(entry.parameters, entry.provider, entry.model) || !validBudget(entry.requestBudget, entry.parameters) || !fingerprint(entry.promptSha256)
       || !timestamp(entry.startedAt) || start < previousStart
       || !['initial-model', 'legacy-provenance', 'resume-model', 'explicit-model-change'].includes(entry.reason)
       || !Number.isSafeInteger(coverage?.complete) || coverage.complete < 0 || coverage.complete > paper.blocks.length || coverage.total !== paper.blocks.length
@@ -174,10 +192,12 @@ function assertTranslationMetadata(paper) {
 /** Verify the public processed snapshot. This deliberately does not claim to re-hash excluded raw HTML. */
 export async function verifyReleaseData({ dataDir = 'paper-data', report = value => console.log(JSON.stringify(value)) } = {}) {
   const { root, catalog, papers, files } = await inspectPublicData({ dataDir })
-  if (!papers.length) throw new Error('Public release catalog must contain at least one complete document.')
+  const completePapers = papers.filter(({ paper }) => paper !== null)
+  const sourceOnlyPapers = papers.length - completePapers.length
+  if (!completePapers.length) throw new Error('Public release catalog must contain at least one complete document.')
   await assertPublicFileAllowlist(root, files)
   let blocks = 0, assets = 0
-  for (const { entry, paper, metadata: publicMetadata, dataPath } of papers) {
+  for (const { entry, paper, metadata: publicMetadata, dataPath } of completePapers) {
     if (publicMetadata.content?.format !== 'html') throw new Error(`Public release requires standalone en.html/zh.html with body-free metadata: ${paper.id}.`)
     if (!nonempty(paper.title) || !Array.isArray(paper.authors) || !paper.authors.length || !paper.authors.every(nonempty)
       || !Number.isInteger(paper.year) || paper.year < 1900 || paper.year > 2100 || !Array.isArray(paper.tags) || !paper.tags.every(nonempty)
@@ -211,13 +231,23 @@ export async function verifyReleaseData({ dataDir = 'paper-data', report = value
         || metadata.sourceSha256 !== sha256(block.en) || !fingerprint(metadata.promptSha256) || !timestamp(metadata.translatedAt)) {
         throw new Error(`Missing or stale block translation provenance: ${paper.id}/${block.id}.`)
       }
+      if (metadata?.status === 'machine' && (metadata.provider === 'Codex subagent' || (!modelHistory && paper.translation.provider === 'Codex subagent'))) {
+        if (metadata.provider !== 'Codex subagent' || !validProviderIdentity(metadata.modelIdentity, metadata.model, metadata.provider)
+          || !validParameters(metadata.parameters, metadata.provider, metadata.model) || !validBudget(metadata.requestBudget, metadata.parameters)
+          || (!modelHistory && metadata.promptSha256 !== paper.translation.promptSha256)
+          || Date.parse(metadata.translatedAt) < Date.parse(paper.translation.createdAt)
+          || Date.parse(metadata.translatedAt) > Date.parse(paper.translation.updatedAt)) {
+          throw new Error(`Invalid Codex block translation provenance: ${paper.id}/${block.id}.`)
+        }
+      }
       if (metadata?.status === 'machine' && modelHistory) {
         const translatedAt = Date.parse(metadata.translatedAt)
         const runs = modelHistory.filter((run, index) => run.model === metadata.model && Date.parse(run.startedAt) <= translatedAt
           && (index === modelHistory.length - 1 || translatedAt < Date.parse(modelHistory[index + 1].startedAt)))
-        if (!validIdentity(metadata.modelIdentity, metadata.model) || !validParameters(metadata.parameters)
+        if (!validProviderIdentity(metadata.modelIdentity, metadata.model, metadata.provider) || !validParameters(metadata.parameters, metadata.provider, metadata.model)
           || !validBudget(metadata.requestBudget, metadata.parameters)
-          || !runs.some(run => same(identityFacts(metadata.modelIdentity), identityFacts(run.modelIdentity)) && same(metadata.parameters, run.parameters) && same(metadata.requestBudget, run.requestBudget))) {
+          || !runs.some(run => (run.provider !== 'Codex subagent' || metadata.provider === run.provider)
+            && same(identityFacts(metadata.modelIdentity), identityFacts(run.modelIdentity)) && same(metadata.parameters, run.parameters) && same(metadata.requestBudget, run.requestBudget))) {
           throw new Error(`Block model, identity, parameters or timestamp disagree with declared history: ${paper.id}/${block.id}.`)
         }
       }
@@ -236,14 +266,8 @@ export async function verifyReleaseData({ dataDir = 'paper-data', report = value
       })
       const anchors = $ => $('[id]').map((_, node) => $(node).attr('id')).get()
       if (JSON.stringify(anchors(languages[0])) !== JSON.stringify(anchors(languages[1]))) throw new Error(`Source HTML anchor changed: ${paper.id}/${block.id}.`)
-      const signature = $ => $('math,img,a,code,pre').map((_, node) => ['math', 'code', 'pre'].includes(node.name)
-        ? $.html(node) : `${node.name}:${$(node).attr(node.name === 'img' ? 'src' : 'href')}`).get()
-      if (JSON.stringify(signature(languages[0])) !== JSON.stringify(signature(languages[1]))) throw new Error(`Equation, code, image or citation changed: ${paper.id}/${block.id}.`)
-      const prose = $ => {
-        $('math,code,pre').remove()
-        return $.root().find('*').contents().filter((_, node) => node.type === 'text').map((_, node) => node.data).get().join(' ')
-      }
-      try { assertTranslationFidelity(prose(languages[0]), prose(languages[1])) } catch (error) {
+      if (JSON.stringify(scientificSignature(languages[0])) !== JSON.stringify(scientificSignature(languages[1]))) throw new Error(`Equation, code, image or citation changed: ${paper.id}/${block.id}.`)
+      try { assertTranslationFidelity(visibleProseText(languages[0]), visibleProseText(languages[1])) } catch (error) {
         throw new Error(`Release translation fidelity failed: ${paper.id}/${block.id}: ${error.message}`)
       }
     }
@@ -267,6 +291,7 @@ export async function verifyReleaseData({ dataDir = 'paper-data', report = value
     blocks += paper.blocks.length; assets += paper.assets.length
   }
   const result = { papers: catalog.papers.length, blocks, assets, files: files.size, rawSourceVerified: false }
+  if (sourceOnlyPapers) Object.assign(result, { sourceOnlyPapers, completePapers: completePapers.length })
   report({ type: 'public-release-verified', ...result })
   return result
 }

@@ -4,9 +4,22 @@ import { load } from 'cheerio'
 import { mkdtemp, mkdir, writeFile, readFile, rm } from 'node:fs/promises'
 import path from 'node:path'
 import { tmpdir } from 'node:os'
-import { parsePaper, sanitizeHtml, sanitizeSvg, translationUnits, normalizeHeadingNumber, assertTranslationFidelity, technicalIdentifiers, isTechnicalLabelOnly, sha256, safeId, validArxivId } from './paper-lib.mjs'
+import { parsePaper, sanitizeHtml, sanitizeSvg, translationUnits, normalizeHeadingNumber, assertTranslationFidelity, technicalIdentifiers, isTechnicalLabelOnly, sha256, safeId, validArxivId, visibleProseText, scientificSignature, isLiteralChatTemplateNode, isLiteralFencedCodeNode } from './paper-lib.mjs'
 import { parseUnitResponse, translateWithSplitting, compactRequestContexts } from './translate-paper.mjs'
 import { importArxiv, updateCatalog } from './import-paper.mjs'
+import { translatedAbstractText } from './paper-lib.mjs'
+
+test('derived translated abstract excludes front matter and duplicate LaTeX annotations', () => {
+  const blocks = [
+    {sourceId:'abstract1.1',kind:'paragraph',zh:'<p>摘要 <math><semantics><mi>x</mi><annotation>x_latex</annotation></semantics></math>。</p>'},
+    {sourceId:'abstract1.2',kind:'paragraph',zh:'<p>第二段。</p>'},
+    {sourceId:'p1.1',kind:'paragraph',sectionId:'abstract1',zh:'<p>Technical Report</p>'},
+    {sourceId:'S0.F1',kind:'figure',sectionId:'abstract1',zh:'<figure><figcaption>图1</figcaption></figure>'},
+  ]
+  const before = structuredClone(blocks)
+  assert.equal(translatedAbstractText(blocks), '摘要 x。 第二段。')
+  assert.deepEqual(blocks, before)
+})
 
 test('sanitizer removes executable markup and retains scientific MathML and safe local assets', () => {
   const sanitized = sanitizeHtml('<p onclick="alert(1)">Text<script>alert(2)</script><a href="javascript:alert(3)">link</a><img src="assets/figure.svg" onerror="alert(4)"><math><semantics><mfrac><mi>x</mi><mn>2</mn></mfrac><annotation encoding="application/x-tex">x/2</annotation></semantics></math></p><iframe src="https://example.org"></iframe>')
@@ -134,6 +147,88 @@ test('translation fidelity catches dropped scores and altered model ids while al
   assert.doesNotThrow(() => assertTranslationFidelity('and discuss its advantages over models such as', '并讨论其相比以下模型的优势，例如'))
 })
 
+test('new report model families retain full version and checkpoint identifiers', () => {
+  const identifiers = [
+    'DeepSeek-V3', 'DeepSeek-R1-Zero-Qwen-32B', 'DeepSeek-R1-Distill-Qwen-1.5B',
+    'DeepSeek-V3.2-Speciale', 'DeepSeek-V4-Pro-Max', 'DeepSeek V3', 'deepseekV3.2',
+    'Kimi K2.5', 'Kimi-K2.5', 'KimiK3', 'Kimi K2-Thinking',
+    'MiniMax-M3', 'MiniMax M3', 'MiniMaxM3-230B', 'MiniMax-M3-0125',
+    'K1.5', 'K2', 'K2.5', 'K2.6-Thinking', 'K3',
+  ]
+  for (const identifier of identifiers) {
+    assert.deepEqual(technicalIdentifiers(`The ${identifier} model scores 91.2%.`), [identifier])
+    assert.doesNotThrow(() => assertTranslationFidelity(`The ${identifier} model scores 91.2%.`, `${identifier} 模型得分91.2%。`))
+    assert.throws(() => assertTranslationFidelity(`The ${identifier} model scores 91.2%.`, '其他模型得分91.2%。'), /Technical identifier/)
+  }
+  assert.deepEqual(technicalIdentifiers('DeepSeek and Kimi work on models, while MiniMax studies attention.'), [])
+  assert.deepEqual(technicalIdentifiers('K9, K2.7 and a physical M3 label.'), [])
+  assert.deepEqual(technicalIdentifiers('The Qwen2.5-72B and Llama-3-70B models.'), ['Qwen2.5-72B', 'Llama-3-70B'])
+})
+
+test('new family fidelity rejects variant changes, omitted repetitions and invented models or values', () => {
+  assert.throws(() => assertTranslationFidelity('DeepSeek-V3.2-Speciale scores 91.2%.', 'DeepSeek-V3.2 得分91.2%。'), /Technical identifier/)
+  assert.throws(() => assertTranslationFidelity('DeepSeek-R1-Distill-Qwen-1.5B scores 91.2%.', 'DeepSeek-R1-Distill-Qwen-7B 得分91.2%。'), /Technical identifier/)
+  assert.throws(() => assertTranslationFidelity('Kimi K2.5 scores 91.2%.', 'Kimi K2.6 得分91.2%。'), /Technical identifier/)
+  assert.throws(() => assertTranslationFidelity('MiniMax-M3-230B scores 91.2%.', 'MiniMax-M3-23B 得分91.2%。'), /Technical identifier/)
+  assert.throws(() => assertTranslationFidelity('MiniMax-M3-0125 scores 91.2%.', 'MiniMax-M3-0126 得分91.2%。'), /Technical identifier/)
+  assert.throws(() => assertTranslationFidelity('K2.5 improves K2.5.', 'K2.5 得到提升。'), /Technical identifier/)
+  assert.throws(() => assertTranslationFidelity('The model scores 91.2%.', 'MiniMax-M3 模型得分91.2%。'), /Technical identifiers added/)
+  assert.throws(() => assertTranslationFidelity('DeepSeek-V4 scores 91.2%.', 'DeepSeek-V4 和 Kimi-K2.5 得分91.2%。'), /Technical identifiers added/)
+  assert.throws(() => assertTranslationFidelity('Kimi-K2.5 scores 91.2%.', 'Kimi-K2.5 得分91.2%和99.9%。'), /Numeric values added/)
+  assert.doesNotThrow(() => assertTranslationFidelity('Kimi-K2.5 has 1 million parameters.', 'Kimi-K2.5 有1000000个参数。'))
+})
+
+test('long exact new-model table labels remain English but ordinary copied prose still fails', () => {
+  const labels = 'DeepSeek-V4-Pro-Max, DeepSeek-V3.2-Speciale, Kimi-K2.5, MiniMax-M3-230B, K2.6-Thinking'
+  assert.equal(isTechnicalLabelOnly(labels), true)
+  assert.deepEqual(parseUnitResponse(JSON.stringify({ translations: { models: labels } }), [{ id: 'models', text: labels }]).map(item => item.text), [labels])
+  assert.throws(() => parseUnitResponse(JSON.stringify({ translations: { models: labels.replace('MiniMax-M3-230B', 'MiniMax-M3-23B') } }), [{ id: 'models', text: labels }]), /No Chinese|Technical identifier/)
+  const prose = `We compare ${labels} using the same training data and explain their evaluation results.`
+  assert.equal(isTechnicalLabelOnly(prose), false)
+  assert.throws(() => parseUnitResponse(JSON.stringify({ translations: { prose } }), [{ id: 'prose', text: prose }]), /No Chinese/)
+})
+
+test('prose dashes after every model-family alternative do not turn positive quantities negative', () => {
+  for (const dash of ['–', '—', '―']) {
+    assert.doesNotThrow(() => assertTranslationFidelity(`DeepSeek-V3${dash}671 billion parameters.`, 'DeepSeek-V3有671B参数。'))
+    assert.doesNotThrow(() => assertTranslationFidelity(`Kimi-K2.5${dash}1 trillion parameters.`, 'Kimi-K2.5有1T参数。'))
+    assert.doesNotThrow(() => assertTranslationFidelity(`MiniMax-M3${dash}230 billion parameters.`, 'MiniMax-M3有230B参数。'))
+    assert.doesNotThrow(() => assertTranslationFidelity(`Qwen3${dash}32 billion parameters.`, 'Qwen3有32B参数。'))
+  }
+  assert.throws(() => assertTranslationFidelity('DeepSeek-V3 −671 billion parameters.', 'DeepSeek-V3有671B参数。'), /Numeric value/)
+  assert.doesNotThrow(() => assertTranslationFidelity('DeepSeek-V3 −671 billion parameters.', 'DeepSeek-V3有-671B参数。'))
+  assert.throws(() => assertTranslationFidelity('Kimi-K2.5—1 trillion parameters.', 'Kimi-K2.5有1T参数，得分99.9%。'), /Numeric values added/)
+})
+
+test('report hyphenated token and parameter quantities keep their complete numeric scale', () => {
+  const source = ': DeepSeek-V4-Pro-Max delivers strong results on synthetic and real use cases with a 1-million-token context window, surpassing even Gemini-3.1-Pro on academic benchmarks.'
+  for (const quantity of ['1M', '100万', '1000000']) {
+    assert.doesNotThrow(() => assertTranslationFidelity(source, `：DeepSeek-V4-Pro-Max 在合成和真实用例中表现强劲，拥有${quantity} token上下文窗口，在学术基准上甚至超越Gemini-3.1-Pro。`))
+  }
+  for (const quantity of ['0.5B', '5亿', '500000000']) assert.doesNotThrow(() => assertTranslationFidelity('A 0.5-billion-parameter model.', `一个${quantity}参数模型。`))
+  for (const quantity of ['2.8T', '28000亿', '2800000000000']) assert.doesNotThrow(() => assertTranslationFidelity('A 2.8-trillion-parameter model.', `一个${quantity}参数模型。`))
+  assert.throws(() => assertTranslationFidelity(source, 'DeepSeek-V4-Pro-Max 拥有10万token上下文窗口，超越Gemini-3.1-Pro。'), /Numeric value/)
+  assert.throws(() => assertTranslationFidelity(source, 'DeepSeek-V4-Pro-Max 拥有1个token上下文窗口，超越Gemini-3.1-Pro。'), /Numeric value/)
+  assert.throws(() => assertTranslationFidelity(source, 'DeepSeek-V4-Pro-Max 拥有100万token上下文窗口，超越Gemini-3.1-Pro，得分99.9%。'), /Numeric values added/)
+  assert.throws(() => assertTranslationFidelity('A 0.5-billion-parameter model.', '一个0.5亿参数模型。'), /Numeric value/)
+})
+
+test('quantity compounds do not relax identifier, sign, range or subtraction boundaries', () => {
+  assert.doesNotThrow(() => assertTranslationFidelity('An offset of -0.5-billion-parameter scale.', '偏移量为-0.5B参数规模。'))
+  assert.throws(() => assertTranslationFidelity('An offset of -0.5-billion-parameter scale.', '偏移量为0.5B参数规模。'), /Numeric value/)
+  assert.throws(() => assertTranslationFidelity('A 1-million-token context.', '一个-100万token上下文。'), /Numeric value/)
+  assert.throws(() => assertTranslationFidelity('A 1−million-token context.', '一个100万token上下文。'), /Numeric value/)
+  assert.doesNotThrow(() => assertTranslationFidelity('The offset is −0.5 billion parameters.', '偏移量为-0.5B参数。'))
+  assert.doesNotThrow(() => assertTranslationFidelity('A 0.5-1 million token range.', '范围为0.5M至1M个token。'))
+  assert.throws(() => assertTranslationFidelity('A 0.5-1-million-token range.', '范围为0.5M至1M个token。'), /Numeric value/)
+  assert.throws(() => assertTranslationFidelity('The difference is 2-1-million-token.', '差值为200万至100万token。'), /Numeric value/)
+  assert.throws(() => assertTranslationFidelity('The expression is 1-million.', '表达式为1000000。'), /Numeric value/)
+  assert.throws(() => assertTranslationFidelity('The expression is 1 - million-token.', '表达式为1000000。'), /Numeric value/)
+  assert.doesNotThrow(() => assertTranslationFidelity('The Qwen3-1-million-token model.', 'Qwen3-1-million-token 模型。'))
+  assert.throws(() => assertTranslationFidelity('The Qwen3-1-million-token model.', 'Qwen3-1000000-token 模型。'), /Technical identifier/)
+  assert.throws(() => assertTranslationFidelity('The Prototype-1-million-token model.', 'Prototype-1000000-token 模型。'), /Numeric value/)
+})
+
 test('source listings are preserved and marker context has exact node boundaries and formulas', () => {
   const html = '<article class="ltx_document"><h1 class="ltx_title_document">Code example</h1><section id="S1"><h2>Code</h2><pre>model.generate(x)</pre><p>Even with <math alttext="k=n"><mi>k</mi><mo>=</mo><mi>n</mi></math> the score improves.</p></section></article>'
   const paper = parsePaper(html, { id: 'code', arxivId: '2505.09388v1' })
@@ -141,6 +236,112 @@ test('source listings are preserved and marker context has exact node boundaries
   assert.equal(translationUnits(paper.blocks[1].en).units.length, 0)
   const context = translationUnits(paper.blocks[2].en).context('block')
   assert.match(context, /⟦block:0⟧Even with ⟦\/block:0⟧⟪FORMULA:k=n⟫⟦block:1⟧/)
+})
+
+test('LaTeXML listing divs preserve complete JSON, control syntax and math while figure captions translate', () => {
+  const html = sanitizeHtml('<figure class="ltx_float ltx_lstlisting"><figcaption><span>Listing 1: </span>Prompt for a tool call.</figcaption><div id="LST1.2" class="ltx_listing ltx_lstlisting"><div class="ltx_listingline">  {"tool":"call", "args":{"x":3}}</div><div class="ltx_listingline">&lt;think&gt; literal reasoning &lt;/think&gt;</div><div class="ltx_listingline"><math alttext="x=3"><mi>x</mi><mo>=</mo><mn>3</mn><annotation>x=3</annotation></math><code>model.generate(x)</code></div></div></figure>')
+  const prepared = translationUnits(html, 'figure')
+  assert.deepEqual(prepared.units.map(unit => unit.text), ['Listing 1: ', 'Prompt for a tool call.'])
+  const context = prepared.context('listing')
+  assert.match(context, /⟦listing:1⟧Prompt for a tool call\./)
+  assert.equal((context.match(/⟪CODE_PRESERVED⟫/g) || []).length, 1)
+  assert.doesNotMatch(context, /literal reasoning|model\.generate|"args"/)
+  const translated = prepared.render(['代码清单1：', '工具调用提示。'])
+  const english = load(html, {}, false), chinese = load(translated, {}, false)
+  assert.equal(chinese.html('.ltx_listing.ltx_lstlisting'), english.html('.ltx_listing.ltx_lstlisting'))
+  assert.equal(chinese('figcaption').text(), '代码清单1：工具调用提示。')
+  assert.doesNotMatch(visibleProseText(english), /literal reasoning|model\.generate|"args"/)
+  assert.doesNotThrow(() => assertTranslationFidelity(visibleProseText(english), visibleProseText(chinese)))
+})
+
+test('inline LaTeXML listings stay literal without freezing framed algorithm narrative', () => {
+  const html = sanitizeHtml('<p>Use this template: <span id="tools" class="ltx_listing ltx_lstlisting"><span class="ltx_listingline">  {"type":"function","name":"get_weather"}</span><span class="ltx_listingline">&lt;|im_start|&gt;assistant &lt;think&gt;</span><span class="ltx_listingline"><math alttext="y_1"><msub><mi>y</mi><mn>1</mn></msub></math><code>return tool(x)</code></span></span> Then call the tool.</p>')
+  const prepared = translationUnits(html)
+  assert.deepEqual(prepared.units.map(unit => unit.text), ['Use this template: ', ' Then call the tool.'])
+  assert.equal((prepared.context('inline').match(/⟪CODE_PRESERVED⟫/g) || []).length, 1)
+  const translated = prepared.render(['使用以下模板：', '然后调用工具。'])
+  const english = load(html, {}, false), chinese = load(translated, {}, false)
+  assert.equal(chinese.html('.ltx_listing.ltx_lstlisting'), english.html('.ltx_listing.ltx_lstlisting'))
+  assert.equal(chinese('span.ltx_listingline').length, 3)
+  assert.doesNotThrow(() => assertTranslationFidelity(visibleProseText(english), visibleProseText(chinese)))
+  const algorithm = '<figure><figcaption>Algorithm 1</figcaption><div class="ltx_listing ltx_framed"><span>Return the selected indices </span><math alttext="I"><mi>I</mi></math></div></figure>'
+  const algorithmUnits = translationUnits(algorithm, 'figure')
+  assert.deepEqual(algorithmUnits.units.map(unit => unit.text), ['Algorithm 1', 'Return the selected indices '])
+  assert.match(visibleProseText(load(algorithm, {}, false)), /Return the selected indices/)
+  assert.match(algorithmUnits.render(['算法1', '返回选中的索引']), /返回选中的索引/)
+})
+
+test('whole XTML syntax and explicit typewriter fields stay literal while captions and prose translate', () => {
+  const html = '<figure><span>[open]think[sep]</span><span class="ltx_font_typewriter">[open]message role="assistant"[sep]</span><span class="ltx_font_typewriter">[open]call tool="python" index="1"[sep]</span><span class="ltx_font_typewriter">{"timeout": 150}</span><figcaption>Use the <span class="ltx_font_typewriter">think</span> channel and the <span class="ltx_font_typewriter">messages</span> field.</figcaption><p>Set <span class="ltx_font_typewriter">type="tool-declare"</span> before input.</p></figure>'
+  const prepared = translationUnits(html, 'figure')
+  assert.deepEqual(prepared.units.map(unit => unit.text), ['Use the ', ' channel and the ', ' field.', 'Set ', ' before input.'])
+  assert.equal((prepared.context('xtml').match(/⟪CODE_PRESERVED⟫/g) || []).length, 7)
+  const translated = prepared.render(['使用', '通道和', '字段。', '在输入前设置', '。'])
+  const english = load(html, {}, false), chinese = load(translated, {}, false)
+  assert.deepEqual(scientificSignature(chinese), scientificSignature(english))
+  assert.equal(chinese('figcaption').text(), '使用think通道和messages字段。')
+  assert.doesNotMatch(visibleProseText(english), /\[open\]|messages|type=/)
+  for (const replacement of [translated.replace('>messages<', '>消息<'), translated.replace('role="assistant"', 'role="user"'), translated.replace('>think<', '>response<'), translated.replace('"timeout"', '"超时"')]) {
+    assert.notDeepEqual(scientificSignature(load(replacement, {}, false)), scientificSignature(english))
+  }
+  const example = load('<span class="ltx_font_typewriter">[open]tag attr="value"[sep] … [close]tag[sep]</span>', {}, false)
+  assert.equal(isLiteralChatTemplateNode(example('span')[0]), true)
+  const array = load('<span class="ltx_font_typewriter">[{"timeout": 150}]</span>', {}, false)
+  assert.equal(isLiteralChatTemplateNode(array('span')[0]), true)
+})
+
+test('XTML protection does not freeze ordinary typewriter labels or prose surrounding token examples', () => {
+  const html = '<p><span class="ltx_font_typewriter">ordinary narrative</span> <span class="ltx_font_typewriter">tools improve results</span> <span class="ltx_font_typewriter">indexing</span> <span>Use [open]think[sep] for thinking.</span> <span>response</span> <span class="ltx_font_typewriter">{"timeout": tomorrow}</span></p>'
+  const prepared = translationUnits(html)
+  assert.deepEqual(prepared.units.map(unit => unit.text), ['ordinary narrative', 'tools improve results', 'indexing', 'Use [open]think[sep] for thinking.', 'response', '{"timeout": tomorrow}'])
+  assert.deepEqual(scientificSignature(load(html, {}, false)), [])
+  assert.match(visibleProseText(load(html, {}, false)), /ordinary narrative/)
+  assert.doesNotMatch(prepared.context('prose'), /CODE_PRESERVED/)
+  assert.match(prepared.render(['普通叙述', '工具提高结果', '索引过程', '使用 [open]think[sep] 开启思考。', '回答', '{"timeout": 明天}']), /普通叙述/)
+})
+
+test('complete fenced SQL spans preserve syntax and numbers while prompts, explanations and captions translate', () => {
+  for (const code of ['```sql\nSELECT *\nFROM table1\nLIMIT 10;\n```', '~~~sql\nSELECT code FROM table1 LIMIT 10;\n~~~', '````\nSELECT code FROM table1 LIMIT 10;\n`````', '“‘sql\nSELECT *\nFROM table1\nLIMIT 10;\n“‘']) {
+    const html = `<figure><table><tbody><tr><td><p>Write a query for the top 10 rows.</p><span id="query" class="ltx_text">${code}</span><p>This query selects rows from table1.</p></td></tr></tbody></table><figcaption>Table 25: SQL evaluation example.</figcaption></figure>`
+    const prepared = translationUnits(html, 'table')
+    assert.deepEqual(prepared.units.map(unit => unit.text), ['Write a query for the top 10 rows.', 'This query selects rows from table1.', 'Table 25: SQL evaluation example.'])
+    assert.equal((prepared.context('sql').match(/⟪CODE_PRESERVED⟫/g) || []).length, 1)
+    assert.doesNotMatch(prepared.context('sql'), /SELECT|LIMIT/)
+    const translated = prepared.render(['编写查询获取前 10 行。', '此查询从 table1 中选择行。', '表 25：SQL 评估示例。'])
+    const english = load(html, {}, false), chinese = load(translated, {}, false)
+    assert.equal(chinese('#query').text(), code)
+    assert.deepEqual(scientificSignature(chinese), scientificSignature(english))
+    assert.notDeepEqual(scientificSignature(load(translated.replace('LIMIT 10', 'LIMIT 11'), {}, false)), scientificSignature(english))
+    assert.notDeepEqual(scientificSignature(load(translated.replace('FROM table1', 'FROM table2'), {}, false)), scientificSignature(english))
+    assert.doesNotMatch(visibleProseText(english), /SELECT|LIMIT/)
+    assert.match(visibleProseText(chinese), /此查询从 table1/)
+    assert.doesNotThrow(() => assertTranslationFidelity(visibleProseText(english), visibleProseText(chinese)))
+  }
+})
+
+test('fenced-code protection excludes ordinary quoted SQL prose, partial fences and mixed narrative spans', () => {
+  const examples = ['“SQL selects the top 10 rows.”', '“‘sql\nSELECT *', '“‘sql\nSELECT *\n”’', '“‘\nSELECT *\n“‘', '```sql\nSELECT *\n~~~', '````sql\nSELECT *\n```', 'Explain this:\n```sql\nSELECT *\n```', '```sql\nSELECT *\n```\nThen explain the query.\n```sql\nSELECT *\n```']
+  for (const text of examples) {
+    const html = `<span class="ltx_text">${text}</span>`, $ = load(html, {}, false)
+    assert.equal(isLiteralFencedCodeNode($('span')[0]), false)
+    assert.equal(translationUnits(html).units.length, 1)
+    assert.deepEqual(scientificSignature($), [])
+    assert.match(visibleProseText($), /SQL|SELECT/)
+    assert.doesNotMatch(translationUnits(html).context('prose'), /CODE_PRESERVED/)
+  }
+  const nested = load('<span>```sql\nSELECT <em>code</em>\n```</span>', {}, false)
+  assert.equal(isLiteralFencedCodeNode(nested('span')[0]), false)
+})
+
+test('generated context markers cannot leak or multiply while authentic literal source markers remain exact', () => {
+  for (const marker of ['⟪FORMULA:\\times⟫', '⟪CODE_PRESERVED⟫', '⟦block-242:0⟧', '⟦/block-242:0⟧']) {
+    assert.throws(() => assertTranslationFidelity('The speedup is shown here.', `加速比为${marker}。`), /Generated context marker leaked/)
+    assert.doesNotThrow(() => assertTranslationFidelity(`The literal marker is ${marker}.`, `字面标记为${marker}。`))
+    assert.throws(() => assertTranslationFidelity(`The literal marker is ${marker}.`, '字面标记在这里。'), /Literal source context marker omitted/)
+    assert.throws(() => assertTranslationFidelity(`The literal marker is ${marker}.`, `字面标记为${marker}和${marker}。`), /Generated context marker leaked/)
+  }
+  assert.throws(() => assertTranslationFidelity('The literal marker is ⟪FORMULA:x⟫.', '字面标记为⟪FORMULA:y⟫。'), /Literal source context marker omitted/)
+  assert.doesNotThrow(() => assertTranslationFidelity('The literal pair is ⟦block-242:0⟧text⟦/block-242:0⟧.', '字面标记对为⟦block-242:0⟧文本⟦/block-242:0⟧。'))
 })
 
 test('catalog checkpoint updates preserve the position of every existing paper', async () => {
@@ -235,6 +436,39 @@ test('offline Android Control evaluation retains its benchmark inside the same c
   // repair the missing benchmark from this exact source text unit.
   response.translations['block:0'] = 'ScreenSpot Pro 和 Android Control '
   assert.throws(() => parseUnitResponse(JSON.stringify(response), records), /Technical identifiers added|Android Control/)
+})
+
+test('a scale word after a hierarchical section number cannot multiply its last component', () => {
+  assert.doesNotThrow(() => assertTranslationFidelity('5.2.4 Scaling RL for Million-Token Context', '5.2.4 百万Token上下文扩展RL框架'))
+  assert.doesNotThrow(() => assertTranslationFidelity('3.4.2 Memory-efficient implementation', '3.4.2 内存高效的实现'))
+  assert.doesNotThrow(() => assertTranslationFidelity('5.2.4 A model with 4 million tokens.', '5.2.4 一个拥有400万个token的模型。'))
+  assert.throws(() => assertTranslationFidelity('5.2.4 A model with 4 million tokens.', '5.2.4 一个拥有40万个token的模型。'), /Numeric value/)
+})
+
+test('visible prose keeps nested section numbers and stage references in document order', () => {
+  const english = load('<h4><span>3.2.1 </span>Training Details of the First RL Stage</h4>', {}, false)
+  const chinese = load('<h4><span>3.2.1 </span>第一阶段 RL 的训练细节</h4>', {}, false)
+  assert.doesNotThrow(() => assertTranslationFidelity(visibleProseText(english), visibleProseText(chinese)))
+  assert.equal(visibleProseText(english).trim(), '3.2.1  Training Details of the First RL Stage')
+  const markup = 'Root<p>Before <a href="#stage">Stage <span>2</span></a> after<math><mn>99</mn></math><code>98</code><pre>97</pre><sup>1</sup> end.</p>'
+  const $ = load(markup, {}, false)
+  assert.equal(visibleProseText($), 'Root Before  Stage  2  after 1  end.')
+  assert.equal($.html(), load(markup, {}, false).html(), 'prose extraction must not alter the preserved scientific DOM')
+  assert.throws(() => assertTranslationFidelity(visibleProseText(load('<p>Stage <span>2</span> scores 8.</p>', {}, false)), '第一阶段得分8。'), /Stage reference/)
+})
+
+test('3rd-party has its own exact lexical occurrences without relaxing other numbers', () => {
+  assert.doesNotThrow(() => assertTranslationFidelity('Support 3rd-party frameworks.', '支持第三方框架。'))
+  assert.doesNotThrow(() => assertTranslationFidelity('Support 3rd party frameworks.', '支持第三方框架。'))
+  assert.doesNotThrow(() => assertTranslationFidelity('Support 3rd-party frameworks.', '支持 third-party 框架。'))
+  assert.doesNotThrow(() => assertTranslationFidelity('Support 3rd-party frameworks and 3 tools.', '支持第三方框架和3个工具。'))
+  assert.throws(() => assertTranslationFidelity('Support 3rd-party frameworks.', '支持第四方框架。'), /Third-party/)
+  assert.throws(() => assertTranslationFidelity('Support 3rd-party frameworks.', '支持框架，数量为3。'), /Third-party/)
+  assert.throws(() => assertTranslationFidelity('Support 3rd-party frameworks.', '支持第三方框架和第三方工具。'), /Third-party/)
+  assert.throws(() => assertTranslationFidelity('Support 3rd-party frameworks and 3 tools.', '支持第三方框架和工具。'), /Numeric value/)
+  assert.throws(() => assertTranslationFidelity('Support 3rd-party frameworks and 3 tools.', '支持第三方框架和4个工具。'), /Numeric value/)
+  assert.throws(() => assertTranslationFidelity('The 3rd GPU handles 8 tokens.', '第三个GPU处理8个token。'), /Numeric value/)
+  assert.throws(() => assertTranslationFidelity('The Prototype-3rd-party module.', 'Prototype-third-party 模块。'), /Numeric value/)
 })
 
 test('explicit Stage labels accept matching Chinese ordinals only with their exact multiplicities', () => {
@@ -347,6 +581,32 @@ test('named months match only the same valid calendar date and never license inv
   assert.doesNotThrow(() => assertTranslationFidelity('Released in February 2024.', '于2024年2月发布。'))
   assert.doesNotThrow(() => assertTranslationFidelity('Updated on 29 February 2024.', '于2024年2月29日更新。'))
   assert.throws(() => assertTranslationFidelity('Updated on February 28, 2025.', '于2025年2月29日更新。'), /Calendar date/)
+})
+
+test('yearless month-day dates match exact valid dates without absorbing years or quantities', () => {
+  const source = 'Updated on July 19.'
+  assert.doesNotThrow(() => assertTranslationFidelity(source, '于7月19日更新。'))
+  assert.doesNotThrow(() => assertTranslationFidelity('Updated on 19th July.', '于7 月 19 号更新。'))
+  assert.doesNotThrow(() => assertTranslationFidelity('Updated on Jul. 19.', '于07月19日更新。'))
+  assert.doesNotThrow(() => assertTranslationFidelity('Updated on February 29.', '于2月29日更新。'))
+  assert.throws(() => assertTranslationFidelity(source, '于8月19日更新。'), /Calendar date/)
+  assert.throws(() => assertTranslationFidelity(source, '于7月18日更新。'), /Calendar date/)
+  assert.throws(() => assertTranslationFidelity(source, '于13月19日更新。'), /Invalid calendar date/)
+  assert.throws(() => assertTranslationFidelity('Updated on February 30.', '于2月30日更新。'), /Invalid calendar date/)
+  assert.throws(() => assertTranslationFidelity(source, '于7月32日更新。'), /Invalid calendar date/)
+  assert.throws(() => assertTranslationFidelity(source, '于7月19日及7月19日更新。'), /Calendar dates added/)
+  assert.throws(() => assertTranslationFidelity('July 19 and July 19.', '7月19日。'), /Calendar date omitted/)
+  assert.doesNotThrow(() => assertTranslationFidelity('July 19 and 19 July.', '7月19日和7月19日。'))
+  assert.doesNotThrow(() => assertTranslationFidelity('Updated on July 19, 2026.', '于2026-07-19更新。'))
+  assert.doesNotThrow(() => assertTranslationFidelity('Updated on 2026-07-19 and July 19.', '于2026年7月19日及7月19日更新。'))
+  assert.throws(() => assertTranslationFidelity(source, '于2026年7月19日更新。'), /Calendar date/)
+  assert.throws(() => assertTranslationFidelity('Updated on July 19, 2026.', '于7月19日更新。'), /Calendar date/)
+  assert.throws(() => assertTranslationFidelity('July 19 with 2026 parameters.', '2026年7月19日，具有参数。'), /Calendar date/)
+  assert.throws(() => assertTranslationFidelity('July 19 with 2026 parameters.', '2026a年7月19日，具有参数。'), /Calendar date/)
+  assert.doesNotThrow(() => assertTranslationFidelity('July 19 with 7 participants.', '7月19日有7位参与者。'))
+  assert.throws(() => assertTranslationFidelity('July 19 with 7 participants.', '7月19日有参与者。'), /Numeric value omitted/)
+  assert.throws(() => assertTranslationFidelity('Scores of 7 and 19.', '日期为7月19日。'), /Calendar dates added/)
+  assert.throws(() => assertTranslationFidelity('July 19.4 points.', '7月19日得分4。'), /Calendar dates added/)
 })
 
 test('long technical-label fragments preserve programming languages while real English prose still fails', () => {

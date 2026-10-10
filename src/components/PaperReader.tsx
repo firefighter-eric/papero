@@ -4,7 +4,7 @@ import { sanitizePaperHtml } from '../lib/paper-data'
 import { readSavedAnchor, saveAnchor } from '../hooks/reading-storage'
 import type { ReadingAnchor } from '../hooks/reading-storage'
 import type { ReaderPreferences } from '../hooks/usePreferences'
-import type { CatalogPaper, PaperBlock, PaperDocument } from '../types'
+import type { FullTextCatalogPaper, PaperBlock, PaperDocument } from '../types'
 import { ScrollRail } from './ScrollRail'
 
 type Language = 'zh' | 'en'
@@ -20,7 +20,7 @@ export interface PaperReaderHandle {
 
 interface Props {
   paper: PaperDocument
-  entry: CatalogPaper
+  entry: FullTextCatalogPaper
   preferences: ReaderPreferences
   onPosition: (position: ReadingPosition) => void
 }

@@ -14,6 +14,23 @@ const image = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQ
 const pointer = 'version https://git-lfs.github.com/spec/v1\noid sha256:' + 'a'.repeat(64) + '\nsize 1000\n'
 const secondModel = 'qwen3.6-35b-a3b', secondDate = '2026-02-01T00:00:00.000Z'
 
+function sourceOnlyEntry(overrides = {}) {
+  return { access: 'source-only', id: 'source-report', arxivId: '2601.00001v2', sourceKind: 'arxiv',
+    title: 'Source Report', titleZh: null, authors: ['Source Author'], year: 2026, tags: ['Testing'],
+    sourceUrl: 'https://arxiv.org/abs/2601.00001v2', sourceHtmlUrl: 'https://arxiv.org/html/2601.00001v2',
+    dataPath: null, blockCount: 0, sectionCount: 0, translationStatus: 'pending', abstract: '', abstractZh: '', ...overrides }
+}
+
+const sourceArticle = () => sourceOnlyEntry({ id: 'source-article', arxivId: null, sourceKind: 'official-article',
+  title: 'Official Article', sourceUrl: 'https://qwen.ai/blog?id=qwen3.5', sourceHtmlUrl: 'https://qwen.ai/blog?id=qwen3.5' })
+
+async function addSources(dataDir, entries) {
+  const filename = path.join(dataDir, 'catalog.json')
+  const catalog = JSON.parse(await readFile(filename, 'utf8'))
+  catalog.papers = [...catalog.papers.filter(entry => entry.access !== 'source-only'), ...entries]
+  await writeFile(filename, JSON.stringify(catalog))
+}
+
 function mixedModelFixture(paper) {
   const old = structuredClone(paper.translation)
   const parameters = { ...old.parameters, temperature: 0.2 }
@@ -146,6 +163,155 @@ test('a complete processed snapshot verifies without raw HTML and preserves all 
   })
 })
 
+test('a mixed catalog exports and verifies source-only metadata without requiring any document or asset files', async () => {
+  await fixture(async ({ directory, dataDir, paper }) => {
+    await addSources(dataDir, [sourceOnlyEntry(), sourceArticle()])
+    const inspected = await inspectPublicData({ dataDir })
+    assert.equal(inspected.papers.length, 3)
+    assert.equal(inspected.files.size, 5)
+    assert.deepEqual(inspected.papers.slice(1), [sourceOnlyEntry(), sourceArticle()].map(entry => ({ entry, paper: null, metadata: null, dataPath: null })))
+    const expected = { papers: 3, blocks: 3, assets: 1, files: 5, rawSourceVerified: false, sourceOnlyPapers: 2, completePapers: 1 }
+    const reports = []
+    assert.deepEqual(await verifyReleaseData({ dataDir, report: value => reports.push(value) }), expected)
+    assert.deepEqual(reports, [{ type: 'public-release-verified', ...expected }])
+    const exported = await prepareData({ dataDir, outDir: path.join(directory, 'dist'), include: true })
+    assert.equal(exported.paperCount, 3)
+    assert.equal(exported.fileCount, 5)
+    assert.deepEqual(await readdir(path.join(exported.output, 'papers')), [paper.id])
+    assert.deepEqual(await readFile(path.join(exported.output, 'catalog.json')), await readFile(path.join(dataDir, 'catalog.json')))
+    assert.deepEqual(await verifyReleaseData({ dataDir: exported.output, report: () => {} }), expected)
+  })
+})
+
+test('source-only export copies catalog metadata while release still requires at least one complete document', async () => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), 'papero-sources-only-'))
+  try {
+    const dataDir = path.join(directory, 'input')
+    await mkdir(dataDir)
+    await writeFile(path.join(dataDir, 'catalog.json'), JSON.stringify({ schemaVersion: 1, papers: [sourceOnlyEntry(), sourceArticle()] }))
+    const exported = await prepareData({ dataDir, outDir: path.join(directory, 'dist'), include: true })
+    assert.equal(exported.paperCount, 2)
+    assert.equal(exported.fileCount, 1)
+    assert.deepEqual(await readdir(exported.output), ['catalog.json'])
+    await assert.rejects(verifyReleaseData({ dataDir: exported.output, report: () => {} }), /at least one complete document/)
+  } finally { await rm(directory, { recursive: true, force: true }) }
+})
+
+test('source-only catalog entries reject body paths, translation data, invalid metadata, missing fields and unknown content fields', async () => {
+  const mutations = [
+    entry => { entry.dataPath = 'papers/synthetic-report/paper.json' },
+    entry => { entry.dataPath = 'papers/source-report/paper.json' },
+    entry => { entry.dataPath = '../private.json' },
+    entry => { entry.blockCount = 1 },
+    entry => { entry.sectionCount = 1 },
+    entry => { entry.translationStatus = 'machine' },
+    entry => { entry.titleZh = '来源报告' },
+    entry => { entry.abstract = 'Full abstract' },
+    entry => { entry.abstractZh = '译文摘要' },
+    entry => { entry.abstractZh = null },
+    entry => { entry.blocks = [{ en: '<p>Private body</p>', zh: '私有译文' }] },
+    entry => { entry.content = { format: 'html' } },
+    entry => { entry.assets = [] },
+    entry => { entry.translation = { status: 'pending' } },
+    entry => { entry.title = '' },
+    entry => { entry.title = 'x'.repeat(2_001) },
+    entry => { entry.id = 'x'.repeat(161) },
+    entry => { entry.authors = [] },
+    entry => { entry.authors = [''] },
+    entry => { entry.year = 2026.5 },
+    entry => { entry.tags = [''] },
+    entry => { entry.sourceKind = 'other' },
+    entry => { delete entry.sourceKind },
+    entry => { delete entry.abstract },
+    entry => { delete entry.abstractZh },
+  ]
+  await fixture(async ({ directory, dataDir }) => {
+    for (const mutate of mutations) {
+      const entry = sourceOnlyEntry()
+      mutate(entry)
+      await addSources(dataDir, [entry])
+      await assert.rejects(inspectPublicData({ dataDir }), /source-only|Source-only/)
+      await assert.rejects(prepareData({ dataDir, outDir: path.join(directory, 'dist'), include: true }), /source-only|Source-only/)
+      await assert.rejects(verifyReleaseData({ dataDir, report: () => {} }), /source-only|Source-only/)
+    }
+  })
+})
+
+test('source-only identities require exact pinned arXiv links and safe official article HTTPS links', async () => {
+  const entries = [
+    sourceOnlyEntry({ arxivId: '2601.00001' }),
+    sourceOnlyEntry({ arxivId: '2601.00001v0' }),
+    sourceOnlyEntry({ arxivId: `2601.00001v${'1'.repeat(160)}`,
+      sourceUrl: `https://arxiv.org/abs/2601.00001v${'1'.repeat(160)}`, sourceHtmlUrl: `https://arxiv.org/html/2601.00001v${'1'.repeat(160)}` }),
+    sourceOnlyEntry({ sourceUrl: 'https://arxiv.org/abs/2601.00001v1' }),
+    sourceOnlyEntry({ sourceHtmlUrl: 'https://arxiv.org/html/2601.00001' }),
+    sourceOnlyEntry({ sourceUrl: 'https://arxiv.org/abs/2601.00001v2#body' }),
+    sourceOnlyEntry({ sourceUrl: 'https://arxiv.org.evil.example/abs/2601.00001v2' }),
+    sourceOnlyEntry({ sourceHtmlUrl: 'https://evil.example/html/2601.00001v2' }),
+    sourceOnlyEntry({ sourceUrl: 'javascript:alert(1)' }),
+    { ...sourceArticle(), arxivId: '2601.00001v2' },
+  ]
+  for (const url of ['http://qwen.ai/blog', 'javascript:alert(1)', '//qwen.ai/blog', 'https://user:password@qwen.ai/blog',
+    'https://qwen.ai/blog\n', 'https://qwen.ai\\@evil.example/blog', 'https://']) {
+    entries.push({ ...sourceArticle(), sourceUrl: url }, { ...sourceArticle(), sourceHtmlUrl: url })
+  }
+  await fixture(async ({ dataDir }) => {
+    for (const entry of entries) {
+      await addSources(dataDir, [entry])
+      await assert.rejects(inspectPublicData({ dataDir }), /source-only.*identity/)
+    }
+    await addSources(dataDir, [sourceOnlyEntry({ id: 'synthetic-report' })])
+    await assert.rejects(inspectPublicData({ dataDir }), /duplicate paper ID/)
+  })
+})
+
+test('source-only local document and source files are never read or exported and any source-only public directory is rejected', async () => {
+  await fixture(async ({ directory, dataDir, paper }) => {
+    const entry = sourceOnlyEntry(), sourceDir = path.join(dataDir, 'papers', entry.id)
+    await addSources(dataDir, [entry])
+    await mkdir(path.join(sourceDir, 'assets'), { recursive: true })
+    for (const relative of ['paper.json', 'en.html', 'zh.html', 'source.html', 'assets/private.png']) {
+      await writeFile(path.join(sourceDir, relative), pointer)
+    }
+    const inspected = await inspectPublicData({ dataDir })
+    assert.equal(inspected.files.size, 5)
+    assert.ok([...inspected.files.keys()].every(relative => !relative.includes(entry.id)))
+    const exported = await prepareData({ dataDir, outDir: path.join(directory, 'dist'), include: true })
+    assert.deepEqual(await readdir(path.join(exported.output, 'papers')), [paper.id])
+    await verifyReleaseData({ dataDir: exported.output, report: () => {} })
+    await assert.rejects(verifyReleaseData({ dataDir, report: () => {} }), /Unexpected public release file or directory: papers\/source-report/)
+    await rm(sourceDir, { recursive: true })
+    const exportedSourceDir = path.join(exported.output, 'papers', entry.id)
+    for (const relative of [null, 'paper.json', 'en.html', 'source.html', 'assets/private.png']) {
+      await mkdir(relative ? path.dirname(path.join(exportedSourceDir, relative)) : exportedSourceDir, { recursive: true })
+      if (relative) await writeFile(path.join(exportedSourceDir, relative), pointer)
+      await assert.rejects(verifyReleaseData({ dataDir: exported.output, report: () => {} }), /Unexpected public release file or directory: papers\/source-report/)
+      await rm(exportedSourceDir, { recursive: true })
+    }
+    await writeFile(path.join(exported.output, 'source.html'), 'private source')
+    await assert.rejects(verifyReleaseData({ dataDir: exported.output, report: () => {} }), /Unexpected public release file or directory: source.html/)
+  })
+})
+
+test('source-only entries do not weaken complete-document fingerprints, translation completeness or catalog matching', async () => {
+  for (const [mutate, override, expected] of [
+    [paper => { paper.blocks[0].zh = null; paper.translation.status = 'pending'; paper.translation.coverage.complete = 2 }, {}, /translation incomplete/],
+    [paper => { paper.blocks[0].translation.sourceSha256 = 'a'.repeat(64) }, {}, /stale block translation/],
+    [() => {}, { blockCount: 99 }, /Catalog\/document mismatch/],
+    [() => {}, { access: 'full-text' }, /Unsupported catalog access mode/],
+  ]) await fixture(async ({ dataDir, paper, save }) => {
+    mutate(paper)
+    await save(override)
+    await addSources(dataDir, [sourceOnlyEntry()])
+    await assert.rejects(verifyReleaseData({ dataDir, report: () => {} }), expected)
+  })
+  await fixture(async ({ dataDir, paperDir }) => {
+    await addSources(dataDir, [sourceOnlyEntry()])
+    await writeFile(path.join(paperDir, 'en.html'), '<p>Changed body</p>')
+    await assert.rejects(verifyReleaseData({ dataDir, report: () => {} }), /document fingerprint or byte-count mismatch/)
+  })
+})
+
 test('internal checkpoint JSON exports exact standalone bilingual HTML and never re-encodes a published snapshot', async () => {
   await fixture(async ({ directory, dataDir, paper, save }) => {
     const en = sanitizeHtml('<table id="results"><tbody><tr><th>Layers</th><td>2</td></tr></tbody></table>')
@@ -173,6 +339,52 @@ test('internal checkpoint JSON exports exact standalone bilingual HTML and never
     const copied = await inspectPublicData({ dataDir: second.output })
     assert.deepEqual([...copied.files], [...inspected.files])
     for (const relative of inspected.files.keys()) assert.deepEqual(await readFile(path.join(second.output, relative)), await readFile(path.join(first.output, relative)))
+  })
+})
+
+test('raw export includes only referenced assets while validating and preserving the complete input snapshot', async () => {
+  await fixture(async ({ directory, dataDir, paperDir, paper, save }) => {
+    const unused = { ...paper.assets[0], filename: 'unused-preview.png', sourceUrl: 'https://example.com/unused-preview.png' }
+    paper.assets.push(unused)
+    const unusedPath = path.join(paperDir, 'assets', unused.filename)
+    await writeFile(unusedPath, image)
+    await save({}, { raw: true })
+    const before = await inspectPublicData({ dataDir })
+    assert.equal(before.files.size, 4)
+    const inputBytes = new Map(await Promise.all([...before.files.keys()].map(async relative => [relative, await readFile(path.join(dataDir, relative))])))
+    const outDir = path.join(directory, 'dist')
+    const exported = await prepareData({ dataDir, outDir, include: true })
+    assert.equal(exported.fileCount, 5)
+    assert.deepEqual(await readdir(path.join(exported.output, 'papers', paper.id, 'assets')), ['figure.png'])
+    const output = await inspectPublicData({ dataDir: exported.output })
+    assert.equal(output.files.size, exported.fileCount)
+    assert.deepEqual(output.papers[0].metadata.assets, [paper.assets[0]])
+    for (const language of ['en', 'zh']) assert.deepEqual(output.papers[0].paper.blocks.map(block => block[language]), paper.blocks.map(block => block[language]))
+    assert.deepEqual(await verifyReleaseData({ dataDir: exported.output, report: () => {} }),
+      { papers: 1, blocks: 3, assets: 1, files: 5, rawSourceVerified: false })
+    assert.deepEqual([...((await inspectPublicData({ dataDir })).files)], [...before.files])
+    for (const [relative, bytes] of inputBytes) assert.deepEqual(await readFile(path.join(dataDir, relative)), bytes)
+
+    // An omitted asset is still inspected rather than silently ignored when corrupt or missing.
+    await writeFile(unusedPath, 'corrupt unused asset')
+    await assert.rejects(prepareData({ dataDir, outDir, include: true }), /fingerprint or byte-count mismatch/)
+    await rm(unusedPath)
+    await assert.rejects(prepareData({ dataDir, outDir, include: true }), /ENOENT/)
+    await writeFile(unusedPath, image)
+
+    // An existing HTML publication is copied exactly, leaving closure validation to the release verifier.
+    await save()
+    const published = await inspectPublicData({ dataDir })
+    const copied = await prepareData({ dataDir, outDir: path.join(directory, 'published-copy'), include: true })
+    assert.equal(copied.fileCount, published.files.size)
+    for (const relative of published.files.keys()) assert.deepEqual(await readFile(path.join(copied.output, relative)), await readFile(path.join(dataDir, relative)))
+    await assert.rejects(verifyReleaseData({ dataDir: copied.output, report: () => {} }), /metadata\/reference count mismatch/)
+
+    for (const language of ['en', 'zh']) paper.blocks[0][language] = paper.blocks[0][language].replace('assets/figure.png', 'assets/missing.png')
+    paper.blocks[0].translation.sourceSha256 = sha256(paper.blocks[0].en)
+    await save({}, { raw: true })
+    await assert.rejects(prepareData({ dataDir, outDir, include: true }), /Referenced asset has no metadata/)
+    assert.deepEqual([...((await inspectPublicData({ dataDir: exported.output })).files)], [...output.files])
   })
 })
 

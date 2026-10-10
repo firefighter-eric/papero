@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { load } from 'cheerio'
-import { sanitizeHtml, sha256, safeId, catalogEntry, assertTranslationFidelity } from './paper-lib.mjs'
+import { sanitizeHtml, sha256, safeId, catalogEntry, assertTranslationFidelity, visibleProseText, scientificSignature } from './paper-lib.mjs'
 
 export async function verifyData({ dataDir = process.env.DATA_DIR || 'data', strictTranslation = false, requireData = false } = {}) {
   let catalog
@@ -53,17 +53,10 @@ export async function verifyData({ dataDir = process.env.DATA_DIR || 'data', str
       }
       if (block.zh) {
         const english = load(block.en, {}, false), chinese = load(block.zh, {}, false)
-        const signature = ($) => $('math,img,a').map((_, node) => node.name === 'math' ? $.html(node) : `${node.name}:${$(node).attr(node.name === 'img' ? 'src' : 'href')}`).get()
-        if (JSON.stringify(signature(english)) !== JSON.stringify(signature(chinese))) throw new Error(`Formula, figure, or citation changed: ${block.id}`)
+        if (JSON.stringify(scientificSignature(english)) !== JSON.stringify(scientificSignature(chinese))) throw new Error(`Formula, code, figure, or citation changed: ${block.id}`)
         // Check the complete visible prose as well as the preserved DOM. This
         // catches numeric/citation text copied outside its original anchor.
-        const prose = ($) => {
-          $('math,code,pre').remove()
-          // Separate immutable note/inline nodes so "Hugging Face" + "1"
-          // is compared the same way as "权重" + "1".
-          return $.root().find('*').contents().filter((_, node) => node.type === 'text').map((_, node) => node.data).get().join(' ')
-        }
-        try { assertTranslationFidelity(prose(english), prose(chinese)) } catch (error) { throw new Error(`Translation fidelity failed for ${entry.id}/${block.id}: ${error.message}`) }
+        try { assertTranslationFidelity(visibleProseText(english), visibleProseText(chinese)) } catch (error) { throw new Error(`Translation fidelity failed for ${entry.id}/${block.id}: ${error.message}`) }
       }
       if (block.translation?.sourceSha256 && block.translation.sourceSha256 !== sha256(block.en)) throw new Error(`Stale translated block: ${block.id}`)
       if (block.zh && block.translation?.status === 'machine' && (!translationModels.has(block.translation.model) || block.translation.modelIdentity && block.translation.modelIdentity.apiModelId !== block.translation.model)) throw new Error(`Undeclared translated block model: ${block.id}`)

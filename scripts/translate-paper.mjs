@@ -2,7 +2,7 @@ import { readFile, writeFile, rename } from 'node:fs/promises'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { load } from 'cheerio'
-import { translationUnits, normalizeHeadingNumber, assertTranslationFidelity, technicalIdentifiers, isTechnicalLabelOnly, safeId, sha256 } from './paper-lib.mjs'
+import { translationUnits, normalizeHeadingNumber, assertTranslationFidelity, technicalIdentifiers, isTechnicalLabelOnly, safeId, sha256, translatedAbstractText } from './paper-lib.mjs'
 import { updateCatalog } from './import-paper.mjs'
 import { withExclusivePaperLock } from './catalog-lock.mjs'
 import { createRequestGate, runBoundedTasks, createSerialWriter, validateConcurrency, extractCompletionText, translationRequestBudget, protectSourceDelimiters } from './translation-workers.mjs'
@@ -214,7 +214,7 @@ async function translateUnlocked({ id, dataDir, endpoint = process.env.LM_STUDIO
       paper.translation.status = 'machine'
       paper.translation.completedAt = new Date().toISOString()
     }
-    paper.abstractZh = paper.blocks.filter(block => block.sectionId.startsWith('abstract') && block.kind !== 'heading' && block.zh).map(block => load(block.zh).text()).join(' ')
+    paper.abstractZh = translatedAbstractText(paper.blocks)
     await writeCheckpoint(async () => {
       const checkpoint = structuredClone(paper)
       await savePaper(filename, checkpoint)

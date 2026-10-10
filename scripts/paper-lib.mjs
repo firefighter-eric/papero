@@ -5,6 +5,76 @@ export const sha256 = (text) => createHash('sha256').update(text).digest('hex')
 export const safeId = (value) => /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value)
 export const validArxivId = (value) => /^(?:\d{4}\.\d{4,5}|[a-z-]+(?:\.[A-Z]{2})?\/\d{7})(?:v\d+)?$/.test(value)
 
+const chatTemplateFields = new Set('think response tools tool index messages tool_choice response_format'.split(' '))
+const xtmlBoundary = String.raw`\[(?:open|close|sep|end_of_msg)\]`
+const xtmlElement = String.raw`\[(?:open|close)\][A-Za-z_][A-Za-z0-9_-]*(?:\s+[A-Za-z_][A-Za-z0-9_-]*="[^"\r\n]*")*\[sep\]`
+const xtmlSyntax = new RegExp(`^(?:${xtmlBoundary}|${xtmlElement})(?:\\s+…\\s+(?:${xtmlElement}))*$`)
+
+// Protocol syntax is code even when LaTeXML emits a plain diagram span.
+// Only whole literal spans, JSON objects/arrays, and observed typewriter fields qualify;
+// ordinary typewriter phrases and prose surrounding a token remain narrative.
+export function isLiteralChatTemplateNode(node) {
+  if (node.type !== 'tag' || node.name !== 'span' || !node.children?.length || node.children.some(child => child.type !== 'text')) return false
+  const text = node.children.map(child => child.data).join('').trim()
+  if (xtmlSyntax.test(text)) return true
+  if (!(node.attribs?.class || '').split(/\s+/).includes('ltx_font_typewriter')) return false
+  if (chatTemplateFields.has(text) || text === 'type="tool-declare"') return true
+  if (!/^(?:\{[\s\S]*\}|\[[\s\S]*\])$/.test(text)) return false
+  try { const value = JSON.parse(text); return value !== null && typeof value === 'object' } catch { return false }
+}
+
+// LaTeXML may leave an entire fenced code block in an ordinary text span.
+// Require a complete, standalone fence; quoted prose and partial fences remain narrative.
+export function isLiteralFencedCodeNode(node) {
+  if (node.type !== 'tag' || node.name !== 'span' || !node.children?.length || node.children.some(child => child.type !== 'text')) return false
+  const lines = node.children.map(child => child.data).join('').trim().split(/\r?\n/)
+  if (lines.length < 3) return false
+  const opening = lines[0].match(/^ {0,3}(`{3,}|~{3,})([^\r\n]*)$/)
+  if (opening) {
+    if (opening[1][0] === '`' && opening[2].includes('`')) return false
+    const closing = new RegExp(`^ {0,3}${opening[1][0]}{${opening[1].length},}[ \\t]*$`)
+    return closing.test(lines.at(-1)) && !lines.slice(1, -1).some(line => closing.test(line))
+  }
+  // The observed LaTeXML smart-quote fence requires a language and matching end.
+  return /^“‘[A-Za-z][A-Za-z0-9_+.#-]*[ \t]*$/.test(lines[0]) && lines.at(-1).trim() === '“‘'
+    && lines.slice(1, -1).some(line => line.trim()) && !lines.slice(1, -1).some(line => line.trim() === '“‘')
+}
+
+const isLiteralCodeSpanNode = node => isLiteralChatTemplateNode(node) || isLiteralFencedCodeNode(node)
+
+export function scientificSignature($) {
+  return $('math,img,a,code,pre,.ltx_listing.ltx_lstlisting,span').map((_, node) => {
+    if ($(node).is('math,code,pre,.ltx_listing.ltx_lstlisting') || isLiteralCodeSpanNode(node)) return $.html(node)
+    if (node.name === 'img' || node.name === 'a') return `${node.name}:${$(node).attr(node.name === 'img' ? 'src' : 'href')}`
+    return null
+  }).get()
+}
+
+// The importer's fallback abstract section may also contain front matter or
+// a figure. Only actual abstract paragraphs contribute to the derived summary.
+export function translatedAbstractText(blocks) {
+  return blocks.filter(block => block.kind === 'paragraph' && /^abstract[^.]*\./.test(block.sourceId) && block.zh)
+    .map(block => {
+      const $ = load(block.zh, {}, false)
+      $('annotation,annotation-xml').remove()
+      return $.root().text().replace(/\s+/g, ' ').trim()
+    }).join(' ')
+}
+
+// Traverse in document order. Collecting every element's direct contents
+// puts a heading's narrative before its nested section number and can invent
+// a "Stage N" reference that never occurs in the displayed document.
+export function visibleProseText($) {
+  const text = []
+  const visit = node => {
+    if (['math', 'code', 'pre'].includes(node.name) || node.type === 'tag' && ($(node).is('.ltx_listing.ltx_lstlisting') || isLiteralCodeSpanNode(node))) return
+    if (node.type === 'text') text.push(node.data)
+    else for (const child of node.children ?? []) visit(child)
+  }
+  visit($.root()[0])
+  return text.join(' ')
+}
+
 const tags = new Set('p div section h1 h2 h3 h4 h5 h6 br span em strong i b sup sub a cite figure figcaption img table tr th td tbody thead tfoot ul ol li dl dt dd blockquote code pre math semantics annotation mrow mi mn mo mtext mspace ms mfrac msqrt mroot mstyle merror mpadded mphantom mfenced menclose msub msup msubsup munder mover munderover mmultiscripts mprescripts none mtable mtr mtd maligngroup malignmark'.split(' '))
 const attributes = new Set('id class href src alt title width height colspan rowspan display alttext encoding mathvariant stretchy fence separator accent accentunder form lspace rspace columnalign rowalign columnspacing rowspacing columnspan rowspan'.split(' '))
 const dangerousTags = 'script style iframe object embed link meta base form input button textarea select noscript template annotation-xml'
@@ -139,7 +209,7 @@ export function translationUnits(html, kind = 'paragraph') {
     if (node.type !== 'tag' && node.type !== 'root') return
     if (node.type === 'tag') {
       const item = $(node)
-      if (item.is('math,code,pre,.ltx_personname,.ltx_note_mark,.ltx_note_type')) return
+      if (item.is('math,code,pre,.ltx_listing.ltx_lstlisting,.ltx_personname,.ltx_note_mark,.ltx_note_type') || isLiteralCodeSpanNode(node)) return
       // Bibliographic author names and venues are original metadata. Translate only the paper title.
       if (kind === 'reference' && item.hasClass('ltx_bibblock') && item.index() !== 2) return
     }
@@ -154,7 +224,7 @@ export function translationUnits(html, kind = 'paragraph') {
         return unit ? `⟦${blockId}:${unit.id}⟧${unit.text}⟦/${blockId}:${unit.id}⟧` : node.data
       }
       if (node.type === 'tag' && node.name === 'math') return `⟪FORMULA:${$(node).attr('alttext') || $(node).find('annotation').text() || $(node).text()}⟫`
-      if (node.type === 'tag' && $(node).is('code,pre')) return '⟪CODE_PRESERVED⟫'
+      if (node.type === 'tag' && ($(node).is('code,pre,.ltx_listing.ltx_lstlisting') || isLiteralCodeSpanNode(node))) return '⟪CODE_PRESERVED⟫'
       return (node.children ?? []).map(walkContext).join('')
     }
     return walkContext($.root()[0]).replace(/\n{3,}/g, '\n\n')
@@ -169,7 +239,12 @@ export function translationUnits(html, kind = 'paragraph') {
   } }
 }
 
-const modelPattern = /\b(?:Qwen\d+(?:\.\d+)*(?:[-_][A-Za-z0-9.]+)*|(?:GPT|LLaMA|Llama|Gemini|Claude|DeepSeek|Mixtral|Mistral)(?:[-_]?[0-9]+(?:\.[0-9]+)*(?:[-_][A-Za-z0-9.]+)*)|(?:BF|FP|INT)\d+|GSM8K|MMLU(?:-Pro)?|GPQA(?:-Diamond)?|IFEval|HumanEval|MBPP|MMMU|MathVista|DocVQA|ChartQA|VideoMME|LiveCodeBench|Android Control)\b/gi
+const legacyModelPattern = /\b(?:Qwen\d+(?:\.\d+)*(?:[-_][A-Za-z0-9.]+)*|(?:GPT|LLaMA|Llama|Gemini|Claude|DeepSeek|Mixtral|Mistral)(?:[-_]?[0-9]+(?:\.[0-9]+)*(?:[-_][A-Za-z0-9.]+)*)|(?:BF|FP|INT)\d+|GSM8K|MMLU(?:-Pro)?|GPQA(?:-Diamond)?|IFEval|HumanEval|MBPP|MMMU|MathVista|DocVQA|ChartQA|VideoMME|LiveCodeBench|Android Control)\b/gi
+// These reports use both branded and short model names. Keep version letters,
+// decimal versions and full checkpoint suffixes together; an embedded V3 or K2
+// numeral is otherwise invisible to the ordinary numeric-token guard.
+const reportModelFamilies = String.raw`(?:DeepSeek[-_ ]?[VR]\d+(?:\.\d+)*(?:[-_][A-Za-z0-9.]+)*|Kimi[-_ ]?K\d+(?:\.\d+)*(?:[-_][A-Za-z0-9.]+)*|MiniMax[-_ ]?M\d+(?:\.\d+)*(?:[-_][A-Za-z0-9.]+)*|K(?:1\.5|2(?:\.[56])?|3)(?:[-_][A-Za-z0-9.]+)*(?!\.\d))`
+const modelPattern = new RegExp(String.raw`\b${reportModelFamilies}\b|${legacyModelPattern.source}`, 'gi')
 
 // Prose en/em dashes separate words; true identifier hyphens remain hyphens.
 const identifierText = (text) => text.normalize('NFKC').replace(/[\u2013\u2014\u2015]/g, ' ').replace(/[\u2010\u2011]/g, '-')
@@ -222,18 +297,39 @@ function calendarDates(text) {
   clean = clean
     .replace(new RegExp(`\\b(${monthPattern})\\s+((?:19|20)\\d{2})\\b`, 'gi'), (whole, month, year) => replace(whole, year, monthNumber(month)))
     .replace(/\b((?:19|20)\d{2})\s*年\s*(\d{1,2})\s*月(?!\s*\d)/g, (whole, year, month) => replace(whole, year, month))
+  // Month/day dates have no implied year. Keep them in a separate canonical
+  // namespace, and handle full dates first so a year can never be discarded.
+  const yearlessDate = (whole, month, day) => {
+    const m = Number(month), d = Number(day)
+    const maxDay = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][m - 1]
+    if (!maxDay || d < 1 || d > maxDay) throw new Error(`Invalid calendar date: ${whole}`)
+    dates.push(`--${m}-${d}`)
+    return ' '
+  }
+  clean = clean
+    .replace(new RegExp(`\\b(${monthPattern})\\s+(\\d{1,2})(?:st|nd|rd|th)?(?!\\w|\\.\\d)(?!\\s*,?\\s*(?:19|20)\\d{2}\\b)`, 'gi'), (whole, month, day) => yearlessDate(whole, monthNumber(month), day))
+    .replace(new RegExp(`\\b(\\d{1,2})(?:st|nd|rd|th)?\\s+(${monthPattern})(?!\\w|\\.\\d)(?!\\s*,?\\s*(?:19|20)\\d{2}\\b)`, 'gi'), (whole, day, month) => yearlessDate(whole, monthNumber(month), day))
+    .replace(/(?<![\w.])(?<!\d\s*[A-Za-z]?\s*年\s*)(\d{1,2})\s*月\s*(\d{1,2})\s*[日号](?!\d)/g, (whole, month, day) => yearlessDate(whole, month, day))
   return { clean, dates }
 }
 
 export function assertTranslationFidelity(source, translated) {
   const normalize = (text) => text.normalize('NFKC').replace(/\u00a0/g, ' ')
   const normalizeNumbers = (text) => text.normalize('NFKC').replace(/[\u2010\u2011]/g, '-')
-    .replace(new RegExp(`${modelPattern.source}[\\u2013\\u2014\\u2015]`, 'gi'), ' ').replace(modelPattern, '')
+    .replace(new RegExp(`(?:${modelPattern.source})[\\u2013\\u2014\\u2015]`, 'gi'), ' ').replace(modelPattern, '')
     // An en/em dash between two explicit multipliers is a positive range;
     // a mathematical minus sign (U+2212) still denotes a negative endpoint.
     .replace(/(\d+(?:\.\d+)?\s*[×x])\s*[\u2013\u2014]\s*(?=\d+(?:\.\d+)?\s*[×x])/g, '$1 to ')
     .replace(/[\u2010-\u2015\u2212]/g, '-').replace(/\u00a0/g, ' ')
   const en = normalize(source), zh = normalize(translated)
+  const contextMarkers = /⟪FORMULA:[^⟫]*⟫|⟪CODE_PRESERVED⟫|⟦\/?[A-Za-z0-9_.-]+:\d+⟧/gi
+  const remainingContextMarkers = [...(zh.match(contextMarkers) || [])]
+  for (const marker of en.match(contextMarkers) || []) {
+    const index = remainingContextMarkers.indexOf(marker)
+    if (index < 0) throw new Error(`Literal source context marker omitted or changed: ${marker}`)
+    remainingContextMarkers.splice(index, 1)
+  }
+  if (remainingContextMarkers.length) throw new Error(`Generated context marker leaked into translation: ${remainingContextMarkers.join(', ')}`)
   if (isBenchmarkLanguageList(en) || isIsoBenchmarkLanguageList(en)) {
     const labels = text => text.trim().replace(/,$/, '').replace(/\s/g, '')
     if (labels(en) !== labels(zh)) throw new Error('Benchmark language tags changed')
@@ -276,17 +372,33 @@ export function assertTranslationFidelity(source, translated) {
   const quantityNumber = '[+-]?\\d+(?:,\\d{3})*(?:\\.\\d+)?'
   const quantityUnit = '(?:[Bb]illion|[Mm]illion|[Tt]rillion|百万|十亿|万亿|亿|万|千|[BMTKk]\\b)'
   const canonicalQuantity = (value, unit) => String(Number((Number(value.replace(/,/g, '')) * (unitScale[unit] || unitScale[unit.toLowerCase()])).toPrecision(15)))
+  // Report compound modifiers bind a number to its scale: "1-million-token"
+  // and "2.8-trillion-parameter". Match complete standalone compounds before
+  // dash normalization so identifier/range hyphens and mathematical minus
+  // connectors cannot be reinterpreted as quantity separators.
+  const compoundQuantity = new RegExp(`(?<![\\w.+\\-\\u2010-\\u2015\\u2212])(${quantityNumber})-([Bb]illion|[Mm]illion|[Tt]rillion)-(?=(?:tokens?|parameters?)\\b)`, 'g')
   const numbers = (text) => {
-    let normalized = normalizeNumbers(text)
+    let normalized = normalizeNumbers(text.normalize('NFKC').replace(compoundQuantity, (_, value, unit) => `${canonicalQuantity(value, unit)} `))
     // Bibliography suffixes such as "Wang et al., 2024k" denote a year,
     // whereas "32k tokens" is a quantity. Never multiply a citation year.
     normalized = normalized.replace(/\b((?:19|20)\d{2})k\b/g, '$1_citation')
     // A trailing unit applies to both ends of a quantity range (0.5 to 72 billion).
-    normalized = normalized.replace(new RegExp(`(${quantityNumber})\\s*(?:to|到|至|-)\\s*(${quantityNumber})\\s*(${quantityUnit})`, 'g'), (_, first, last, unit) => `${canonicalQuantity(first, unit)} to ${canonicalQuantity(last, unit)}`)
-    normalized = normalized.replace(new RegExp(`(${quantityNumber})\\s*(${quantityUnit})`, 'g'), (_, value, unit) => canonicalQuantity(value, unit))
+    normalized = normalized.replace(new RegExp(`(?<![\\w.])(${quantityNumber})\\s*(?:to|到|至|-)\\s*(${quantityNumber})\\s*(${quantityUnit})`, 'g'), (_, first, last, unit) => `${canonicalQuantity(first, unit)} to ${canonicalQuantity(last, unit)}`)
+    normalized = normalized.replace(new RegExp(`(?<![\\w.])(${quantityNumber})\\s*(${quantityUnit})`, 'g'), (_, value, unit) => canonicalQuantity(value, unit))
     return normalized.match(/(?<![\w.])[+-]?\d+(?:,\d{3})*(?:\.\d+)?(?:[eE][+-]?\d+)?\s*%?/g)?.map(value => value.replace(/[,\s]/g, '')) || []
   }
   let sourceNumericText = sourceCalendar.clean, targetNumericText = targetCalendar.clean
+  // "3rd-party" is the lexical third-party relationship, not a count of
+  // three. Match its own occurrences before checking the remaining numbers;
+  // an unrelated score or a different ordinal cannot stand in for it.
+  if (/(?<![\w.-])3rd[- ]party(?![\w.-])/i.test(sourceNumericText)) {
+    const sourceParties = /(?<![\w.-])(?:3rd|third)[- ]party(?![\w.-])/gi
+    const targetParties = /(?<![\w.-])(?:3rd|third)[- ]party(?![\w.-])|第三方/gi
+    const expected = (sourceNumericText.match(sourceParties) || []).length
+    if ((targetNumericText.match(targetParties) || []).length !== expected) throw new Error('Third-party relationship omitted, added or changed')
+    sourceNumericText = sourceNumericText.replace(sourceParties, ' ')
+    targetNumericText = targetNumericText.replace(targetParties, ' ')
+  }
   const extraPerRow = (sourceNumericText.match(/\b1 extra per row\b/g) || []).length
   if (extraPerRow) {
     const translatedExtras = (targetNumericText.match(/每行\s*(?:多出|多)(?:了)?\s*一列/g) || []).length

@@ -1,6 +1,8 @@
 # Papero
 
-一个静态前端论文阅读器：从 arXiv HTML 离线导入论文，通过 LM Studio 生成中文译文，在浏览器中逐段对照阅读。前端使用 React、TypeScript 和 Vite，可部署到 Vercel。
+一个静态前端论文阅读器：从 arXiv HTML 离线导入论文，通过本机 LM Studio 或实际 GPT-6 Luna 任务生成中文译文，在浏览器中逐段对照阅读。前端使用 React、TypeScript 和 Vite，可部署到 Vercel。
+
+[在线阅读器](https://papero-omega.vercel.app) · [GitHub 仓库](https://github.com/firefighter-eric/papero)
 
 支持多篇论文、标题与作者搜索、章节目录、中英双栏、交换左右、单语言阅读、双向段落同步滚动、字号调整和阅读位置保存。拖动任意一栏都能带动另一栏；也可关闭同步，分别阅读。提供白色、黑色和淡橙色三种主题，主题与阅读设置会保存在当前浏览器。公式、图表和参考文献随论文保留。移动端也可以切换阅读模式。
 
@@ -15,9 +17,25 @@ npm ci
 DATA_DIR=paper-data npm run dev
 ```
 
-阅读器通过 `/paper-data` 加载论文。每篇文章的英文与中文正文分别保存为 `en.html` 和 `zh.html`，可以单独打开；公式使用原生 MathML，图表与正文放在一起。小型 `paper.json` 只保存标题、目录、段落定位和来源记录，不保存正文字符串。阅读器按相同段落标记对齐两份 HTML。
+阅读器通过 `/paper-data` 加载目录。全文条目的英文与中文正文分别保存为 `en.html` 和 `zh.html`，可以单独打开；公式使用原生 MathML，图表与正文放在一起。小型 `paper.json` 只保存标题、目录、段落定位和来源记录，不保存正文字符串。阅读器按相同段落标记对齐两份 HTML。仅来源条目提供官方原文与摘要页链接，不加载正文。
 
-发布库包括 **Attention Is All You Need**，arXiv `1706.03762v7`，以及 Qwen2、Qwen2.5、Qwen2.5-VL、Qwen3、Qwen3-VL 技术报告。Qwen3.5 收入官方发布文章，明确标注为官方文章。论文来源和固定版本见 [论文来源记录](docs/paper-sources.md)。
+首批七篇全文包括 **Attention Is All You Need**，arXiv `1706.03762v7`，以及 Qwen2、Qwen2.5、Qwen2.5-VL、Qwen3、Qwen3-VL 技术报告。Qwen3.5 收入官方发布文章，明确标注为官方文章。
+
+公共论文库包含 **14 个目录条目：首批 7 篇全文，并对 Attention 的六处公式或引用相邻译文片段定向校正，新增 7 篇仅来源条目**：
+
+| 系列 | 报告原题 | 固定 arXiv 版本 |
+| --- | --- | --- |
+| DeepSeek V3 | DeepSeek-V3 Technical Report | [2412.19437v2](https://arxiv.org/abs/2412.19437v2) |
+| DeepSeek R1 | DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning | [2501.12948v2](https://arxiv.org/abs/2501.12948v2) |
+| DeepSeek V4 | DeepSeek-V4: Towards Highly Efficient Million-Token Context Intelligence | [2606.19348v1](https://arxiv.org/abs/2606.19348v1) |
+| Kimi K2 | Kimi K2: Open Agentic Intelligence | [2507.20534v2](https://arxiv.org/abs/2507.20534v2) |
+| Kimi K2.5 | Kimi K2.5: Visual Agentic Intelligence | [2602.02276v2](https://arxiv.org/abs/2602.02276v2) |
+| Kimi K3 | Kimi K3: Open Frontier Intelligence | [2607.24653v2](https://arxiv.org/abs/2607.24653v2) |
+| MiniMax M3 关联架构论文 | MiniMax Sparse Attention | [2606.13392v2](https://arxiv.org/abs/2606.13392v2) |
+
+MiniMax M3 的官方技术报告链接指向 *MiniMax Sparse Attention*，目录保留报告原题并增加 M3 检索标签。新增条目只公开原题、作者、年份、标签和固定版本的官方 HTML／摘要页链接，不含正文、摘要、中文标题或图片。本地库已完成 14 篇全文，共 5209 个对齐内容块；新增七篇共 2882 块，均为机器译文。
+
+三个 Kimi 固定版本明确使用 **CC BY-NC-ND 4.0**，尚未收到译文公开授权回复。七篇新增报告均待确认当前固定版本的译文公开许可覆盖，因此公共库保留为仅来源条目。来源核验、固定版本与本地导入命令见 [论文来源记录](docs/paper-sources.md)。
 
 需要导入或重新翻译论文时，使用下面的流程。开发服务器默认读取被 Git 忽略的原始工作目录 `data/`；运行 `npm run dev` 即可阅读该目录中的处理结果。本地处理时保留 JSON 检查点，便于中断后继续翻译；发布时导出 HTML 正文。原始下载的 HTML、检查点和模型权重不属于发布库。
 
@@ -70,7 +88,7 @@ npm run library:translate -- qwen3-technical-report qwen3-5-official-article --c
 
 早期 Splash 短段落实测中，2 路与 4 路分别约为串行吞吐量的 1.31 倍和 1.32 倍，脚本默认 2 路。后续 MoE 使用已测得的四路全局队列，可显式运行 `npm run library:translate -- --model qwen3.6-35b-a3b --concurrency 4`。并发数可设为 1 到 4；不需要为每个本地请求启动一个 Subagent，也不需要加载多份模型。完整测量与局限见 [验证记录](docs/verification.md)。
 
-本次发布包含七篇完整机器译文，共 2327 个对齐内容块。早期段落由 Splash 翻译，后续由 MoE 完成；四段中的八个片段使用 GPT-6 Luna 辅助校正，另一段使用 Luna 草稿作为本地重译参考。实际贡献分别记录在 `assistedCorrections`，不伪造 Luna 的 API 参数或 token 用量。19 处已知问题已复核修复，仍不代表整库经过人工逐句审校。独立的八组首轮翻译比较基本打平，见 [翻译质量比较](docs/translation-comparison.md)。
+2026-10-11 首批发布验证记录包含七篇完整机器译文，共 2327 个对齐内容块；这不是新增批次的完成统计。首批早期段落由 Splash 翻译，后续由 MoE 完成；四段中的八个片段使用 GPT-6 Luna 辅助校正，另一段使用 Luna 草稿作为本地重译参考。实际贡献分别记录在 `assistedCorrections`，不伪造 Luna 的 API 参数或 token 用量。19 处已知问题已复核修复，仍不代表整库经过人工逐句审校。独立的八组首轮翻译比较基本打平，见 [翻译质量比较](docs/translation-comparison.md)。
 
 Qwen3.5 当前的官方来源是 [Qwen3.5: Towards Native Multimodal Agents](https://qwen.ai/blog?id=qwen3.5)，此次核验未找到对应的基础系列 arXiv 技术报告，因此文章与 arXiv 论文使用不同的来源标记。
 
@@ -93,7 +111,7 @@ src/                 阅读器与数据访问层（代码）
 scripts/             离线导入、翻译、验证与构建脚本（代码）
 docs/                设计与数据部署说明（代码）
 paper-data/          经验证的公开处理数据（整树 Git LFS 跟踪）
-  catalog.json       发布目录
+  catalog.json       全文与仅来源条目的发布目录
   papers/<id>/
     paper.json       轻量元数据、目录、段落定位、HTML 哈希（无正文）
     en.html          完整英文正文与 MathML 公式
@@ -102,29 +120,39 @@ paper-data/          经验证的公开处理数据（整树 Git LFS 跟踪）
 data/                原始 HTML、目录、论文 JSON、图像（本地，Git 忽略）
   catalog.json       论文目录
   papers/<id>/       每篇论文的数据与素材
+.cache/local-library/ 本地 HTML 导出（Git 忽略）
 ```
 
-`data/`、`dist/`、环境变量文件和缓存均被 Git 忽略。`paper-data/**` 使用 Git LFS 保存公开的 HTML 正文、轻量元数据和图片；普通 Git 提交保存的是指针。默认 `npm run build` 只构建前端；发布构建必须显式选择论文库。
+仅来源条目使用 `access: "source-only"`、`dataPath: null`、`blockCount: 0`、`sectionCount: 0`、`titleZh: null`、空的 `abstract`／`abstractZh` 和 `translationStatus: "pending"`；其下没有 `papers/<id>/` 目录。这个状态表示没有公开译文，不代表本地翻译进度。读取端在发送正文请求前拒绝加载此类条目。
+
+`data/`、`dist/`、环境变量文件和缓存均被 Git 忽略。`paper-data/**` 使用 Git LFS 保存公开目录、全文条目的 HTML 正文、轻量元数据和图片；普通 Git 提交保存的是指针。默认 `npm run build` 只构建前端；发布构建必须显式选择论文库。
 
 ```sh
 npm run check        # 类型检查、数据安全与处理器测试
 npm run build        # 前端代码构建，不包含本地论文
-npm run build:local  # 明确选择：把处理后的论文一起放入本机构建产物
+npm run build:local  # 把本地处理数据放入本机构建产物；不上传
 npm run build:library # 验证并构建 paper-data/ 发布库，输出 dist/paper-data/
 npm run preview      # 预览最近一次构建
 ```
 
-所有翻译完成后，先验证本地源数据，再导出发布快照：
+本地完整库单独导出到被 Git 忽略的目录，供本机阅读；部分译文也可导出，完整性仍以验证结果为准：
 
 ```sh
+node scripts/prepare-data.mjs --include --data-dir data --out-dir .cache/local-library
+DATA_DIR=.cache/local-library/paper-data npm run dev
+# 本地库全部翻译完成后执行：
 npm run paper:verify -- --strict-translation --require-data
-node scripts/prepare-data.mjs --include --out-dir .
+```
+
+该命令生成 `.cache/local-library/paper-data/`，不会上传或更新公开库。公共库使用显式审查的目录，保留首批全文并为新增报告注册仅来源元数据；用于组装的公共元数据暂存目录属于被忽略的临时材料，不是自动发布本地全文的通道。校验现有公开快照后构建：
+
+```sh
 node scripts/verify-release-data.mjs --data-dir paper-data
 npm run check
 npm run build:library
 ```
 
-导出仅包含目录、轻量论文元数据、中英文 HTML 正文和允许的图片，不包含原始下载的 HTML、日志、翻译检查点或模型。元数据记录两份 HTML 的 UTF-8 字节数、整文件哈希与每个段落的哈希；阅读器会检查文件身份、段落顺序和内容完整性，避免混用不同版本。核对显式文件清单后提交代码、`.gitattributes` 与 `paper-data/` 的 LFS 指针，通过 PR 的 CI 验证再合并。CI 使用 `lfs: true` 还原对象，验证处理数据与实际构建产物；未还原的 LFS 指针、缺失图片或未完成译文会阻止发布构建。
+导出器不读取或复制仅来源条目的本地正文与素材；严格发布校验拒绝这些条目对应的任何正文目录，也拒绝未知文件、原始来源和检查点。全文元数据记录两份 HTML 的 UTF-8 字节数、整文件哈希与每个段落的哈希；阅读器会检查文件身份、段落顺序和内容完整性，避免混用不同版本。核对显式文件清单后提交代码、`.gitattributes` 与 `paper-data/` 的 LFS 指针，通过 PR 的 CI 验证再合并。CI 使用 `lfs: true` 还原对象，验证处理数据与实际构建产物；未还原的 LFS 指针、缺失图片或全文条目的未完成译文会阻止发布构建。
 
 ## Vercel 与独立数据存储
 
@@ -132,13 +160,13 @@ npm run build:library
 
 `.vercelignore` 排除原始 `data/`、缓存、模型所在缓存目录、环境变量和本地构建输出，保留经过验证的 `paper-data/`。Vercel 与浏览器都不调用本机 LM Studio。
 
-论文数据增长后，也可以独立部署。把 `catalog.json`、每篇论文的 `paper.json`、`en.html`、`zh.html` 和 `assets/` 上传至独立的 HTTPS 对象存储或 CDN，并保持目录结构；在 Vercel 项目中设置：
+论文数据增长后，也可以独立部署。把已通过公开发布校验的 `catalog.json` 和全文条目的 `paper.json`、`en.html`、`zh.html`、`assets/` 上传至独立的 HTTPS 对象存储或 CDN，并保持目录结构；仅来源条目继续只存在于目录。在 Vercel 项目中设置：
 
 ```text
 VITE_PAPER_DATA_URL=https://your-data-host.example/papero
 ```
 
-然后部署前端。前端先读取小型目录，打开某篇论文时才加载元数据与两份 HTML，图像随阅读加载。数据服务需允许阅读器来源的 CORS GET 请求，并使用正确的 JSON、HTML 和图像 MIME 类型。新增或更新数据不需要重新构建前端；切换数据根地址需要重新构建，因为 Vite 环境变量在构建时生效。
+然后部署前端。前端先读取小型目录，打开全文条目时才加载元数据与两份 HTML，图像随阅读加载；仅来源条目直接提供官方链接。数据服务需允许阅读器来源的 CORS GET 请求，并使用正确的 JSON、HTML 和图像 MIME 类型。新增或更新数据不需要重新构建前端；切换数据根地址需要重新构建，因为 Vite 环境变量在构建时生效。
 
 使用独立数据服务时，将 Vercel 构建命令改为 `npm run build`，让部署产物只包含前端。如果没有发布库或可读取的数据地址，页面会显示数据配置说明。
 

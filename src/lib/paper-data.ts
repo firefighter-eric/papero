@@ -1,6 +1,7 @@
 import DOMPurify from 'dompurify'
 import type {
   CatalogPaper,
+  FullTextCatalogPaper,
   PaperBlockKind,
   PaperCatalog,
   PaperDocument,
@@ -35,6 +36,11 @@ const BLOCK_KINDS = new Set<PaperBlockKind>([
 const ID_PATTERN = /^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,159}$/
 const MAX_CATALOG_BYTES = 2 * 1024 * 1024
 const MAX_PAPER_BYTES = 20 * 1024 * 1024
+const SOURCE_ONLY_KEYS = new Set([
+  'access', 'id', 'arxivId', 'sourceKind', 'title', 'titleZh', 'authors', 'year', 'tags',
+  'sourceUrl', 'sourceHtmlUrl', 'translationStatus', 'blockCount', 'sectionCount',
+  'dataPath', 'abstract', 'abstractZh',
+])
 
 function invalid(message: string): never {
   throw new PaperDataError('invalid', message)
@@ -82,6 +88,9 @@ function status(value: unknown, label: string): asserts value is TranslationStat
 
 function httpsUrl(value: unknown, label: string): void {
   nonempty(value, label, 8_192)
+  if (!/^https:\/\//i.test(value) || /[\u0000-\u0020\u007f\\]/.test(value)) {
+    invalid(`${label} must be an explicit HTTPS URL without whitespace or backslashes.`)
+  }
   try {
     const url = new URL(value)
     if (url.protocol !== 'https:' || url.username || url.password) invalid(`${label} must use HTTPS.`)
@@ -129,22 +138,42 @@ export function validateCatalog(value: unknown): PaperCatalog {
   catalog.papers.forEach((item, index) => {
     const label = `catalog.papers[${index}]`
     const paper = record(item, label)
-    validatePaperIdentity(paper, label, sourceKind(paper.sourceKind, `${label}.sourceKind`))
+    const kind = sourceKind(paper.sourceKind, `${label}.sourceKind`)
+    validatePaperIdentity(paper, label, kind)
     httpsUrl(paper.sourceUrl, `${label}.sourceUrl`)
     httpsUrl(paper.sourceHtmlUrl, `${label}.sourceHtmlUrl`)
     status(paper.translationStatus, `${label}.translationStatus`)
     integer(paper.blockCount, `${label}.blockCount`)
     integer(paper.sectionCount, `${label}.sectionCount`)
-    validateDataPath(paper.dataPath)
+    if (paper.access === 'source-only') {
+      if (Object.keys(paper).some(key => !SOURCE_ONLY_KEYS.has(key))) invalid('Source-only entries contain unsupported metadata fields.')
+      if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(paper.id as string)) invalid('Source-only IDs must use lowercase letters, numbers, and separating hyphens.')
+      if (paper.sourceKind === undefined) invalid('Source-only entries must identify their source kind.')
+      if (!(paper.authors as string[]).length) invalid('Source-only entries must identify their authors.')
+      if (paper.dataPath !== null || paper.blockCount !== 0 || paper.sectionCount !== 0
+        || paper.translationStatus !== 'pending') invalid('Source-only entries cannot contain a body path, body counts, or a published translation.')
+      if (paper.titleZh !== null || paper.abstract !== '' || paper.abstractZh !== '') {
+        invalid('Source-only entries must contain bibliographic metadata without translated titles or abstracts.')
+      }
+      if (kind === 'arxiv' && (
+        !/^\d{4}\.\d{4,5}v[1-9]\d*$/.test(paper.arxivId as string)
+        || paper.sourceUrl !== `https://arxiv.org/abs/${paper.arxivId}`
+        || paper.sourceHtmlUrl !== `https://arxiv.org/html/${paper.arxivId}`
+      )) invalid('Source-only arXiv links must identify the exact fixed paper version.')
+    } else {
+      if (paper.access !== undefined) invalid(`${label}.access is unsupported.`)
+      validateDataPath(paper.dataPath)
+    }
     const id = paper.id as string
-    if (ids.has(id) || paths.has(paper.dataPath)) invalid('Catalog contains a duplicate paper ID or path.')
+    if (ids.has(id) || (typeof paper.dataPath === 'string' && paths.has(paper.dataPath))) invalid('Catalog contains a duplicate paper ID or path.')
     ids.add(id)
-    paths.add(paper.dataPath)
+    if (typeof paper.dataPath === 'string') paths.add(paper.dataPath)
   })
   return value as PaperCatalog
 }
 
 export function validatePaper(value: unknown, expected?: CatalogPaper): PaperDocument {
+  if (expected?.access === 'source-only') invalid('Source-only entries do not publish a paper document.')
   const paper = record(value, 'paper')
   if (paper.schemaVersion !== 1) invalid('Unsupported paper schema version.')
   const source = record(paper.source, 'paper.source')
@@ -376,7 +405,7 @@ async function loadHtmlBlocks(
   paper: PaperDocument,
   language: 'en' | 'zh',
   file: PaperHtmlFile,
-  entry: CatalogPaper,
+  entry: FullTextCatalogPaper,
   options: PaperDataOptions,
 ): Promise<(string | null)[]> {
   const directory = entry.dataPath.slice(0, entry.dataPath.lastIndexOf('/') + 1)
@@ -438,6 +467,9 @@ export async function loadCatalog(options: PaperDataOptions = {}): Promise<Paper
 }
 
 export async function loadPaper(entry: CatalogPaper, options: PaperDataOptions = {}): Promise<PaperDocument> {
+  // Also protect direct callers that did not obtain this entry from loadCatalog.
+  validateCatalog({ schemaVersion: 1, papers: [entry] })
+  if (entry.access === 'source-only') invalid('Source-only entries do not publish a paper document.')
   const value = record(await fetchJson(entry.dataPath, options, MAX_PAPER_BYTES), 'paper')
   if (value.content === undefined) return validatePaper(value, entry)
   const paper = validateHtmlMetadata(value, entry)
