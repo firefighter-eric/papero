@@ -1,0 +1,30 @@
+import type { CatalogPaper, PaperDocument } from '../types'
+import { ChevronDown } from 'lucide-react'
+
+export function PaperHeader({ entry, paper }: { entry: CatalogPaper; paper: PaperDocument | null }) {
+  const title = paper?.title || entry.title
+  const titleZh = paper?.titleZh || entry.titleZh
+  const authors = paper?.authors || entry.authors
+  const authorNames = authors.join(', ')
+  const manyAuthors = authors.length > 12 || authorNames.length > 230
+  const translated = paper?.blocks.filter((block) => block.zh !== null).length ?? 0
+  const total = paper?.blocks.length ?? entry.blockCount
+  const complete = paper ? translated === total : entry.translationStatus === 'machine'
+  return <header className="paper-heading">
+    <h1>{title}</h1>
+    {titleZh && <p className="paper-title-zh" lang="zh-CN">{titleZh}</p>}
+    {manyAuthors ? <div className="paper-authors paper-authors-expandable">
+      <p className="author-preview" lang="en">{authorNames}</p>
+      <details className="author-disclosure" key={entry.id} onKeyDown={(event) => {
+        if (event.key === 'Escape') event.currentTarget.open = false
+      }}>
+        <summary>{authors.length > 1 ? `查看全部署名（${authors.length}）` : '查看完整署名'}<ChevronDown size={12} aria-hidden="true" /></summary>
+        <div className="author-full-list" tabIndex={0} aria-label="完整署名名单"><p lang="en">{authorNames}</p></div>
+      </details>
+    </div> : <p className="paper-authors" lang="en">{authorNames}</p>}
+    <p className="paper-metadata"><span>{paper?.year || entry.year}</span><span aria-hidden="true">·</span>
+      <span>{entry.arxivId === null ? '官方文章' : `arXiv:${entry.arxivId}`}</span><span aria-hidden="true">·</span>
+      <span>{complete ? '机器翻译' : translated > 0 ? `机器翻译 · ${Math.round(translated / Math.max(1, total) * 100)}% 已完成` : '中文翻译待生成'}</span>
+    </p>
+  </header>
+}
