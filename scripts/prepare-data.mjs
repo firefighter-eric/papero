@@ -5,6 +5,7 @@ import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { load } from 'cheerio'
 import { createPublication, parseReadingHtml } from './publication-html.mjs'
+import { mergePaperTags } from './paper-tags.mjs'
 
 const ASSET_EXTENSIONS = new Set(['.png', '.jpg', '.jpeg', '.gif', '.webp', '.avif', '.svg'])
 const digest = bytes => createHash('sha256').update(bytes).digest('hex')
@@ -158,9 +159,19 @@ export async function prepareData({
   const { root, catalog, papers, files } = await inspectPublicData({ dataDir })
   const generated = new Map()
   const excludedAssets = new Set()
+  const exportedCatalog = { ...catalog, papers: catalog.papers.map(entry => ({ ...entry, tags: mergePaperTags(entry.id, entry.tags) })) }
+  if (JSON.stringify(exportedCatalog) !== JSON.stringify(catalog)) {
+    generated.set('catalog.json', Buffer.from(JSON.stringify(exportedCatalog, null, 2) + '\n'))
+  }
   for (const { paper, metadata, dataPath } of papers) {
     if (!paper) continue
-    if (metadata.content?.format === 'html') continue
+    const tags = mergePaperTags(paper.id, paper.tags)
+    if (metadata.content?.format === 'html') {
+      if (JSON.stringify(tags) !== JSON.stringify(metadata.tags)) {
+        generated.set(dataPath, Buffer.from(JSON.stringify({ ...metadata, tags }, null, 2) + '\n'))
+      }
+      continue
+    }
     const referencedAssets = new Set()
     for (const block of paper.blocks) for (const language of ['en', 'zh']) {
       const $ = load(block[language] ?? '', {}, false)
@@ -180,7 +191,7 @@ export async function prepareData({
       excludedAssets.add(path.posix.join(path.posix.dirname(dataPath), 'assets', asset.filename))
       return false
     })
-    const publication = createPublication({ ...paper, assets })
+    const publication = createPublication({ ...paper, tags, assets })
     generated.set(dataPath, Buffer.from(JSON.stringify(publication.metadata, null, 2) + '\n'))
     for (const language of ['en', 'zh']) generated.set(path.posix.join(path.posix.dirname(dataPath), `${language}.html`), Buffer.from(publication.html[language]))
   }

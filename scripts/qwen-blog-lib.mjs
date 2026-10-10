@@ -1,6 +1,7 @@
 import { load } from 'cheerio'
 import katex from 'katex'
 import { sanitizeHtml, sha256 } from './paper-lib.mjs'
+import { mergePaperTags } from './paper-tags.mjs'
 
 export const QWEN_ARTICLE_ID = 'qwen3-5-official-article'
 export const QWEN_ARTICLE_URL = 'https://qwen.ai/blog?id=qwen3.5'
@@ -162,7 +163,7 @@ export function parseQwenArticle(prepared, { html, metadata, fetchedAt = new Dat
   const firstRelease = content.children('p').filter((_, node) => $(node).text().startsWith('We are delighted')).first().text().replace(/\s+/g, ' ').trim()
   return {
     schemaVersion: 1, id: QWEN_ARTICLE_ID, arxivId: null, title: QWEN_ARTICLE_TITLE, titleZh: null,
-    authors: ['Qwen Team'], year: new Date(metadata.publishedAt).getUTCFullYear(), tags: ['Qwen3.5', '官方文章', '多模态'],
+    authors: ['Qwen Team'], year: new Date(metadata.publishedAt).getUTCFullYear(), tags: mergePaperTags(QWEN_ARTICLE_ID, ['Qwen3.5', '官方文章', '多模态']),
     abstract: firstRelease, abstractZh: null, sections, blocks, assets,
     source: { kind: 'official-article', url: QWEN_ARTICLE_URL, htmlUrl: QWEN_ARTICLE_URL,
       payloadUrl: QWEN_ARTICLE_PAYLOAD_URL, fetchedAt, publishedAt: metadata.publishedAt, language: 'en-US', sha256: sha256(html), media },

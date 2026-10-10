@@ -103,7 +103,7 @@ describe('source-only selection', () => {
     await act(async () => { root!.render(<App />) })
     expect(host.querySelector('h1')?.textContent).toBe(source.title)
     expect(host.querySelector('h2#paper-source-title')?.textContent).toBe('全文保留在本地')
-    expect(host.querySelector('.paper-source-tags')?.textContent).toBe('Kimi · MoE')
+    expect(host.querySelector('.paper-heading .paper-tags')?.textContent).toBe('KimiMoE')
     expect(host.querySelector('.paper-card')?.textContent).toContain('来源条目')
     expect(host.querySelector('input[type="search"]')).not.toBeNull()
     const links = Array.from(host.querySelectorAll<HTMLAnchorElement>('.paper-source a'))

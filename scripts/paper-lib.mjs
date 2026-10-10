@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto'
 import { load } from 'cheerio'
+import { mergePaperTags } from './paper-tags.mjs'
 
 export const sha256 = (text) => createHash('sha256').update(text).digest('hex')
 export const safeId = (value) => /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value)
@@ -175,7 +176,7 @@ export function parsePaper(html, { id, arxivId, htmlUrl, fetchedAt = new Date().
   return {
     schemaVersion: 1, id, arxivId, title, titleZh: null, authors, authorCredits,
     year: yearCode + (yearCode >= 91 ? 1900 : 2000),
-    tags: id === 'attention-is-all-you-need' ? ['Transformer', '注意力机制', '机器翻译'] : /^Qwen/.test(title) ? ['Qwen', /-VL\b/i.test(title) ? '视觉语言模型' : '大语言模型'] : [],
+    tags: mergePaperTags(id, id === 'attention-is-all-you-need' ? ['Transformer', '注意力机制', '机器翻译'] : /^Qwen/.test(title) ? ['Qwen', /-VL\b/i.test(title) ? '视觉语言模型' : '大语言模型'] : []),
     abstract: article.find('.ltx_abstract p').text().replace(/\s+/g, ' ').trim(), abstractZh: null,
     source: { kind: 'arxiv', url: `https://arxiv.org/abs/${arxivId}`, htmlUrl, fetchedAt, sha256: sha256(html), license: sourceLicense.text().replace('License:', '').trim() || null, licenseUrl: sourceLicense.attr('href') || null },
     translation: { status: 'pending', model: null, coverage: { complete: 0, total: blocks.length }, humanReviewed: false },
