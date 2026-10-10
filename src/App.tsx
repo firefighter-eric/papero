@@ -63,6 +63,8 @@ export default function App() {
           <span className="breadcrumb-library">论文库</span>
           {library.selected && <><span className="breadcrumb-slash" aria-hidden="true">/</span><span className="breadcrumb-title">{library.selected.title}</span></>}
         </div>
+        {library.catalog.status === 'ready' && library.selected && library.selected.access !== 'source-only' &&
+          <ReaderToolbar preferences={preferences} onChange={(patch) => setPreferences((current) => ({ ...current, ...patch }))} />}
         <div className="topbar-actions">
           <ThemeControl theme={preferences.theme} onChange={(theme) => setPreferences((current) => ({ ...current, theme }))} />
           {library.selected && <a className="source-link" href={library.selected.sourceHtmlUrl} target="_blank" rel="noopener noreferrer"
@@ -76,7 +78,6 @@ export default function App() {
             : <div className="paper-workspace">
               <PaperHeader entry={library.selected} paper={paper} />
               {library.selected.access === 'source-only' ? <PaperSource entry={library.selected} /> : <>
-                <ReaderToolbar preferences={preferences} onChange={(patch) => setPreferences((current) => ({ ...current, ...patch }))} />
                 {library.document.status === 'error' ? <ReaderState kind="error" scope="paper" error={library.document.error} onRetry={library.reloadPaper} />
                   : paper ? <PaperReader key={paper.id} ref={reader} paper={paper} entry={library.selected} preferences={preferences} onPosition={onPosition} />
                     : <ReaderState kind="loading" scope="paper" />}
