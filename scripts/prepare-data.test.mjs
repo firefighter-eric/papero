@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { mkdtemp, mkdir, readFile, readdir, rm, symlink, writeFile } from 'node:fs/promises'
+import { mkdtemp, mkdir, readFile, readdir, rename, rm, symlink, writeFile } from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 import { inspectPublicData, prepareData } from './prepare-data.mjs'
@@ -8,6 +8,7 @@ import { verifyReleaseData } from './verify-release-data.mjs'
 import { catalogEntry, sanitizeHtml, sha256, translationUnits } from './paper-lib.mjs'
 import { beginModelRun, recordModelUsage } from './translation-provenance.mjs'
 import { createPublication } from './publication-html.mjs'
+import { createCodexTranslationManifest } from './apply-codex-translations.mjs'
 
 const model = 'qwen3.8-27b-splash', date = '2026-01-01T00:00:00.000Z', prompt = sha256('synthetic test prompt')
 const image = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=', 'base64')
@@ -159,6 +160,42 @@ test('a complete processed snapshot verifies without raw HTML and preserves all 
     const exported = await prepareData({ dataDir, outDir: path.join(directory, 'dist'), include: true })
     const before = await inspectPublicData({ dataDir }), after = await inspectPublicData({ dataDir: exported.output })
     assert.deepEqual([...after.files], [...before.files])
+    await verifyReleaseData({ dataDir: exported.output, report: () => {} })
+  })
+})
+
+test('export applies evidenced tags to full and source-only metadata without changing source, frozen manifests, HTML or translation provenance', async () => {
+  for (const raw of [false, true]) await fixture(async ({ directory, dataDir, paperDir, paper, save }) => {
+    paper.id = 'qwen2-technical-report'
+    paper.tags = ['Legacy topic', 'Qwen', 'Legacy topic']
+    await save({}, { raw })
+    const inputPaperDir = path.join(dataDir, 'papers', paper.id)
+    await rename(paperDir, inputPaperDir)
+    const manifest = createCodexTranslationManifest(paper, { prompt: 'Synthetic frozen translation prompt.', createdAt: date })
+    await writeFile(path.join(inputPaperDir, 'frozen-manifest.json'), JSON.stringify(manifest))
+    await writeFile(path.join(inputPaperDir, 'source.html'), '<p>Private unchanged original source.</p>')
+    const sourceEntry = sourceOnlyEntry({ id: 'deepseek-r1-technical-report', tags: ['推理模型', 'DeepSeek'] })
+    await addSources(dataDir, [sourceEntry])
+    const inputFiles = ['catalog.json', `papers/${paper.id}/paper.json`, `papers/${paper.id}/frozen-manifest.json`, `papers/${paper.id}/source.html`]
+    if (!raw) inputFiles.push(`papers/${paper.id}/en.html`, `papers/${paper.id}/zh.html`)
+    const before = new Map(await Promise.all(inputFiles.map(async relative => [relative, await readFile(path.join(dataDir, relative))])))
+
+    const exported = await prepareData({ dataDir, outDir: path.join(directory, 'dist'), include: true })
+    for (const [relative, bytes] of before) assert.deepEqual(await readFile(path.join(dataDir, relative)), bytes)
+    const catalog = JSON.parse(await readFile(path.join(exported.output, 'catalog.json'), 'utf8'))
+    const expectedTags = ['Qwen', '预训练', '后训练', 'Legacy topic']
+    assert.deepEqual(catalog.papers[0].tags, expectedTags)
+    assert.deepEqual(catalog.papers[1], { ...sourceEntry, tags: ['DeepSeek', '后训练', '推理模型'] })
+    const metadata = JSON.parse(await readFile(path.join(exported.output, 'papers', paper.id, 'paper.json'), 'utf8'))
+    const unchangedPublication = createPublication(paper)
+    assert.deepEqual(metadata, { ...unchangedPublication.metadata, tags: expectedTags })
+    for (const language of ['en', 'zh']) {
+      const bytes = await readFile(path.join(exported.output, 'papers', paper.id, `${language}.html`))
+      assert.deepEqual(bytes, Buffer.from(unchangedPublication.html[language]))
+    }
+    assert.deepEqual(await readdir(path.join(exported.output, 'papers')), [paper.id])
+    assert.deepEqual(await readdir(path.join(exported.output, 'papers', paper.id)), ['assets', 'en.html', 'paper.json', 'zh.html'])
+    assert.deepEqual(await readFile(path.join(exported.output, 'papers', paper.id, 'assets', 'figure.png')), image)
     await verifyReleaseData({ dataDir: exported.output, report: () => {} })
   })
 })
