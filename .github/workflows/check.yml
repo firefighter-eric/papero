@@ -1,0 +1,32 @@
+name: Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Check types and source contracts
+        run: npm run check
+      - name: Build frontend without local data
+        run: npm run build
+      - name: Ensure the default build excludes paper data
+        run: test ! -d dist/paper-data
+      - name: Verify and build the curated paper library
+        run: npm run build:library
+      - name: Verify the published library output
+        run: node scripts/verify-release-data.mjs --data-dir dist/paper-data
