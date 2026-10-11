@@ -306,7 +306,9 @@ function isLocalHttp(url: URL): boolean {
 }
 
 export function resolvePaperDataUrl(path: string, baseUrl = getPaperDataBaseUrl()): string {
-  if (path !== 'catalog.json') validateDataPath(path)
+  const researchPath = path === 'research/catalog.json'
+    || /^research\/[a-z0-9]+(?:-[a-z0-9]+)*\/(?:report\.json|zh\.html)$/.test(path)
+  if (path !== 'catalog.json' && !researchPath) validateDataPath(path)
   return resolveStorageUrl(path, baseUrl)
 }
 

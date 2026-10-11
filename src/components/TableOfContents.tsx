@@ -31,7 +31,7 @@ function ancestorsOf(nodes: SectionNode[], id: string | null): string[] | null {
 }
 
 interface Props {
-  entry?: CatalogPaper
+  entry?: Pick<CatalogPaper, 'title' | 'year'> & { titleZh?: string | null; access?: 'source-only' }
   sections: PaperSection[]
   activeSection: string | null
   mobile: boolean

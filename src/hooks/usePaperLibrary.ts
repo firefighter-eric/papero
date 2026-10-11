@@ -16,7 +16,7 @@ function lastSelectedPaper(): string | null {
   try { return localStorage.getItem(LAST_PAPER) } catch { return null }
 }
 
-export function usePaperLibrary() {
+export function usePaperLibrary(active = true) {
   const [catalog, setCatalog] = useState<Resource<PaperCatalog>>(loading)
   const [selectedId, setSelectedId] = useState<string | null>(lastSelectedPaper)
   const [document, setDocument] = useState<Resource<PaperDocument> | { status: 'source-only'; value: null; error: null }>(loading)
@@ -39,7 +39,7 @@ export function usePaperLibrary() {
   const selected: CatalogPaper | undefined = catalog.value?.papers.find((paper) => paper.id === selectedId)
 
   useEffect(() => {
-    if (!selected) return
+    if (!selected || !active) return
     const controller = new AbortController()
     if (selected.access === 'source-only') {
       setDocument({ status: 'source-only', value: null, error: null })
@@ -52,11 +52,12 @@ export function usePaperLibrary() {
       })
     }
     const url = new URL(window.location.href)
+    url.searchParams.delete('research')
     url.searchParams.set('paper', selected.id)
     history.replaceState(null, '', url)
     try { localStorage.setItem(LAST_PAPER, selected.id) } catch { /* Optional preference. */ }
     return () => controller.abort()
-  }, [selected, paperRevision])
+  }, [selected, paperRevision, active])
 
   const selectPaper = useCallback((id: string) => {
     setSelectedId(id)

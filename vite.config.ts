@@ -20,6 +20,7 @@ const CONTENT_TYPES: Record<string, string> = {
 
 function allowedDataFile(relative: string): boolean {
   if (relative === 'catalog.json') return true
+  if (relative === 'research/catalog.json' || /^research\/[a-z0-9]+(?:-[a-z0-9]+)*\/(?:report\.json|zh\.html)$/.test(relative)) return true
   if (/^papers\/[a-zA-Z0-9][a-zA-Z0-9_-]*\/(?:paper\.json|en\.html|zh\.html)$/.test(relative)) return true
   return /^papers\/[a-zA-Z0-9][a-zA-Z0-9_-]*\/assets\/[a-zA-Z0-9][a-zA-Z0-9_.-]*$/.test(relative)
     && ASSET_EXTENSIONS.has(path.extname(relative).toLowerCase())

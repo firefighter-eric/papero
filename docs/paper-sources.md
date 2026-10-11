@@ -1,5 +1,17 @@
 # 示例论文的官方来源
 
+## 原生多模态缩放定律补充
+
+核验日期：2026-10-12。用户同意补充并发布 *Scaling Laws for Native Multimodal Models*，作者为 Mustafa Shukor、Enrico Fini、Victor Guilherme Turrisi da Costa、Matthieu Cord、Joshua Susskind、Alaaeldin El-Nouby。固定为 [arXiv 2504.07951v1](https://arxiv.org/abs/2504.07951v1)，正文来自 [官方 v1 HTML](https://arxiv.org/html/2504.07951v1)，没有改用后续修订版。论文许可为 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)；原始作者、英文标题、固定来源与许可记录随正文保留。
+
+本地 ID 为 `scaling-laws-native-multimodal-models`，包含 238 个中英对齐内容块、42 个目录项及 90 个正文图像文件。原始 HTML SHA-256 为 `17ecca9e3f28a219d4e5fb8079e45f2485d61e10fcf0be98cec3cd587c94ed45`，抓取时间为 `2026-10-11T17:09:19.714Z`；UTC 与上述本地核验日期对应。它补充了综述 R14 的原生 early/late fusion 受控缩放实验，不作为所有模型和预算下的普遍能力排名。
+
+官方 HTML 的 84 个图表面板使用内嵌 SVG。原导入器的正文清理会移除 SVG 路径，仅留下脱离图形的文字，因此本轮从同一固定来源渲染完整面板为 2 倍像素的 PNG，另保留 6 个官方图像文件。使用 Chromium `154.0.8037.98`，视口 `1440×1000`、`deviceScaleFactor: 2`、等待字体就绪后按 SVG 元素边界渲染；不是整页截图。图中文字保留官方英文，图注翻译中文。原始 SVG 与其 MathML 保存在被忽略的 `source-assets/inline-svg/`；每张来源 SVG 与输出 PNG 的指纹、尺寸、浏览器参数、来源 HTML 指纹以及修改的正文块记录在 `source.repairs` 和资产元数据中。原始 `source.html` 未修改。官方 HTML 在附录前有一个空的 `ltx_title_part`；目录标签补为“Appendices / 附录”，双语正文仍保留原空标题，修复记录明确限定为目录元数据。
+
+主译与定向重译均实际调用已安装的 `qwen3.6-35b-a3b`：`mlx-community`、MLX `4bit`、35B/A3B、8192 token 上下文；没有下载新模型。API 参数为 `temperature: 0.1`、`top_p: 0.9`、`max_tokens: 4096`、基础 `seed: 42`、`reasoning_effort: none`、`stream: false`。正常与纠错运行采用并发 1–2；实际批次预算、重试 seed、模型身份、用量、响应通道与指导指纹分别保留。摘要、融合优劣、参数与数据比例、MoE 饱和与公式变量对应等处做过定向核对和修正，不能据此声称全篇人工审校；公开译文仍为 `humanReviewed: false`。
+
+原始来源与处理后双语 HTML 分别经过严格校验，检查图像指纹、数值、公式、内部引用、内容块对应和模型记录。新增条目单独导出，再追加到公共目录；原有 54 个全文条目的文件保持原指纹。综述和论文的实际阅读器与线上验证在发布后另行执行。
+
 核验日期：2026-10-10。导入固定的 arXiv 版本，保留该版本 HTML 的来源 URL、抓取时间、SHA-256 和图片指纹。以下 HTML 地址均已实际请求，返回 `200 text/html`，包含 LaTeXML 论文正文、匹配的论文标题与 arXiv 版本水印。
 
 | 论文 | 固定版本与官方摘要页 | 官方 HTML | 本地论文 ID |

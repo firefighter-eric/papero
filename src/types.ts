@@ -161,3 +161,39 @@ export interface PaperDocument {
   /** Present for published HTML; the loader reconstructs blocks in memory. */
   content?: PaperHtmlContent
 }
+
+/** Original research is separate from papers and their translations. */
+export interface ResearchEntry {
+  id: string
+  title: string
+  date: string
+  summary: string
+  tags: string[]
+  dataPath: string
+}
+
+export interface ResearchSource {
+  id: string
+  title: string
+  authors: string[]
+  year: number
+  url: string
+  version: string
+  locator: string
+  verifiedAt: string
+  snapshotSha256: string
+  snapshotKind: string
+  localPaperId?: string
+  upstreamSha256?: string
+}
+
+export interface ResearchDocument extends ResearchEntry {
+  schemaVersion: 1
+  kind: 'research'
+  language: 'zh-CN'
+  revision: number
+  authorship: { agent: string; model: string; humanReviewed: false; method: string }
+  sections: { id: string; title: string; level: number }[]
+  sources: ResearchSource[]
+  content: { path: 'zh.html'; sha256: string; bytes: number }
+}

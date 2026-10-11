@@ -10,6 +10,8 @@
 
 ## 本地运行
 
+新增独立的“研究产出”栏目，用于根据论文与官方资料形成中文调研和综述。首篇简述 LLM vision 的三条路线：分开预训练后连接、原生多模态预训练、Gemma 4 12B ViT-free；开头提供 TL;DR，附 7 个来源及版本定位。研究正文为独立 `zh.html`，与论文及其译文分别维护；支持目录、引用回查、关联论文和 HTML 下载。数据格式与核验方式见 [研究产出](docs/research-publications.md)。
+
 使用 Node.js 24 LTS（`.nvmrc`）与 Git LFS。正式发布的处理后论文库位于 `paper-data/`，克隆后先还原 LFS 文件：
 
 ```sh
@@ -21,7 +23,7 @@ DATA_DIR=paper-data npm run dev
 
 阅读器通过 `/paper-data` 加载目录。全文条目的英文与中文正文分别保存为 `en.html` 和 `zh.html`，可以单独打开；公式优先使用原生 MathML；Adam v9 的 PDF 数学表达使用原始字形矢量，图表与正文放在一起。小型 `paper.json` 只保存标题、目录、段落定位和来源记录，不保存正文字符串。阅读器按相同段落标记对齐两份 HTML。仅来源条目提供官方原文与摘要页链接，不加载正文。
 
-公开处理库 `paper-data/` 包含 **54 个中英全文条目**（52 篇论文、Qwen3.5 官方文章及 Muon 作者文章），共 **19272 个对齐内容块、1561 个正文素材、1724 个处理后文件**。本轮按用户明确发布要求加入十二个优化器条目；原有四十二个条目的 1158 个正文、元数据和素材文件保持 SHA-256 一致，公共目录更新为 54 项。
+公开处理库 `paper-data/` 包含 **55 个中英全文条目**（53 篇论文、Qwen3.5 官方文章及 Muon 作者文章），共 **19510 个对齐内容块、1651 个正文素材、1817 个论文处理文件**，另有 1 篇中文研究报告的 3 个文件。本轮按用户明确要求补充 *Scaling Laws for Native Multimodal Models* `2504.07951v1` 并发布视觉路线综述；原有 54 个条目的正文、元数据和素材文件保持 SHA-256 一致。
 
 已有报告涵盖 Attention、Qwen、DeepSeek、Kimi、MiniMax、Gemini、Gemma 和 Chinchilla。上一轮预训练扩展包括 Llama 1／2／3、OLMo 2／3、FineWeb、DataComp-LM、DoReMi、Scaling Laws、DeepSeekMoE、DeepSeek LLM、μP、GPT-2／3、BERT、T5、RefinedWeb、Dolma、Switch Transformers 和 CLIP。固定版本、来源及各系列记录见 [论文来源](docs/paper-sources.md)。Qwen3.5 明确标注为官方文章；GPT-2 来自官方 PDF，转换为完整英文 HTML 后翻译，标注为官方论文。
 
@@ -161,7 +163,7 @@ DATA_DIR=.cache/local-library/paper-data npm run dev
 npm run paper:verify -- --strict-translation --require-data
 ```
 
-该命令生成 `.cache/local-library/paper-data/`，不会上传或更新公开库。公共库使用显式审查的目录，本次公开快照包含 54 个全文条目。添加论文、修改界面和构建本地库不等于发布授权；只有用户明确要求发布时才推送 GitHub 或部署 Vercel。用于组装的公共元数据暂存目录属于被忽略的临时材料，不是自动发布本地全文的通道。校验处理后快照再构建：
+该命令生成 `.cache/local-library/paper-data/`，不会上传或更新公开库。公共库使用显式审查的目录，本次公开快照包含 55 个全文条目。添加论文、修改界面和构建本地库不等于发布授权；只有用户明确要求发布时才推送 GitHub 或部署 Vercel。用于组装的公共元数据暂存目录属于被忽略的临时材料，不是自动发布本地全文的通道。校验处理后快照再构建：
 
 ```sh
 node scripts/verify-release-data.mjs --data-dir paper-data
