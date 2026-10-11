@@ -23,21 +23,21 @@ DATA_DIR=paper-data npm run dev
 
 首批七篇全文包括 **Attention Is All You Need**，arXiv `1706.03762v7`，以及 Qwen2、Qwen2.5、Qwen2.5-VL、Qwen3、Qwen3-VL 技术报告。Qwen3.5 收入官方发布文章，明确标注为官方文章。
 
-公共论文库包含 **14 个目录条目：首批 7 篇全文，并对 Attention 的六处公式或引用相邻译文片段定向校正，新增 7 篇仅来源条目**：
+公共论文库包含 **14 个目录条目：10 篇全文、4 篇仅来源条目**。全文包括首批 7 篇和 Kimi K2／K2.5／K3；Attention 的六处公式或引用相邻译文片段已定向校正。扩充批次的公开范围如下：
 
-| 系列 | 报告原题 | 固定 arXiv 版本 |
-| --- | --- | --- |
-| DeepSeek V3 | DeepSeek-V3 Technical Report | [2412.19437v2](https://arxiv.org/abs/2412.19437v2) |
-| DeepSeek R1 | DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning | [2501.12948v2](https://arxiv.org/abs/2501.12948v2) |
-| DeepSeek V4 | DeepSeek-V4: Towards Highly Efficient Million-Token Context Intelligence | [2606.19348v1](https://arxiv.org/abs/2606.19348v1) |
-| Kimi K2 | Kimi K2: Open Agentic Intelligence | [2507.20534v2](https://arxiv.org/abs/2507.20534v2) |
-| Kimi K2.5 | Kimi K2.5: Visual Agentic Intelligence | [2602.02276v2](https://arxiv.org/abs/2602.02276v2) |
-| Kimi K3 | Kimi K3: Open Frontier Intelligence | [2607.24653v2](https://arxiv.org/abs/2607.24653v2) |
-| MiniMax M3 关联架构论文 | MiniMax Sparse Attention | [2606.13392v2](https://arxiv.org/abs/2606.13392v2) |
+| 系列 | 报告原题 | 固定 arXiv 版本 | 公开范围 |
+| --- | --- | --- | --- |
+| DeepSeek V3 | DeepSeek-V3 Technical Report | [2412.19437v2](https://arxiv.org/abs/2412.19437v2) | 仅来源 |
+| DeepSeek R1 | DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning | [2501.12948v2](https://arxiv.org/abs/2501.12948v2) | 仅来源 |
+| DeepSeek V4 | DeepSeek-V4: Towards Highly Efficient Million-Token Context Intelligence | [2606.19348v1](https://arxiv.org/abs/2606.19348v1) | 仅来源 |
+| Kimi K2 | Kimi K2: Open Agentic Intelligence | [2507.20534v2](https://arxiv.org/abs/2507.20534v2) | 中英全文 |
+| Kimi K2.5 | Kimi K2.5: Visual Agentic Intelligence | [2602.02276v2](https://arxiv.org/abs/2602.02276v2) | 中英全文 |
+| Kimi K3 | Kimi K3: Open Frontier Intelligence | [2607.24653v2](https://arxiv.org/abs/2607.24653v2) | 中英全文 |
+| MiniMax M3 关联架构论文 | MiniMax Sparse Attention | [2606.13392v2](https://arxiv.org/abs/2606.13392v2) | 仅来源 |
 
-MiniMax M3 的官方技术报告链接指向 *MiniMax Sparse Attention*，目录保留报告原题并增加 M3 检索标签。新增条目只公开原题、作者、年份、标签和固定版本的官方 HTML／摘要页链接，不含正文、摘要、中文标题或图片。本地库已完成 14 篇全文，共 5209 个对齐内容块；新增七篇共 2882 块，均为机器译文。
+MiniMax M3 的官方技术报告链接指向 *MiniMax Sparse Attention*，目录保留报告原题并增加 M3 检索标签。四篇仅来源条目只公开原题、作者、年份、标签和固定版本的官方 HTML／摘要页链接，不含正文、摘要、中文标题或图片。本地库已完成 14 篇全文，共 5209 个对齐内容块；扩充的七篇共 2882 块，其中此次公开的 Kimi 三篇共 1342 块，均为机器译文。
 
-三个 Kimi 固定版本明确使用 **CC BY-NC-ND 4.0**，尚未收到译文公开授权回复。七篇新增报告均待确认当前固定版本的译文公开许可覆盖，因此公共库保留为仅来源条目。来源核验、固定版本与本地导入命令见 [论文来源记录](docs/paper-sources.md)。
+三个 Kimi 固定版本明确使用 **CC BY-NC-ND 4.0**。用户于 **2026-10-11** 确认已获得作者授权公开这三篇固定版本的中文全文，本次发布依据为该用户确认，未独立核验书面授权文件；原始许可标注继续保留。该确认不扩展到 DeepSeek 三篇或 MiniMax Sparse Attention，它们继续保留为仅来源条目。来源核验、固定版本与本地导入命令见 [论文来源记录](docs/paper-sources.md)。
 
 需要导入或重新翻译论文时，使用下面的流程。开发服务器默认读取被 Git 忽略的原始工作目录 `data/`；运行 `npm run dev` 即可阅读该目录中的处理结果。本地处理时保留 JSON 检查点，便于中断后继续翻译；发布时导出 HTML 正文。原始下载的 HTML、检查点和模型权重不属于发布库。
 
@@ -147,7 +147,7 @@ DATA_DIR=.cache/local-library/paper-data npm run dev
 npm run paper:verify -- --strict-translation --require-data
 ```
 
-该命令生成 `.cache/local-library/paper-data/`，不会上传或更新公开库。公共库使用显式审查的目录，保留首批全文并为新增报告注册仅来源元数据；用于组装的公共元数据暂存目录属于被忽略的临时材料，不是自动发布本地全文的通道。校验现有公开快照后构建：
+该命令生成 `.cache/local-library/paper-data/`，不会上传或更新公开库。公共库使用显式审查的目录，保留首批全文与此次获授权的 Kimi 三篇全文，其他四篇新增报告仍为仅来源元数据；用于组装的公共元数据暂存目录属于被忽略的临时材料，不是自动发布本地全文的通道。校验现有公开快照后构建：
 
 ```sh
 node scripts/verify-release-data.mjs --data-dir paper-data
