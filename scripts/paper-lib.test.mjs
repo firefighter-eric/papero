@@ -178,6 +178,236 @@ test('new family fidelity rejects variant changes, omitted repetitions and inven
   assert.doesNotThrow(() => assertTranslationFidelity('Kimi-K2.5 has 1 million parameters.', 'Kimi-K2.5 有1000000个参数。'))
 })
 
+test('model versions next to modal may are not calendar dates, while actual dates remain exact', () => {
+  assert.doesNotThrow(() => assertTranslationFidelity('All Gemma 2 users should test scenarios in which Gemma 2 may be used.', '所有 Gemma 2 用户都应测试可能使用 Gemma 2 的场景。'))
+  assert.doesNotThrow(() => assertTranslationFidelity('Gemma 3 may improve. The release is May 2.', 'Gemma 3 可能有所改进。发布于5月2日。'))
+  assert.throws(() => assertTranslationFidelity('Gemma 3 may improve. The release is May 2.', 'Gemma 3 可能有所改进。发布于5月3日。'), /Calendar date/)
+  assert.throws(() => assertTranslationFidelity('Gemma 2 may be used.', 'Gemma 2 可在5月2日使用。'), /Calendar dates added/)
+})
+
+test('Gemini report names retain spaced tiers, version aliases and complete checkpoint suffixes', () => {
+  // Observed in 2312.11805v5, 2403.05530v5 and 2507.06261v6.
+  const names = [
+    'Gemini 1.0', 'Gemini Ultra', 'Gemini Pro', 'Gemini Nano',
+    'Gemini 1.0 Ultra', 'Gemini 1.0 Pro', 'Gemini 1.0 Nano',
+    'Gemini 1.5', 'Gemini 1.5 Pro', 'Gemini 1.5 Flash', 'Gemini 1.5 Flash-8B',
+    'Gemini 2.X', 'Gemini 2.0', 'Gemini 2.0 Pro', 'Gemini 2.0 Flash', 'Gemini 2.0 Flash-Lite',
+    'Gemini 2.5', 'Gemini 2.5 Pro', 'Gemini 2.5 Flash', 'Gemini 2.5 Flash-Lite',
+    'gemini-2.5-flashlite-preview-06-17', 'Gemini-1.5-Pro', 'Gemini-2.5-Flash-Lite',
+    '1.0 Ultra', '1.5 Pro', '1.5 Flash', '2.0 Flash-Lite', '2.5 Pro', '2.5 Flash',
+  ]
+  for (const name of names) {
+    assert.deepEqual(technicalIdentifiers(`We evaluate ${name} on 57 tasks.`), [name])
+    assert.doesNotThrow(() => assertTranslationFidelity(`We evaluate ${name} on 57 tasks.`, `我们在57项任务上评估${name}。`))
+    assert.throws(() => assertTranslationFidelity(`We evaluate ${name} on 57 tasks.`, '我们在57项任务上评估该模型。'), /Technical identifier/)
+  }
+})
+
+test('Gemini fidelity rejects changed tiers, versions, suffixes and occurrence counts', () => {
+  const changes = [
+    ['Gemini 1.5 Pro', 'Gemini 1.5 Flash'],
+    ['Gemini Ultra', 'Gemini Nano'],
+    ['Gemini 2.0 Flash-Lite', 'Gemini 2.0 Flash'],
+    ['Gemini 2.5 Pro', 'Gemini 2.0 Pro'],
+    ['Gemini 2.X', 'Gemini 2.5'],
+    ['Gemini 1.5 Flash-8B', 'Gemini 1.5 Flash'],
+    ['Gemini 1.5 Flash-8B', 'Gemini 1.5 Flash-7B'],
+    ['gemini-2.5-flashlite-preview-06-17', 'gemini-2.5-flashlite-preview-06-18'],
+    ['1.5 Pro', '1.5 Flash'],
+  ]
+  for (const [source, changed] of changes) {
+    assert.throws(() => assertTranslationFidelity(`${source} scores 95%.`, `${changed} 得分95%。`), /Technical identifier/)
+  }
+  assert.throws(() => assertTranslationFidelity('Gemini 1.5 Pro improves Gemini 1.5 Pro.', 'Gemini 1.5 Pro 得到改进。'), /Technical identifier/)
+  assert.throws(() => assertTranslationFidelity('Gemini 1.5 Pro performs well.', 'Gemini 1.5 Pro 和 Gemini 1.5 Flash 表现良好。'), /Technical identifiers added/)
+  assert.throws(() => assertTranslationFidelity('The model performs well.', 'Gemini 2.5 Flash 模型表现良好。'), /Technical identifiers added/)
+  assert.throws(() => assertTranslationFidelity('Gemini 2.5 Pro scores 95%.', 'Gemini 2.5 Pro 得分95%与99%。'), /Numeric values added/)
+  assert.throws(() => assertTranslationFidelity('Gemini 2.5 Pro has -0.5% change.', 'Gemini 2.5 Pro 变化为0.5%。'), /Numeric value/)
+})
+
+test('Gemini names never consume neighboring prose or turn a prose dash into a numeric minus', () => {
+  assert.deepEqual(technicalIdentifiers('Gemini models use flash memory and ultra-low-latency serving.'), [])
+  assert.deepEqual(technicalIdentifiers('A pro evaluates Gemini research and Pro style.'), [])
+  assert.deepEqual(technicalIdentifiers('Gemini 1.5 Pro now supports audio.'), ['Gemini 1.5 Pro'])
+  assert.deepEqual(technicalIdentifiers('Gemini 2.5 Flash-Lite is faster.'), ['Gemini 2.5 Flash-Lite'])
+  assert.equal(isTechnicalLabelOnly('flash memory'), false)
+  assert.equal(isTechnicalLabelOnly('Gemini 1.5 Pro now supports audio.'), false)
+  for (const dash of ['–', '—', '―']) {
+    assert.deepEqual(technicalIdentifiers(`Gemini 2.5 Pro${dash}1 million tokens.`), ['Gemini 2.5 Pro'])
+    assert.doesNotThrow(() => assertTranslationFidelity(`Gemini 2.5 Pro${dash}1 million tokens.`, 'Gemini 2.5 Pro支持1M个token。'))
+  }
+})
+
+test('Gemini table tiers remain exact within their own source DOM text fragment', () => {
+  for (const label of ['Gemini', 'Ultra', 'Pro', 'Nano', 'Nano-1', 'Nano-2', 'Flash', 'Flash-Lite']) {
+    assert.deepEqual(technicalIdentifiers(` ${label} `), [label])
+    assert.equal(isTechnicalLabelOnly(label), true)
+    assert.doesNotThrow(() => assertTranslationFidelity(label, label))
+  }
+  const source = '<table><tr><th><span>Flash-Lite</span><br><span>Gemini 2.0</span></th><th><span>Pro</span><br><span>Gemini 2.5</span></th></tr></table>'
+  const prepared = translationUnits(source, 'table')
+  const records = prepared.units.map((unit, index) => ({ id: `header:${index}`, text: unit.text }))
+  assert.deepEqual(records.map(record => record.text), ['Flash-Lite', 'Gemini 2.0', 'Pro', 'Gemini 2.5'])
+  const exact = Object.fromEntries(records.map(record => [record.id, record.text]))
+  const accepted = parseUnitResponse(JSON.stringify({ translations: exact }), records)
+  assert.equal(prepared.render(accepted.map(result => result.text)), sanitizeHtml(source))
+  assert.throws(() => parseUnitResponse(JSON.stringify({ translations: { ...exact, 'header:0': 'Flash' } }), records), /Technical identifier/)
+  // A correct neighbor cannot repair an omitted tier, nor may a full name
+  // borrow the version from the following immutable source text fragment.
+  assert.throws(() => parseUnitResponse(JSON.stringify({ translations: { ...exact, 'header:0': 'Gemini 2.0 Flash-Lite', 'header:1': 'Gemini 2.0' } }), records), /Technical identifier/)
+})
+
+test('Gemini fragment validation rejects moving a correct model name to a neighboring node', () => {
+  const prepared = translationUnits('<p><span>Gemini 1.5 Pro</span> outperforms <span>Gemini 1.5 Flash</span> by 5%.</p>')
+  const records = prepared.units.map((unit, index) => ({ id: `comparison:${index}`, text: unit.text }))
+  assert.deepEqual(records.map(record => record.text), ['Gemini 1.5 Pro', ' outperforms ', 'Gemini 1.5 Flash', ' by 5%.'])
+  const translations = { 'comparison:0': 'Gemini 1.5 Pro', 'comparison:1': ' 优于 ', 'comparison:2': 'Gemini 1.5 Flash', 'comparison:3': ' 5%。' }
+  assert.doesNotThrow(() => parseUnitResponse(JSON.stringify({ translations }), records))
+  assert.throws(() => parseUnitResponse(JSON.stringify({ translations: { ...translations, 'comparison:0': '该模型', 'comparison:1': 'Gemini 1.5 Pro 优于 ' } }), records), /Technical identifier/)
+})
+
+test('Gemma report names preserve versions, sizes, effective sizes and checkpoint training stages', () => {
+  const names = [
+    'Gemma 2B', 'Gemma 7B', 'Gemma 7B IT', 'Gemma 1.0 IT', 'Gemma 1.1 IT 7B',
+    'Gemma 2', 'Gemma 2 27B', 'Gemma-1 7B', 'Gemma 2.6B', 'Gemma 2 IT 9B',
+    'gemma-2-27b-it', 'Gemma3-4B-IT', 'Gemma2-27B-IT', 'Gemma-3-27B-IT',
+    'Gemma 3 27B IT', 'Gemma 3 PT', 'Gemma 3 IT', 'Gemma IT',
+    'Gemma 4 12B', 'Gemma 4 31B', 'Gemma 4 26B-A4B', 'Gemma 4 E2B', 'Gemma 4 E4B',
+    'Gemma 3n', 'Gemma 3n E2B', 'Gemma 3n E4B',
+  ]
+  for (const name of names) {
+    assert.deepEqual(technicalIdentifiers(`We evaluate ${name} on 57 tasks.`), [name])
+    assert.doesNotThrow(() => assertTranslationFidelity(`We evaluate ${name} on 57 tasks.`, `我们在57项任务上评估${name}。`))
+    assert.throws(() => assertTranslationFidelity(`We evaluate ${name} on 57 tasks.`, '我们在57项任务上评估该模型。'), /Technical identifier/)
+  }
+  for (const [source, changed] of [
+    ['Gemma3-4B-IT', 'Gemma3-4B-PT'], ['Gemma 3n E2B', 'Gemma 3 E2B'],
+    ['Gemma 4 E2B', 'Gemma 4 E4B'], ['Gemma 4 26B-A4B', 'Gemma 4 26B-A2B'],
+    ['Gemma 2 IT 27B', 'Gemma 2 IT 9B'], ['Gemma 3 27B IT', 'Gemma 3 27B'],
+  ]) assert.throws(() => assertTranslationFidelity(`${source} scores 95%.`, `${changed} 得分95%。`), /Technical identifier/)
+  assert.throws(() => assertTranslationFidelity('Gemma 4 E2B improves Gemma 4 E2B.', 'Gemma 4 E2B 得到改进。'), /Technical identifier/)
+  assert.throws(() => assertTranslationFidelity('The model performs well.', 'Gemma 4 E2B 模型表现良好。'), /Technical identifiers added/)
+  assert.deepEqual(technicalIdentifiers('Gemma models use IT infrastructure and PT methods.'), [])
+  assert.deepEqual(technicalIdentifiers('Gemma Team, Gemini Research, and effective parameter counts.'), [])
+  assert.deepEqual(technicalIdentifiers('Gemma 3 27B scores 95% across 57 tasks.'), ['Gemma 3 27B'])
+  assert.deepEqual(technicalIdentifiers('Gemma 3 2B 9B 27B'), ['Gemma 3 2B'])
+  assert.equal(isTechnicalLabelOnly('Gemma 3 27B IT improves instruction following.'), false)
+  assert.throws(() => assertTranslationFidelity('Gemma 3 2B 9B 27B', 'Gemma 3 2B 9B'), /Numeric value/)
+})
+
+test('Gemma split table brands and PT/IT stages remain exact within the source fragment', () => {
+  for (const label of ['Gemma', 'PT', 'IT']) {
+    assert.deepEqual(technicalIdentifiers(` ${label} `), [label])
+    assert.equal(isTechnicalLabelOnly(label), true)
+    assert.doesNotThrow(() => assertTranslationFidelity(label, label))
+  }
+  for (const prose of ['it', 'it works', 'IT infrastructure', 'PT methods', 'Gemma models']) {
+    assert.deepEqual(technicalIdentifiers(prose), [])
+    assert.equal(isTechnicalLabelOnly(prose), false)
+  }
+  // Actual 2408.00118v3 Table 17 compares separate PT and IT cells for 2B,
+  // 9B and 27B. Numeric size cells are already immutable translation markup.
+  const source = '<table><tr><th colspan="2">2B</th><th colspan="2">9B</th><th colspan="2">27B</th></tr><tr><td><span>PT</span></td><td><span>IT</span></td><td><span>PT</span></td><td><span>IT</span></td><td><span>PT</span></td><td><span>IT</span></td></tr></table>'
+  const prepared = translationUnits(source, 'table')
+  const records = prepared.units.map((unit, index) => ({ id: `stage:${index}`, text: unit.text }))
+  assert.deepEqual(records.map(record => record.text), ['PT', 'IT', 'PT', 'IT', 'PT', 'IT'])
+  const exact = Object.fromEntries(records.map(record => [record.id, record.text]))
+  const accepted = parseUnitResponse(JSON.stringify({ translations: exact }), records)
+  assert.equal(prepared.render(accepted.map(result => result.text)), sanitizeHtml(source))
+  assert.throws(() => parseUnitResponse(JSON.stringify({ translations: { ...exact, 'stage:0': 'IT' } }), records), /Technical identifier/)
+  assert.throws(() => parseUnitResponse(JSON.stringify({ translations: { ...exact, 'stage:0': 'PT PT' } }), records), /Technical identifier/)
+  assert.throws(() => parseUnitResponse(JSON.stringify({ translations: { ...exact, 'stage:0': '预训练', 'stage:1': 'PT IT' } }), records), /Technical identifier/)
+})
+
+function observedGemmaFrontMatter(table = '', markId = 'id1') {
+  return `<article class="ltx_document"><div id="p1" class="ltx_para"><span id="p1.1" class="ltx_ERROR undefined">\\authfootnotetext</span><p id="p1.2" class="ltx_p">1See Contributions and Acknowledgments section for full author list. Please send correspondence to <span id="p1.2.1" class="ltx_text ltx_font_typewriter">gemma-2-report@google.com</span>.</p></div><h1 class="ltx_title_document">Gemma 2: Improving Open Language Models at a Practical Size</h1><div class="ltx_authors"><span class="ltx_personname">Gemma Team\n</span><span class="ltx_personname">Google DeepMind<span id="${markId}" class="ltx_ERROR undefined">\\authfootnotemark</span>1\n</span></div><section id="S1"><h2>1 Introduction</h2><p id="S1.p1">A model <math><msub><mi>x</mi><mn>1</mn></msub></math> uses a <cite><a href="#bib1">1</a></cite> reference.</p>${table}</section><section id="bib"><h2>References</h2><ul class="ltx_biblist"><li id="bib1" class="ltx_bibitem">Original reference.</li></ul></section></article>`
+}
+
+test('only observed pinned Gemma author macros become a linked footnote without changing source hashes or prose', () => {
+  for (const arxivId of ['2403.08295v4', '2408.00118v3', '2503.19786v1', '2607.02770v2']) {
+    const raw = observedGemmaFrontMatter('', arxivId === '2408.00118v3' ? '1' : 'id1')
+    const paper = parsePaper(raw, { id: 'gemma-test', arxivId, htmlUrl: `https://arxiv.org/html/${arxivId}` })
+    assert.deepEqual(paper.authors, ['Gemma Team', 'Google DeepMind'])
+    assert.deepEqual(paper.authorCredits, ['Gemma Team', 'Google DeepMind'])
+    assert.equal(paper.source.sha256, sha256(raw))
+    assert.equal(paper.source.repairs.length, 1)
+    assert.match(raw, /\\authfootnotetext|\\authfootnotemark/)
+    const note = load(paper.blocks[0].en, {}, false), authors = load(paper.blocks[1].en, {}, false)
+    assert.equal(note('sup.ltx_note_mark').text(), '1')
+    assert.equal(note.text(), '1 See Contributions and Acknowledgments section for full author list. Please send correspondence to gemma-2-report@google.com.')
+    assert.equal(authors('sup.ltx_note_mark a').attr('href'), '#p1.2')
+    assert.equal(authors('sup.ltx_note_mark a').text(), '1')
+    assert.doesNotMatch(paper.blocks.map(block => block.en).join(''), /authfootnote|ltx_ERROR/)
+    assert.deepEqual(translationUnits(paper.blocks[0].en).units.map(unit => unit.text), [' See Contributions and Acknowledgments section for full author list. Please send correspondence to '])
+    assert.equal(translationUnits(paper.blocks[1].en).units.length, 0)
+    assert.match(paper.blocks.find(block => block.sourceId === 'S1.p1').en, /<msub><mi>x<\/mi><mn>1<\/mn><\/msub>/)
+    assert.match(paper.blocks.find(block => block.sourceId === 'S1.p1').en, /href="#bib1"/)
+  }
+  const unknown = parsePaper(observedGemmaFrontMatter(), { id: 'unknown', arxivId: '2408.00118v4' })
+  assert.match(unknown.authors[1], /authfootnotemark/)
+  assert.equal(unknown.source.repairs, undefined)
+  const gemini = parsePaper(observedGemmaFrontMatter().replace('Gemma 2:', 'Gemini 1.5:'), { id: 'gemini-test', arxivId: '2408.00118v3' })
+  assert.match(gemini.authors[1], /authfootnotemark/)
+  assert.equal(gemini.source.repairs, undefined)
+})
+
+function observedGemma2BrokenTable(id) {
+  const first = id === 'S8.T21'
+  const headers = first
+    ? [['', 'Challenges', '', '', ''], ['passed', '', '', '', ''], ['end-to-end', 'Challenges', '', '', ''], ['with success on', '', '', '', ''], ['all milestones', 'Total successful', '', '', ''], ['milestones over', '', '', '', ''], ['all challenges', 'Expert bits', '', '', ''], ['required to', '', '', '', ''], ['solve all tasks', '', '', '', '']]
+    : [['', 'Personal', '', '', '', '', '', ''], ['connection', 'Speak', '', '', '', '', '', ''], ['again', 'Funny', 'Interesting', 'Kind', 'Trustworthy', 'Good', '', ''], ['listener', '', '', '', '', '', '', '']]
+  const broken = new Set(first ? ['0:1', '2:1', '4:1', '6:1'] : ['0:1', '1:1', '2:5'])
+  const data = first
+    ? [['Gemini 1.0 Ultra', '0/10', '1/10', '16/45 (36%)', '13,026'], ['Gemini 1.5 Pro', '0/10', '2/10', '25/45 (56%)', '11,046'], ['Gemma 2 27B', '0/10', '1/10', '22/45 (49%)', '12,462']]
+    : [['Gemini 1.0 Pro', '65%', '53%', '32%', '68%', '78%', '66%', '81%'], ['Gemini 1.0 Ultra', '69%', '65%', '38%', '65%', '86%', '63%', '74%'], ['Gemini 1.5 Pro', '82%', '70%', '69%', '81%', '95%', '69%', '90%'], ['Gemma 2 27B', '80%', '75%', '60%', '81%', '87%', '65%', '83%']]
+  return `<figure id="${id}" class="ltx_table"><table id="${id}.2">${[...headers, ...data].map((row, index) => `<tr id="${id}.2.${index + 1}">${row.map((value, column) => `<td id="${id}.2.${index + 1}.${column + 1}">${broken.has(`${index}:${column}`) ? `<span id="${id}.2.${index + 1}.${column + 1}.1" class="ltx_ERROR undefined">\\CellWithForceBreak</span>` : ''}${value}</td>`).join('')}</tr>`).join('')}</table><figcaption id="${id}.caption">Table ${first ? '21' : '22'}: Original caption with <a href="#bib1">1</a>.</figcaption></figure>`
+}
+
+test('Gemma 2 broken multiline headers recover exact PDF column bindings while every source ID and data row remains intact', () => {
+  const expected = [
+    { id: 'S8.T21', page: 12, rows: 4, columns: 5, headers: ['', 'Challenges passed end-to-end', 'Challenges with success on all milestones', 'Total successful milestones over all challenges', 'Expert bits required to solve all tasks'] },
+    { id: 'S8.T22', page: 13, rows: 5, columns: 8, headers: ['', 'Personal connection', 'Speak again', 'Funny', 'Interesting', 'Kind', 'Trustworthy', 'Good listener'] },
+  ]
+  for (const spec of expected) {
+    const rawTable = observedGemma2BrokenTable(spec.id), before = load(sanitizeHtml(rawTable), {}, false)
+    const raw = observedGemmaFrontMatter(rawTable)
+    const paper = parsePaper(raw, { id: 'gemma-2', arxivId: '2408.00118v3' })
+    const block = paper.blocks.find(block => block.sourceId === spec.id), after = load(block.en, {}, false)
+    assert.equal(after('tr').length, spec.rows)
+    assert.equal(after('tr').first().children('th').length, spec.columns)
+    assert.deepEqual(after('tr').first().children('th').toArray().map(cell => after(cell).text().replace(/\s+/g, ' ').trim()), spec.headers)
+    assert.equal(after('td').length, (spec.rows - 1) * spec.columns)
+    const ids = $ => $('[id]').map((_, node) => $(node).attr('id')).get().sort()
+    assert.deepEqual(ids(after), ids(before))
+    assert.equal(new Set(ids(after)).size, ids(after).length)
+    assert.equal(after.html(after('figcaption')[0]), before.html(before('figcaption')[0]))
+    const dataRows = before('tr').slice(-(spec.rows - 1)).toArray()
+    for (const original of dataRows) {
+      const current = after('tr').filter((_, row) => after(row).attr('id') === before(original).attr('id'))[0]
+      assert.equal(after.html(current), before.html(original))
+    }
+    assert.doesNotMatch(block.en, /CellWithForceBreak|ltx_ERROR/)
+    assert.equal(paper.source.sha256, sha256(raw))
+    const repair = paper.source.repairs.find(item => item.sourceId === spec.id)
+    assert.equal(repair.referencePdfPage, spec.page)
+    assert.equal(repair.headerRowsAfter, 1)
+  }
+})
+
+test('Gemma table repair refuses an unexpected observed layout and never rewrites another version or figure', () => {
+  const rawTable = observedGemma2BrokenTable('S8.T21')
+  assert.throws(() => parsePaper(observedGemmaFrontMatter(rawTable.replace('passed', 'changed')), { id: 'gemma-2', arxivId: '2408.00118v3' }), /Unrecognized Gemma 2 table-header structure/)
+  const misplaced = load(rawTable, {}, false)
+  misplaced('[id="S8.T21.2.1.2.1"]').appendTo(misplaced('[id="S8.T21.2.1.1"]'))
+  assert.throws(() => parsePaper(observedGemmaFrontMatter(misplaced.html()), { id: 'gemma-2', arxivId: '2408.00118v3' }), /Unrecognized Gemma 2 table-header structure/)
+  const otherVersion = parsePaper(observedGemmaFrontMatter(rawTable), { id: 'gemma-2', arxivId: '2408.00118v4' })
+  assert.match(otherVersion.blocks.find(block => block.sourceId === 'S8.T21').en, /CellWithForceBreak/)
+  const otherTable = rawTable.replaceAll('S8.T21', 'S8.T99')
+  const untouched = parsePaper(observedGemmaFrontMatter(otherTable), { id: 'gemma-2', arxivId: '2408.00118v3' })
+  assert.match(untouched.blocks.find(block => block.sourceId === 'S8.T99').en, /CellWithForceBreak/)
+  assert.equal(untouched.source.repairs.length, 1)
+})
+
 test('long exact new-model table labels remain English but ordinary copied prose still fails', () => {
   const labels = 'DeepSeek-V4-Pro-Max, DeepSeek-V3.2-Speciale, Kimi-K2.5, MiniMax-M3-230B, K2.6-Thinking'
   assert.equal(isTechnicalLabelOnly(labels), true)
@@ -491,6 +721,33 @@ test('bibliography month dates preserve their exact disambiguation suffix across
   assert.doesNotThrow(() => assertTranslationFidelity(source, 'Athene-70b：重新定义开放模型的后训练边界，2024a 年 7 月。'))
   for (const date of ['2024年7月b', '2024年7月', '2024a年8月', '2025a年7月']) assert.throws(() => assertTranslationFidelity(source, 'Athene-70b：模型，' + date), /Calendar date/)
   assert.throws(() => assertTranslationFidelity(source, 'Athene-70b：模型，2024a年7月，得分3。'), /Numeric values added/)
+})
+
+test('Gemini 2.5 Table 1 consecutive cutoff cells preserve all six complete year/month dates', () => {
+  // Actual 2507.06261v6 S1.T1 values and split model headers. Preserve the
+  // visibleProseText flattening used by strict public-release validation.
+  const headers = [['Flash', 'Gemini 1.5'], ['Pro', 'Gemini 1.5'], ['Flash-Lite', 'Gemini 2.0'], ['Flash', 'Gemini 2.0'], ['Flash', 'Gemini 2.5'], ['Pro', 'Gemini 2.5']]
+  const cells = ['November 2023', 'November 2023', 'June 2024', 'June 2024', 'January 2025', 'January 2025']
+  const table = dates => `<figure id="S1.T1"><table><tbody><tr><th></th>${headers.map(([tier, version]) => `<th><span>${tier}</span><br><span>${version}</span></th>`).join('')}</tr><tr><td>Input length</td>${['1M', '2M', '1M', '1M', '1M', '1M'].map(value => `<td>${value}</td>`).join('')}</tr><tr><td>Knowledge cutoff</td>${dates.map(value => `<td>${value}</td>\n`).join('')}</tr></tbody></table></figure>`
+  const en = table(cells), zh = table(['2023年11月', '2023年11月', '2024年6月', '2024年6月', '2025年1月', '2025年1月']).replace('Input length', '输入长度').replace('Knowledge cutoff', '知识截止时间')
+  const prose = html => visibleProseText(load(html, {}, false))
+  assert.doesNotThrow(() => assertTranslationFidelity(prose(en), prose(zh)))
+  assert.throws(() => assertTranslationFidelity(prose(en), prose(zh.replace('2023年11月', '2023年12月'))), /Calendar date/)
+  assert.throws(() => assertTranslationFidelity(prose(en), prose(zh.replace('2024年6月', '2024年7月'))), /Calendar date/)
+  assert.throws(() => assertTranslationFidelity(prose(en), prose(zh.replace('2023年11月', ''))), /Calendar date omitted/)
+  assert.throws(() => assertTranslationFidelity(prose(en), prose(zh.replace('2023年11月', '2023年11月 2023年11月'))), /Calendar dates added/)
+  assert.throws(() => assertTranslationFidelity(prose(en), prose(zh.replace('2023年11月', '2023年11月15日'))), /Calendar date/)
+  assert.throws(() => assertTranslationFidelity(prose(en), prose(zh.replace('1M', '99M'))), /Numeric value/)
+})
+
+test('complete Chinese year/month dates do not absorb subsequent quantities or bibliography years', () => {
+  assert.doesNotThrow(() => assertTranslationFidelity('The cutoff is November 2023, with 15 layers.', '截止于2023年11月，有15层。'))
+  assert.throws(() => assertTranslationFidelity('The cutoff is November 2023, with 15 layers.', '截止于2023年11月，有14层。'), /Numeric value/)
+  assert.throws(() => assertTranslationFidelity('The cutoff is November 2023, with 15 layers.', '截止于2023年11月15日。'), /Calendar date/)
+  assert.doesNotThrow(() => assertTranslationFidelity('July 2024a August 2024b', '2024a年7月 2024b年8月'))
+  assert.throws(() => assertTranslationFidelity('July 2024a August 2024b', '2024a年7月 2024b年9月'), /Calendar date/)
+  assert.throws(() => assertTranslationFidelity('July 2024a August 2024b', '2024a年7月 2024b年8月 99'), /Numeric values added/)
+  assert.throws(() => assertTranslationFidelity('February 28, 2025.', '2025年2月29日。'), /Calendar date/)
 })
 
 test('one extra per row permits only its corresponding Chinese single-column quantity', () => {

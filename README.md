@@ -6,7 +6,7 @@
 
 支持多篇论文、标题与作者搜索、章节目录、中英双栏、交换左右、单语言阅读、双向段落同步滚动、字号调整和阅读位置保存。拖动任意一栏都能带动另一栏；也可关闭同步，分别阅读。提供白色、黑色和淡橙色三种主题，主题与阅读设置会保存在当前浏览器。公式、图表和参考文献随论文保留。移动端也可以切换阅读模式。
 
-论文列表与标题区显示模型系列和研究标签，可组合筛选 Qwen／千问、DeepSeek、Kimi、MiniMax，以及预训练、后训练等阶段。搜索“千问”也能匹配 Qwen；报告覆盖多个阶段时保留多个标签。分类依据与维护方式见 [论文标签](docs/paper-tags.md)。
+论文列表与标题区显示模型系列和研究标签，可组合筛选 Qwen／千问、DeepSeek、Kimi、MiniMax、Gemini、Gemma、Chinchilla，以及预训练、后训练、缩放定律等研究标签。搜索“千问”也能匹配 Qwen，“Google／谷歌”可检索 Gemini、Gemma 和 Chinchilla，各自保持独立系列；“Chillchila”作为 Chinchilla 的检索别名。报告覆盖多个阶段时保留多个标签。分类依据与维护方式见 [论文标签](docs/paper-tags.md)。
 
 ## 本地运行
 
@@ -23,7 +23,7 @@ DATA_DIR=paper-data npm run dev
 
 首批七篇全文包括 **Attention Is All You Need**，arXiv `1706.03762v7`，以及 Qwen2、Qwen2.5、Qwen2.5-VL、Qwen3、Qwen3-VL 技术报告。Qwen3.5 收入官方发布文章，明确标注为官方文章。
 
-公共论文库包含 **14 篇中英全文**，共 5209 个对齐内容块、191 个正文引用素材和 234 个发布文件。全文包括首批 7 篇、Kimi K2／K2.5／K3、DeepSeek V3／R1／V4 与 MiniMax M3 关联架构论文；Attention 的六处公式或引用相邻译文片段已定向校正。扩充批次的公开范围如下：
+上次已发布的线上论文库包含 **14 篇中英全文**，共 5209 个对齐内容块、191 个正文引用素材和 234 个发布文件。全文包括首批 7 篇、Kimi K2／K2.5／K3、DeepSeek V3／R1／V4 与 MiniMax M3 关联架构论文；Attention 的六处公式或引用相邻译文片段已定向校正。该批次的公开范围如下：
 
 | 系列 | 报告原题 | 固定 arXiv 版本 | 公开范围 |
 | --- | --- | --- | --- |
@@ -38,6 +38,12 @@ DATA_DIR=paper-data npm run dev
 MiniMax M3 的官方技术报告链接指向 *MiniMax Sparse Attention*，目录保留报告原题并增加 M3 检索标签。扩充的七篇共 2882 个对齐内容块，其中 Kimi 三篇共 1342 块，此次补齐的 DeepSeek 三篇与 MiniMax Sparse Attention 共 1540 块、68 个正文引用素材。14 篇均为机器译文，`humanReviewed: false`，不代表完成全篇人工审校。
 
 三个 Kimi 固定版本明确使用 **CC BY-NC-ND 4.0**。用户于 **2026-10-11** 确认已获得作者授权公开这三篇固定版本的中文全文，发布依据为该用户确认，未独立核验书面授权文件；原始许可标注继续保留。同日用户进一步明确要求将剩余 DeepSeek V3／R1／V4 与 MiniMax Sparse Attention 全部上线，本轮按该指示补齐这四篇正文，不更改已有十篇全文或其模型记录。来源核验、固定版本与本地导入命令见 [论文来源记录](docs/paper-sources.md)。
+
+本地已加入 **Gemini 1.0、1.5、2.5** 和 **Gemma 1、2、3、4** 七篇核心技术报告，均提供完整中英 HTML，共 2600 个对齐内容块、115 个正文素材。Gemini 2.5 报告同时介绍 2.0；本批不收录 Gemini 3.x 模型卡。Gemma 2 原始 HTML 中两处错位表头已按固定版本 PDF 修复，原始文件保留。
+
+随后本地加入 **Chinchilla** 对应的 [Training Compute-Optimal Large Language Models](https://arxiv.org/abs/2203.15556v1)，提供完整中英 HTML，包含 244 个对齐内容块、14 个正文素材及附录 A–J；标签为 Chinchilla、预训练、缩放定律，中文由实际 GPT-6 Luna（低思考）生成。固定来源、许可与模型记录见 [Chinchilla 来源记录](docs/paper-sources.md#chinchilla)。
+
+本次公开的 `paper-data/` 包含 **22 个中英全文条目**（21 篇论文及 Qwen3.5 官方文章），共 8053 个对齐内容块、320 个正文素材、387 个处理后文件；添加 Chinchilla 前的 21 个条目的正文、元数据和图片共 369 个文件逐文件哈希不变。用户于 2026-10-11 明确要求先发布这些已完成条目及阅读器更新，再继续新增预训练论文；新增的 20 篇不在本次发布范围。Gemini 1.0／2.5 使用实际 GPT-6 Luna；Gemini 1.5 和四篇 Gemma 保留已验收的本地 Qwen3.6 译文，由 Luna 续译未完成部分，逐块记录实际贡献。均为机器译文，未经全篇人工审校。固定来源与修复记录见 [Gemini 与 Gemma 来源记录](docs/paper-sources.md#gemini-与-gemma-核心报告)。
 
 需要导入或重新翻译论文时，使用下面的流程。开发服务器默认读取被 Git 忽略的原始工作目录 `data/`；运行 `npm run dev` 即可阅读该目录中的处理结果。本地处理时保留 JSON 检查点，便于中断后继续翻译；发布时导出 HTML 正文。原始下载的 HTML、检查点和模型权重不属于发布库。
 
@@ -149,7 +155,7 @@ DATA_DIR=.cache/local-library/paper-data npm run dev
 npm run paper:verify -- --strict-translation --require-data
 ```
 
-该命令生成 `.cache/local-library/paper-data/`，不会上传或更新公开库。公共库使用显式审查的目录，当前发布 14 篇全文；本轮在保留已有十篇全文的基础上加入剩余四篇。用于组装的公共元数据暂存目录属于被忽略的临时材料，不是自动发布本地全文的通道。校验现有公开快照后构建：
+该命令生成 `.cache/local-library/paper-data/`，不会上传或更新公开库。公共库使用显式审查的目录，本次公开快照包含 22 个全文条目。添加论文、修改界面和构建本地库不等于发布授权；只有用户明确要求发布时才推送 GitHub 或部署 Vercel。用于组装的公共元数据暂存目录属于被忽略的临时材料，不是自动发布本地全文的通道。校验处理后快照再构建：
 
 ```sh
 node scripts/verify-release-data.mjs --data-dir paper-data

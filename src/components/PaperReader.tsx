@@ -12,6 +12,7 @@ type Language = 'zh' | 'en'
 export interface ReadingPosition {
   progress: number
   sectionId: string | null
+  headerCollapsed: boolean
 }
 
 export interface PaperReaderHandle {
@@ -106,6 +107,7 @@ export const PaperReader = forwardRef<PaperReaderHandle, Props>(function PaperRe
   const anchor = useRef<ReadingAnchor | null>(getInitialAnchor(paper))
   const paneAnchors = useRef<Partial<Record<Language, ReadingAnchor | null>>>({ zh: anchor.current, en: anchor.current })
   const activeLanguage = useRef<Language>(preferences.mode === 'en' ? 'en' : 'zh')
+  const headerCollapsed = useRef(false)
   const frame = useRef<number | null>(null)
   const ignoreScroll = useRef(new Map<HTMLElement, number>())
   const paneRefs = useMemo(() => {
@@ -144,10 +146,23 @@ export const PaperReader = forwardRef<PaperReaderHandle, Props>(function PaperRe
     if (!block) return
     const body = paper.blocks.filter((item) => item.sectionId !== 'frontmatter')
     const index = body.findIndex((item) => item.id === current.blockId)
+    if (pane) {
+      // Front matter precedes the default abstract anchor, so absolute scrollTop is not a reading offset.
+      const elements = blockElements(pane)
+      const first = elements.find((element) => element.dataset.blockId === body[0]?.id)
+      const currentIndex = elements.findIndex((element) => element.dataset.blockId === current.blockId)
+      if (first && currentIndex >= 0) {
+        const extent = blockExtent(elements, currentIndex, pane)
+        const distance = extent.top + current.fraction * extent.height - relativeTop(first, pane)
+        if (distance >= 96) headerCollapsed.current = true
+        else if (distance <= 24) headerCollapsed.current = false
+      }
+    }
     const atEnd = pane && pane.scrollHeight > pane.clientHeight && pane.scrollTop >= pane.scrollHeight - pane.clientHeight - 2
     onPositionRef.current({
       progress: atEnd ? 100 : Math.max(0, Math.min(100, (index + current.fraction) / Math.max(1, body.length) * 100)),
       sectionId: block.sectionId,
+      headerCollapsed: headerCollapsed.current,
     })
     if (saveTimer.current) clearTimeout(saveTimer.current)
     saveTimer.current = setTimeout(() => saveAnchor(paper.id, current), 400)

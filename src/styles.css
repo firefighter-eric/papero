@@ -150,7 +150,8 @@ a { color: var(--green); text-underline-offset: 3px; }
 .sidebar { width: 282px; flex: 0 0 282px; display: flex; flex-direction: column; padding: 26px 25px 18px; background: var(--sidebar-bg); border-right: 1px solid var(--border); min-height: 0; }
 .brand-row { display: flex; align-items: center; justify-content: space-between; }
 .brand { display: flex; align-items: center; gap: 12px; color: var(--green); }
-.brand span { color: var(--text); font-size: 26px; font-weight: 680; letter-spacing: -1.2px; }
+.brand-mark { display: block; width: 34px; height: 34px; flex: 0 0 34px; background-color: currentColor; -webkit-mask: url('/brand/papero-mark.png') center / contain no-repeat; mask: url('/brand/papero-mark.png') center / contain no-repeat; }
+.brand-wordmark { color: var(--text); font-size: 26px; font-weight: 680; letter-spacing: -1.2px; }
 .brand-caption { margin: 5px 0 27px 46px; font-size: 12px; color: var(--muted); white-space: nowrap; }
 .library-search { height: 43px; flex-shrink: 0; border: 1px solid var(--control-border); border-radius: 5px; display: flex; align-items: center; gap: 10px; padding: 0 12px; background: var(--surface-bg); color: var(--muted); margin: 0 6px 14px; }
 .library-search:focus-within { border-color: var(--green); box-shadow: 0 0 0 2px var(--focus-wash); }
@@ -510,4 +511,31 @@ a { color: var(--green); text-underline-offset: 3px; }
   .paper-authors-expandable { display: block; margin-top: 3px; }
   .paper-authors-expandable .author-preview { display: none; }
   .author-disclosure { margin-top: 0; }
+}
+
+.paper-workspace { --heading-duration: 300ms; --heading-easing: cubic-bezier(.4, 0, .2, 1); }
+.paper-heading { position: relative; min-height: 49px; transition: padding var(--heading-duration) var(--heading-easing); }
+.paper-heading-body { display: grid; grid-template-rows: 1fr; transition: grid-template-rows var(--heading-duration) var(--heading-easing); }
+.paper-heading-body-inner { min-height: 0; overflow: clip; opacity: 1; transform: translateY(0); transition: opacity 220ms var(--heading-easing), transform var(--heading-duration) var(--heading-easing); }
+/* Let the author popover escape the heading once its disclosure is opened. */
+.paper-heading:not(.is-compact) .paper-heading-body-inner:has(.author-disclosure[open]) { overflow: visible; }
+.paper-heading-compact-title { position: absolute; top: 10px; left: 0; right: 40px; font-family: var(--serif); font-size: 21px; line-height: 1.35; font-weight: 600; letter-spacing: -.3px; color: var(--title-text); text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: 0; transform: translateY(6px); pointer-events: none; transition: opacity 140ms var(--heading-easing), transform var(--heading-duration) var(--heading-easing); }
+.paper-heading.is-compact { padding-block: 10px; }
+.paper-heading.is-compact .paper-heading-body { grid-template-rows: 0fr; }
+.paper-heading.is-compact .paper-heading-body-inner { opacity: 0; transform: translateY(-6px); pointer-events: none; transition-duration: 140ms, var(--heading-duration); }
+.paper-heading.is-compact .paper-heading-compact-title { opacity: 1; transform: translateY(0); pointer-events: auto; transition-duration: 220ms, var(--heading-duration); transition-delay: 80ms, 0ms; }
+.paper-heading-toggle { position: absolute; right: 0; top: 5px; display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; padding: 0; border: 0; border-radius: 5px; color: var(--secondary-text); background: transparent; cursor: pointer; }
+.paper-heading-toggle svg { transform: rotate(180deg); transition: transform var(--heading-duration) var(--heading-easing); }
+.paper-heading.is-compact .paper-heading-toggle svg { transform: rotate(0deg); }
+.paper-heading-toggle:hover { background: var(--hover-bg); }
+.paper-heading-toggle:focus-visible { outline: 2px solid var(--green); outline-offset: -2px; }
+.paper-heading + .reader-panes { transition: margin-top var(--heading-duration) var(--heading-easing); }
+.paper-heading.is-compact + .reader-panes { margin-top: 8px; }
+
+@media (max-width: 760px) {
+  .paper-heading-compact-title { font-size: 17px; line-height: 1.5; letter-spacing: -.1px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .paper-heading.is-compact .paper-heading-compact-title { transition-delay: 0s; }
 }

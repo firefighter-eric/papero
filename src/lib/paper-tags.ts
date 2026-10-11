@@ -1,7 +1,7 @@
 import type { CatalogPaper } from '../types'
 
-export const PAPER_FAMILIES = ['Qwen', 'DeepSeek', 'Kimi', 'MiniMax', 'Transformer'] as const
-export const RESEARCH_TAGS = ['预训练', '后训练', '模型架构', '监督训练'] as const
+export const PAPER_FAMILIES = ['Qwen', 'DeepSeek', 'Kimi', 'MiniMax', 'Gemini', 'Gemma', 'Chinchilla', 'Transformer'] as const
+export const RESEARCH_TAGS = ['预训练', '后训练', '模型架构', '监督训练', '缩放定律'] as const
 
 export function tagLabel(tag: string): string {
   return tag === 'Qwen' ? 'Qwen / 千问' : tag
@@ -14,10 +14,14 @@ export function classificationTags(tags: string[]): string[] {
 const searchAliases: Record<string, string> = {
   Qwen: '千问 通义千问',
   DeepSeek: '深度求索',
+  Gemini: '谷歌 Google',
+  Gemma: '谷歌 Google',
+  Chinchilla: 'Chillchila DeepMind Google 谷歌',
   预训练: 'pretraining pre-training',
   后训练: 'posttraining post-training',
   模型架构: 'architecture',
   监督训练: 'supervised training',
+  缩放定律: 'scaling laws scaling-laws',
 }
 
 export function matchesPaperFilters(paper: CatalogPaper, query: string, family: string, research: string): boolean {
