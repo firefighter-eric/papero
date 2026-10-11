@@ -22,6 +22,12 @@ describe('verified paper citation metadata', () => {
     expect(shortPaperAuthors(existing)).toBe('Vaswani')
   })
 
+  it('uses the first credited author when arXiv combines two authors in one node', () => {
+    const original = { id: 'adamw-decoupled-weight-decay', arxivId: '1711.05101v3', authors: ['Ilya Loshchilov & Frank Hutter'] }
+    expect(shortPaperAuthors(original)).toBe('Loshchilov et al.')
+    expect(original.authors).toEqual(['Ilya Loshchilov & Frank Hutter'])
+  })
+
   it('records the exact authoritative version for each new arXiv bibliography without punctuation-only authors', () => {
     expect(Object.keys(registry.papers)).toHaveLength(19)
     for (const paper of Object.values(registry.papers)) {

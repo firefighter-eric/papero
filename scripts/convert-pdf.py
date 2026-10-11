@@ -14,11 +14,13 @@ import json
 import pathlib
 import re
 import unicodedata
+import os
 
 import pdfplumber
 import pypdf
+from pdf_vector_math import PdfMathVectors, vector_math_css
 
-VERSION = "1.2.0"
+VERSION = "1.3.0"
 MATH_FONT = re.compile(r"\+(?:CMMI|CMSY|CMR|CMEX)\d+$")
 
 def escaped(text):
@@ -42,7 +44,7 @@ def mathml(chars):
     def atoms(values):
         result = []
         for c in values:
-            value = c['text']
+            value = c.get('_render_text', c['text'])
             if value.startswith('(cid:'):
                 raise ValueError(f"Unmapped mathematical PDF glyph: {value}")
             tag = 'mn' if value.isdigit() else 'mi' if value.isalpha() else 'mo'
@@ -81,6 +83,10 @@ class Converter:
         self.blocks = []
         self.assets = []
         self.anchors = {}
+        self.math_vectors = None
+        if recipe.get('mathMode') == 'original-pdf-vectors':
+            executable = os.environ.get('PDFTOCAIRO', 'pdftocairo')
+            self.math_vectors = PdfMathVectors(recipe['inputPdf'], pdf, output, executable)
         self.pdf_reader = pypdf.PdfReader(recipe['inputPdf'])
         for page_number, page in enumerate(pdf.pages, 1):
             for index, char in enumerate(page.chars):
@@ -141,7 +147,17 @@ class Converter:
         return None
 
     def render_line(self, page, chars):
+        if self.math_vectors and chars and all(c.get('_display_math') for c in chars):
+            return self.math_vectors.image(page, chars)
         chars = sorted([dict(c, text=c.get('_render_text', c['text'])) for c in chars if not c.get('_render_skip')], key=lambda c: (c['x0'], c['top']))
+        for char in chars:
+            if char['text'].startswith('(cid:'):
+                code = int(char['text'][5:-1])
+                font = char['fontname']
+                if 'CMSY10' in font and code == 12: char['text'] = '∈'
+                elif 'CMMI10' in font and code == 15: char['text'] = 'ϵ'
+                elif 'CMEX10' in font and code in [0, 16, 18]: char['text'] = '('
+                elif 'CMEX10' in font and code in [1, 17, 19]: char['text'] = ')'
         groups = []
         previous = None
         for char in chars:
@@ -151,7 +167,9 @@ class Converter:
             if style != 'math' and char['size'] < 8 and (char['text'].isdigit() or char['text'] == '*'):
                 style = 'sup'
             key = (style, link)
-            space = previous is not None and char['x0'] - previous['x1'] > .45
+            # Scale the gap threshold with type size so letter-spaced small caps
+            # stay joined while actual inter-word gaps remain visible.
+            space = previous is not None and char['x0'] - previous['x1'] > max(.45, char['size'] * .12)
             if not groups or groups[-1][0] != key:
                 groups.append((key, [], ' ' if space else ''))
             elif space and style != 'math':
@@ -160,13 +178,15 @@ class Converter:
             previous = char
         result = []
         for (style, link), chars, prefix in groups:
-            value = mathml(chars) if style == 'math' else escaped(normalized(''.join(c['text'] for c in chars)))
+            value = (self.math_vectors.image(page, chars) if self.math_vectors else mathml(chars)) if style == 'math' else escaped(normalized(''.join(c['text'] for c in chars)))
             if style and style != 'math': value = f'<{style}>{value}</{style}>'
             if link: value = f'<a href="{escaped(link)}">{value}</a>'
             result.append(prefix + value)
         return ''.join(result)
 
     def lines(self, page, chars):
+        if self.math_vectors:
+            return self.vector_lines(page, chars)
         # Establish prose baselines first, then attach mathematical subscripts,
         # superscripts and footnote markers to the nearest prose line.
         regular = [c for c in chars if not MATH_FONT.search(c['fontname']) and c['size'] >= 8]
@@ -195,10 +215,98 @@ class Converter:
         result = []
         for group in sorted(groups, key=lambda g: g['baseline']):
             chars = group['chars']
+            prose_chars = [c for c in chars if not MATH_FONT.search(c['fontname'])]
             result.append({'html': self.render_line(page, chars), 'text': ''.join(c['text'] for c in sorted(chars, key=lambda c: c['x0'])),
+                           'prose_html': self.render_line(page, prose_chars) if prose_chars else '',
+                           'prose_text': ''.join(c['text'] for c in sorted(prose_chars, key=lambda c: c['x0'])),
+                           'prose_size': max((c['size'] for c in prose_chars), default=0),
                            'top': min(c['top'] for c in chars), 'bottom': max(c['bottom'] for c in chars),
                            'x0': min(c['x0'] for c in chars), 'size': max(c['size'] for c in chars),
                            'bold': all('-Medi' in c['fontname'] or c['text'].isspace() for c in chars)})
+        return result
+
+    def vector_lines(self, page, chars):
+        """Use true text baselines, not font-specific glyph-box bottoms.
+
+        Mathematical shapes are copied from the source PDF. Full-size glyphs
+        establish missing lines; scripts and tall radicals join their expression.
+        Consecutive display-only lines stay one vector expression, preserving
+        fractions and multiline alignment rather than flattening them as text.
+        """
+        height = self.pdf.pages[page-1].height
+        baseline = lambda c: height-c['matrix'][5]
+        is_math = lambda c: bool(MATH_FONT.search(c['fontname']))
+        run = 0
+        previous_math = False
+        ordered_source = sorted(chars, key=lambda c: c['_source'][1])
+        for c in ordered_source:
+            if is_math(c):
+                if not previous_math: run += 1
+                c['_math_run'] = run
+            previous_math = is_math(c)
+        groups = []
+        anchors = [c for c in chars if not is_math(c) and c['size'] >= 8]
+        anchors += [c for c in chars if is_math(c) and c['size'] >= 8 and 'CMEX' not in c['fontname'] and c['text'] != '√']
+        for c in sorted(anchors, key=baseline):
+            y = baseline(c)
+            group = next((g for g in groups if abs(g['baseline']-y) < .5), None)
+            if group is None: group = {'baseline': y, 'chars': []}; groups.append(group)
+            group['chars'].append(c)
+        anchor_ids = {id(c) for c in anchors}
+        assigned_baselines = {id(c): baseline(c) for c in anchors}
+        extras = [c for c in chars if id(c) not in anchor_ids]
+        # Resolve full-size operators before their nested limits and scripts.
+        for c in sorted(extras, key=lambda c: -c['size']):
+            y = baseline(c)
+            if is_math(c):
+                # Small nested scripts and tall radicals can have baselines
+                # closer to adjacent prose than to their own expression. Bind
+                # by original glyph geometry and mathematical neighbours.
+                close = [a for a in chars if id(a) in assigned_baselines and is_math(a) and a['size'] >= 8
+                         and a.get('_math_run') == c.get('_math_run') and abs(a['x0']-c['x0']) < 100]
+                if close:
+                    own = self.math_vectors.glyph(page, c)['bounds']
+                    def distance(a):
+                        box = self.math_vectors.glyph(page, a)['bounds']
+                        dx = max(0, own[0]-box[2], box[0]-own[2])
+                        dy = max(0, own[1]-box[3], box[1]-own[3])
+                        return dx + dy*3
+                    neighbor = min(close, key=distance)
+                    y = assigned_baselines[id(neighbor)]
+                else:
+                    # An inline fraction may consist entirely of small glyphs.
+                    # Its adjacent source prose identifies the intended line.
+                    own_run = [a for a in ordered_source if a.get('_math_run') == c['_math_run']]
+                    first, last = own_run[0]['_source'][1], own_run[-1]['_source'][1]
+                    prose_neighbors = [a for a in anchors if not is_math(a) and (a['_source'][1] == first-1 or a['_source'][1] == last+1)]
+                    if prose_neighbors: y = baseline(min(prose_neighbors, key=lambda a: abs(a['x0']-c['x0'])))
+            group = min(groups, key=lambda g: abs(g['baseline']-y), default=None)
+            if group is None or abs(group['baseline']-y) > 7:
+                group = {'baseline': y, 'chars': []}; groups.append(group)
+            group['chars'].append(c)
+            assigned_baselines[id(c)] = group['baseline']
+        ordered = sorted(groups, key=lambda g: g['baseline'])
+        # A display equation can contain roman E/R, numerals and its equation
+        # number. Keep those glyphs with the original mathematical layout;
+        # treating them as prose would flatten sums, fractions and alignment.
+        for g in ordered:
+            roman = ''.join(' ' if is_math(c) else c['text'] for c in sorted(g['chars'], key=lambda c: c['x0']))
+            g['display_math'] = not re.search(r'[A-Za-z]{2,}', roman)
+            if g['display_math']:
+                for c in g['chars']: c['_display_math'] = True
+        merged = []
+        for g in ordered:
+            if merged and g['display_math'] and merged[-1]['display_math'] and g['baseline']-merged[-1]['last_baseline'] < 24:
+                merged[-1]['chars'] += g['chars']; merged[-1]['last_baseline'] = g['baseline']
+            else: merged.append({**g, 'last_baseline': g['baseline']})
+        result = []
+        for g in merged:
+            values = g['chars']; prose = [c for c in values if not is_math(c) and not c.get('_display_math')]
+            result.append({'html': self.render_line(page, values), 'text': ''.join(c['text'] for c in sorted(values,key=lambda c:c['x0'])),
+                'prose_html': self.render_line(page, prose) if prose else '', 'prose_text': ''.join(c['text'] for c in sorted(prose,key=lambda c:c['x0'])),
+                'prose_size': max((c['size'] for c in prose), default=0), 'top': g['baseline']-max(c['size'] for c in values),
+                'bottom': g['last_baseline']+1, 'x0': min(c['x0'] for c in values), 'size': max(c['size'] for c in values),
+                'bold': all('-Medi' in c['fontname'] or c['text'].isspace() for c in values)})
         return result
 
     def paragraphs(self, page, bounds, headings=True, references=False):
@@ -221,11 +329,16 @@ class Converter:
             parts.append(('reference' if references else 'paragraph', '<p>' + ('<span class="ltx_bibblock">' + text + '</span>' if references else text) + '</p>', paragraph[0]['top']))
             paragraph.clear()
         for line in lines:
-            if headings and line['bold'] and (re.match(r'^\d+\.', line['text']) or line['text'] in ['Abstract', 'References', 'Acknowledgments', 'Acknowledgements']):
+            heading_text = line['prose_text'].strip()
+            numbered_heading = re.match(r'^\d+(?:\.\d+)*(?:\s+|(?=[A-Z]))', heading_text)
+            uppercase_heading = len(heading_text) > 4 and any(char.isalpha() for char in heading_text) and not any(char.islower() for char in heading_text)
+            heading_style = line['bold'] or line['prose_size'] >= 10.5 or uppercase_heading
+            if headings and (heading_style or heading_text.casefold() in ['abstract', 'references', 'acknowledgments', 'acknowledgements']) \
+                    and (numbered_heading or heading_text.casefold() in ['abstract', 'references', 'acknowledgments', 'acknowledgements']):
                 flush()
-                level = 3 if re.match(r'^\d+\.\d+', line['text']) else 2
-                parts.append(('heading', f'<h{level}>{line["html"]}</h{level}>', line['top']))
-                if line['text'] == 'References': references = True
+                level = min(6, 2 + heading_text.count('.')) if re.match(r'^\d+\.\d+', heading_text) else 2
+                parts.append(('heading', f'<h{level}>{line["prose_html"]}</h{level}>', line['top']))
+                if heading_text.casefold() == 'references': references = True
             else:
                 if paragraph and (line['top'] - paragraph[-1]['bottom'] > 3.7 or references and line['x0'] < paragraph[-1]['x0'] - 3): flush()
                 paragraph.append(line)
@@ -266,6 +379,12 @@ class Converter:
         self.assets.append({'filename': filename, 'pdfPage': page, 'pdfBounds': spec['bounds'], 'sha256': hashlib.sha256(asset_bytes).hexdigest(), 'bytes': len(asset_bytes)})
         self.add(page, 'figure', f'<figure id="figure-{spec["number"]}"><img src="assets/{filename}" alt="Figure {spec["number"]}"><figcaption>{caption}</figcaption></figure>', spec['bounds'][1])
 
+    def algorithm(self, page, spec):
+        caption = ''.join(content for _, content, _ in self.paragraphs(page, spec['caption'], headings=False))
+        rows = self.lines(page, self.crop_chars(page, spec['bounds']))
+        body = ''.join(f'<div class="algorithm-line">{line["html"]}</div>' for line in rows)
+        self.add(page, 'algorithm', f'<figure class="ltx_algorithm"><figcaption>{caption}</figcaption><div class="algorithm-body">{body}</div></figure>', spec['bounds'][1])
+
     def run(self):
         for page_spec in self.recipe['pages']:
             page = page_spec['page']
@@ -275,6 +394,7 @@ class Converter:
                 elif kind == 'text': self.text(page, spec)
                 elif kind == 'table': self.table(page, spec)
                 elif kind == 'figure': self.figure(page, spec)
+                elif kind == 'algorithm': self.algorithm(page, spec)
                 elif kind == 'equation':
                     self.crop_chars(page, spec['bounds'])
                     self.add(page, 'equation', spec['html'], spec['bounds'][1])
@@ -289,6 +409,7 @@ class Converter:
         if missing or duplicate:
             (self.output / 'coverage-errors.json').write_text(json.dumps({'missing': missing, 'duplicate': duplicate}, indent=2))
             raise ValueError(f'Layout recipe is incomplete: {len(missing)} missing, {len(duplicate)} duplicate source characters. See coverage-errors.json.')
+        (self.output / 'blocks-before-anchors.json').write_text(json.dumps(self.blocks, indent=2))
         # PDF destinations only specify page/height; attach each to its nearest retained block.
         for page, anchors in self.anchors.items():
             candidates = [b for b in self.blocks if page in b['pdfPages']]
@@ -298,17 +419,23 @@ class Converter:
                     block = next((b for b in candidates if b['sourceId'] == target['sourceId']), None)
                     plain = html.unescape(re.sub('<[^>]+>', '', block['html'])) if block else ''
                     compact = lambda value: ''.join(char for char in unicodedata.normalize('NFKC', value) if char.isalnum()).lower()
-                    if not block or target['pdfPage'] != page or not compact(plain).startswith(compact(target['textPrefix'])):
+                    image_match = bool(target.get('imageSrc') and f'src="{target["imageSrc"]}"' in block['html']) if block else False
+                    matches = image_match if target.get('imageSrc') else bool(target.get('textPrefix') and compact(plain).startswith(compact(target['textPrefix'])))
+                    if not block or target['pdfPage'] != page or not matches:
                         raise ValueError(f'Reviewed PDF destination no longer matches its semantic block: {name}')
                 else:
                     raise ValueError(f'PDF destination requires reviewed semantic resolution: {name}')
                 block['html'] = f'<span id="{anchor}"></span>' + block['html']
+        if self.math_vectors:
+            self.assets.extend(self.math_vectors.assets)
         article = '<article>' + ''.join(b['html'] for b in self.blocks) + '</article>'
         document = f'<!doctype html><html lang="en"><head><meta charset="utf-8"><style>body{{max-width:1000px;margin:32px auto;padding:0 24px;font:18px/1.65 Georgia,serif}}table{{width:100%;border-collapse:collapse}}td,th{{border:1px solid #bbb;padding:8px;vertical-align:top}}figure{{margin:24px 0}}img{{max-width:100%;height:auto}}figcaption{{font-size:.9em}}math[display="block"]{{margin:16px 0}}annotation{{display:none}}</style><title>{escaped(self.recipe["title"])}</title></head><body><h1>{escaped(self.recipe["title"])}</h1>{article}</body></html>\n'
+        if self.math_vectors: document = document.replace('</style>',vector_math_css()+'</style>')
         (self.output / 'source.html').write_text(document)
         (self.output / 'en.html').write_text(document)
         pdf_bytes = pathlib.Path(self.recipe['inputPdf']).read_bytes()
         (self.output / 'conversion.json').write_text(json.dumps({'version': VERSION, 'inputPdf': {'sha256': hashlib.sha256(pdf_bytes).hexdigest(), 'bytes': len(pdf_bytes)}, 'recipeSha256': self.recipe['recipeSha256'], 'englishHtmlSha256': hashlib.sha256(document.encode()).hexdigest(), 'pdfplumber': pdfplumber.__version__, 'pypdf': pypdf.__version__,
+            **({'mathMode': 'original-pdf-vectors', 'pdftocairo': self.math_vectors.version, 'vectorMathModuleSha256': hashlib.sha256(pathlib.Path(__file__).with_name('pdf_vector_math.py').read_bytes()).hexdigest()} if self.math_vectors else {}),
             'blocks': self.blocks, 'assets': self.assets, 'resolvedDestinations': self.recipe.get('anchorTargets', {}), 'coverage': {'missing': 0, 'duplicate': 0, 'sourceCharacters': sum(len(p.chars) for p in self.pdf.pages), 'excludedSourceCharacters': len(self.skipped), 'excludedReason': 'Repeated running headers and document title retained in h1; no body text excluded', 'pageCount': len(self.pdf.pages)}}, indent=2))
         print(f'Converted {len(self.pdf.pages)} PDF pages: {len(self.blocks)} semantic blocks, {len(self.assets)} figures; all source characters covered exactly once.')
 

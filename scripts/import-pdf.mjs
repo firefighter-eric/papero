@@ -2,7 +2,7 @@ import { cp, mkdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { load } from 'cheerio'
-import { sanitizeHtml, sha256, safeId } from './paper-lib.mjs'
+import { sanitizeHtml, sanitizeSvg, sha256, safeId } from './paper-lib.mjs'
 import { mergePaperTags } from './paper-tags.mjs'
 import { updateCatalog } from './import-paper.mjs'
 import { withExclusivePaperLock } from './catalog-lock.mjs'
@@ -14,11 +14,19 @@ const https = value => {
 
 /** Import the complete output of convert-pdf.py; no PDF-only entry or textual substitute. */
 export async function importConvertedPdf({ convertedDir, pdfFile, recipeFile, metadata, dataDir = process.env.DATA_DIR || 'data' }) {
+  const arxiv = metadata?.sourceKind === 'arxiv'
+  const validArxivId = typeof metadata?.arxivId === 'string' && /^\d{4}\.\d{4,5}v[1-9]\d*$/.test(metadata.arxivId)
+  const validIdentity = arxiv
+    ? validArxivId && metadata.sourceUrl === `https://arxiv.org/abs/${metadata.arxivId}`
+      && metadata.htmlUrl === `https://arxiv.org/html/${metadata.arxivId}`
+      && metadata.pdfUrl === `https://arxiv.org/pdf/${metadata.arxivId}` && metadata.version === metadata.arxivId
+    : metadata?.sourceKind === undefined && https(metadata?.sourceUrl) && https(metadata?.pdfUrl)
+      && Number.isFinite(Date.parse(metadata?.publishedAt))
   if (!safeId(metadata?.id) || typeof metadata.title !== 'string' || !metadata.title.trim()
     || !Array.isArray(metadata.authors) || !metadata.authors.length || metadata.authors.some(author => typeof author !== 'string' || !author.trim())
-    || !Number.isSafeInteger(metadata.year) || !https(metadata.sourceUrl) || !https(metadata.pdfUrl)
-    || !Number.isFinite(Date.parse(metadata.publishedAt)) || !Number.isFinite(Date.parse(metadata.fetchedAt))
-    || typeof metadata.version !== 'string' || !metadata.version.trim()) throw new Error('Invalid official PDF identity metadata')
+    || !Number.isSafeInteger(metadata.year) || !validIdentity || !https(metadata.pdfUrl)
+    || !Number.isFinite(Date.parse(metadata.fetchedAt))
+    || typeof metadata.version !== 'string' || !metadata.version.trim()) throw new Error(`Invalid ${arxiv ? 'arXiv' : 'official'} PDF identity metadata`)
   return withExclusivePaperLock(dataDir, metadata.id, async () => {
     const directory = path.join(dataDir, 'papers', metadata.id)
     const [pdf, source, recipeBytes, conversion] = await Promise.all([
@@ -32,13 +40,15 @@ export async function importConvertedPdf({ convertedDir, pdfFile, recipeFile, me
     if (!coverage || coverage.missing !== 0 || coverage.duplicate !== 0 || !coverage.sourceCharacters
       || !Number.isSafeInteger(coverage.pageCount) || !conversion.blocks?.length || !conversion.resolvedDestinations) throw new Error('PDF conversion lacks complete character coverage and reviewed destinations')
     const recipe = JSON.parse(recipeBytes)
+    if (conversion.mathMode === 'original-pdf-vectors' && (conversion.vectorMathModuleSha256 !== sha256(await readFile(new URL('./pdf_vector_math.py', import.meta.url)))
+      || typeof conversion.pdftocairo !== 'string' || !conversion.pdftocairo.trim())) throw new Error('Invalid PDF vector conversion tool fingerprint')
     if (recipe.title !== metadata.title || load(source)('title').text() !== metadata.title) throw new Error('Converted PDF title does not match its source identity')
     const sections = [{ id: 'frontmatter', title: 'Paper information', titleZh: '论文信息', level: 2 }]
     let currentSection = sections[0].id
     const blocks = conversion.blocks.map((item, index) => {
       const en = sanitizeHtml(item.html)
       const $ = load(en, {}, false)
-      if (!['heading', 'paragraph', 'reference', 'table', 'figure', 'equation'].includes(item.kind)
+      if (!['heading', 'paragraph', 'reference', 'table', 'figure', 'equation', 'algorithm'].includes(item.kind)
         || !Array.isArray(item.pdfPages) || !item.pdfPages.length || !item.sourceId || !$.text().trim() && !$('img,math').length) throw new Error('Invalid PDF semantic block')
       if (item.kind === 'heading') {
         const heading = $('h2,h3,h4,h5,h6').first()
@@ -51,20 +61,29 @@ export async function importConvertedPdf({ convertedDir, pdfFile, recipeFile, me
     })
     const assets = []
     for (const asset of conversion.assets) {
-      if (!/^[a-zA-Z0-9][a-zA-Z0-9._-]*\.png$/.test(asset.filename)) throw new Error('Invalid converted PDF asset path')
-      const bytes = await readFile(path.join(convertedDir, 'assets', asset.filename))
-      if (asset.sha256 !== sha256(bytes) || asset.bytes !== bytes.length) throw new Error('Converted PDF figure fingerprint mismatch')
+      if (!/^[a-zA-Z0-9][a-zA-Z0-9._-]*\.(?:png|svg)$/.test(asset.filename)) throw new Error('Invalid converted PDF asset path')
+      const original = await readFile(path.join(convertedDir, 'assets', asset.filename))
+      if (asset.sha256 !== sha256(original) || asset.bytes !== original.length) throw new Error('Converted PDF figure fingerprint mismatch')
+      const vector = asset.filename.endsWith('.svg')
+      if (vector && (conversion.mathMode !== 'original-pdf-vectors' || asset.method !== 'original-pdf-math-vectors'
+        || !Number.isSafeInteger(asset.glyphCount) || asset.glyphCount < 1 || !Array.isArray(asset.glyphSourceIndices) || asset.glyphSourceIndices.length !== asset.glyphCount
+        || asset.glyphSourceIndices.some(index => !Number.isSafeInteger(index) || index < 0) || new Set(asset.glyphSourceIndices).size !== asset.glyphCount
+        || !Number.isSafeInteger(asset.pdfPage) || asset.pdfPage < 1 || asset.pdfPage > coverage.pageCount
+        || !Array.isArray(asset.pdfBounds) || asset.pdfBounds.length !== 4 || asset.pdfBounds.some(value => !Number.isFinite(value))
+        || asset.pdfBounds[2] <= asset.pdfBounds[0] || asset.pdfBounds[3] <= asset.pdfBounds[1])) throw new Error('Invalid PDF mathematical vector provenance')
+      const bytes = vector ? Buffer.from(sanitizeSvg(original.toString('utf8'))) : original
       assets.push({ filename: asset.filename, sourceUrl: `${metadata.pdfUrl}#page=${asset.pdfPage}`, sha256: sha256(bytes), bytes: bytes.length,
-        sourceSha256: sha256(pdf), conversion: { pdfPage: asset.pdfPage, pdfBounds: asset.pdfBounds, resolution: 180, method: 'reviewed-figure-crop' } })
+        sourceSha256: vector ? sha256(original) : sha256(pdf), ...(vector ? { sanitized: true } : {}), conversion: { pdfPage: asset.pdfPage, pdfBounds: asset.pdfBounds,
+          ...(vector ? { method: asset.method, sourcePdfSha256: sha256(pdf), glyphCount: asset.glyphCount, glyphSourceIndices: asset.glyphSourceIndices } : { resolution: 180, method: 'reviewed-figure-crop' }) } })
     }
     const abstractHeading = blocks.findIndex(block => block.kind === 'heading' && load(block.en, {}, false).text() === 'Abstract')
     const abstract = abstractHeading >= 0 ? load(blocks[abstractHeading + 1].en, {}, false).text().replace(/\s+/g, ' ').trim() : ''
     const scriptFingerprint = sha256(await readFile(new URL('./convert-pdf.py', import.meta.url)))
     const sourceSha256 = sha256(source)
-    const paper = { schemaVersion: 1, id: metadata.id, arxivId: null, title: metadata.title, titleZh: null,
+    const paper = { schemaVersion: 1, id: metadata.id, arxivId: arxiv ? metadata.arxivId : null, title: metadata.title, titleZh: null,
       authors: metadata.authors, authorCredits: metadata.authors, year: metadata.year, tags: mergePaperTags(metadata.id), abstract, abstractZh: null,
-      source: { kind: 'official-paper', format: 'pdf', url: metadata.sourceUrl, htmlUrl: metadata.sourceUrl,
-        fetchedAt: metadata.fetchedAt, publishedAt: metadata.publishedAt, sha256: sourceSha256, license: null, licenseUrl: null,
+      source: { kind: arxiv ? 'arxiv' : 'official-paper', format: 'pdf', url: metadata.sourceUrl, htmlUrl: arxiv ? metadata.htmlUrl : metadata.sourceUrl,
+        fetchedAt: metadata.fetchedAt, ...(arxiv ? {} : { publishedAt: metadata.publishedAt }), sha256: sourceSha256, license: null, licenseUrl: null,
         pdf: { url: metadata.pdfUrl, sha256: sha256(pdf), bytes: pdf.length, pageCount: coverage.pageCount, version: metadata.version },
         conversion: { method: 'pdf-layout-to-semantic-html', englishHtmlSha256: sourceSha256,
           tools: [{ name: 'papero/convert-pdf.py', version: conversion.version, parameters: { sha256: scriptFingerprint, recipeSha256: sha256(recipeBytes) } },
@@ -80,6 +99,14 @@ export async function importConvertedPdf({ convertedDir, pdfFile, recipeFile, me
             'This is machine-assisted conversion with bounded visual and structural checks; no human review is claimed.'] } },
       translation: { status: 'pending', model: null, coverage: { complete: 0, total: blocks.length }, humanReviewed: false },
       sections, blocks, assets, statistics: { blockCount: blocks.length, sectionCount: sections.length, wordCount: blocks.reduce((count, block) => count + block.wordCount, 0) } }
+    if (conversion.mathMode === 'original-pdf-vectors') {
+      paper.source.conversion.parameters.mathMode = conversion.mathMode
+      paper.source.conversion.parameters.mathExpressionCount = assets.filter(asset => asset.conversion.method === 'original-pdf-math-vectors').length
+      paper.source.conversion.parameters.figureCount = assets.filter(asset => asset.conversion.method === 'reviewed-figure-crop').length
+      paper.source.conversion.tools.push({ name: 'pdftocairo', version: conversion.pdftocairo, parameters: { output: 'svg', scope: 'mathematical-glyph-outlines-and-rules' } },
+        { name: 'papero/pdf_vector_math.py', version: '1.0.0', parameters: { sha256: conversion.vectorMathModuleSha256 } })
+      paper.source.conversion.notes.push('The pinned arXiv source archive contains a PDF wrapper, without mathematical TeX. Formula glyph mappings were unsafe to reconstruct as MathML, so mathematical expressions retain their original PDF vector outlines; surrounding prose, algorithms, references and page mappings remain semantic HTML.')
+    }
     assertPdfProvenance(paper)
     const ids = new Set(), links = new Set()
     for (const block of blocks) {
@@ -98,6 +125,9 @@ export async function importConvertedPdf({ convertedDir, pdfFile, recipeFile, me
     await mkdir(path.dirname(temporary), { recursive: true })
     await mkdir(temporary, { recursive: false })
     await cp(path.join(convertedDir, 'assets'), path.join(temporary, 'assets'), { recursive: true })
+    for (const asset of assets.filter(asset => asset.sanitized)) {
+      await writeFile(path.join(temporary, 'assets', asset.filename), sanitizeSvg((await readFile(path.join(convertedDir, 'assets', asset.filename))).toString('utf8')))
+    }
     await writeFile(path.join(temporary, 'source.pdf'), pdf)
     await writeFile(path.join(temporary, 'source.html'), source)
     await writeFile(path.join(temporary, 'en.html'), source)

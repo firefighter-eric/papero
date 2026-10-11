@@ -138,4 +138,21 @@ describe('paper tag filtering', () => {
     expect(classificationTags(clip.tags)).not.toContain('多模态')
     expect(matchesPaperFilters(paper(['预训练'], 'A paper citing FineWeb and muTransfer'), '', 'FineWeb', '')).toBe(false)
   })
+
+  it('finds all optimizer additions by topic without mixing their algorithm families', () => {
+    const ids = ['adamw-decoupled-weight-decay', 'muon-scalable-llm-training', 'muon-original-design',
+      'adam-stochastic-optimization', 'shampoo-tensor-optimization', 'soap-shampoo-adam', 'old-optimizer-new-norm',
+      'soap-muon-pretraining-scales', 'polar-express-muon', 'adafactor-sublinear-memory',
+      'lion-symbolic-optimizer', 'dion-distributed-orthonormalized-updates'] as const
+    for (const id of ids) {
+      const report = paper(registry.papers[id])
+      expect(matchesPaperFilters(report, 'optimizer', '', '优化器')).toBe(true)
+      expect(matchesPaperFilters(report, '', 'Qwen', '优化器')).toBe(false)
+      expect(matchesPaperFilters(report, '', '', '后训练')).toBe(false)
+    }
+    expect(matchesPaperFilters(paper(registry.papers['adamw-decoupled-weight-decay']), '权重衰减', 'AdamW', '优化器')).toBe(true)
+    expect(matchesPaperFilters(paper(registry.papers['adamw-decoupled-weight-decay']), '', 'Adam', '优化器')).toBe(false)
+    expect(matchesPaperFilters(paper(registry.papers['polar-express-muon']), 'Newton-Schulz', 'Muon', '矩阵优化')).toBe(true)
+    expect(matchesPaperFilters(paper(registry.papers['dion-distributed-orthonormalized-updates']), 'communication', 'Dion', '分布式训练')).toBe(true)
+  })
 })

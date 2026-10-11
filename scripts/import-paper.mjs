@@ -5,6 +5,7 @@ import { load } from 'cheerio'
 import { catalogEntry, parsePaper, safeId, validArxivId, sha256, sanitizeSvg } from './paper-lib.mjs'
 import { withCatalogLock, withExclusivePaperLock } from './catalog-lock.mjs'
 import { readArxivSourceAssetRecovery, recoverArxivSourceAsset } from './arxiv-source-assets.mjs'
+import { recoverMissingArxivGraphics } from './missing-arxiv-graphics.mjs'
 
 export async function updateCatalog(dataDir, paper, lockOptions = {}) {
   return withCatalogLock(dataDir, async () => {
@@ -67,12 +68,41 @@ async function importUnlocked({ arxivId, id, dataDir, force = false }) {
     const image = $('<img>').attr({ src: item.attr('data'), alt: 'Refer to caption', id: item.attr('id') || '', width: item.attr('width') || '', height: item.attr('height') || '' })
     item.replaceWith(image)
   })
-  for (const image of $('article img').toArray()) {
+  const images = $('article img').toArray()
+  // arXiv papers can contain different assets in separate TeX directories
+  // with the same basename. Plan names before downloading so a later asset
+  // can never overwrite the first one. Keep the historical basename for the
+  // common, non-colliding case; colliding names get a stable URL-derived
+  // suffix and remain safe single path components.
+  const imageRecords = images.map(image => {
     const src = $(image).attr('src')
-    if (!src) continue
+    if (!src) return { image, src: null }
     const url = new URL(src, htmlUrl)
     if (url.hostname !== 'arxiv.org' || !/^\.(png|jpg|jpeg|gif|webp|svg)$/i.test(path.extname(url.pathname))) throw new Error(`Unsupported paper asset: ${url.pathname}`)
-    const filename = path.basename(url.pathname)
+    return { image, url, basename: path.basename(url.pathname) }
+  })
+  const basenameUrls = new Map()
+  for (const record of imageRecords) {
+    if (!record.url) continue
+    const urls = basenameUrls.get(record.basename) || new Set()
+    urls.add(record.url.href)
+    basenameUrls.set(record.basename, urls)
+  }
+  const assignedNames = new Map()
+  for (const record of imageRecords) {
+    if (!record.url) continue
+    const collides = basenameUrls.get(record.basename).size > 1
+    const extension = path.extname(record.basename)
+    const stem = record.basename.slice(0, -extension.length) || 'asset'
+    const safe = name => name.replace(/[^a-zA-Z0-9._-]/g, '_')
+    const filename = safe(collides ? `${stem}-${sha256(record.url.href).slice(0, 12)}${extension}` : record.basename)
+    const previousUrl = assignedNames.get(filename)
+    if (previousUrl && previousUrl !== record.url.href) throw new Error(`Stable asset filename collision: ${filename}`)
+    assignedNames.set(filename, record.url.href)
+    record.filename = filename
+  }
+  for (const { image, url, filename } of imageRecords) {
+    if (!url) continue
     const target = path.join(directory, 'assets', filename)
     let bytes
     let recovery = null
@@ -111,17 +141,27 @@ async function importUnlocked({ arxivId, id, dataDir, force = false }) {
       await writeFile(target, bytes)
     }
     const duplicate = assets.find(asset => asset.filename === filename)
-    if (duplicate && duplicate.sourceUrl !== url.href) throw new Error(`Conflicting asset filenames: ${filename}`)
+    if (duplicate && duplicate.sourceUrl !== url.href) throw new Error(`Stable asset filename collision: ${filename}`)
     if (!duplicate) assets.push({ filename, sourceUrl: url.href, sha256: sha256(bytes), sourceSha256, bytes: bytes.length, ...(filename.endsWith('.svg') ? { sanitized: true } : {}), ...(recovery ? { recovery } : {}) })
     $(image).attr('src', `assets/${filename}`)
   }
+  const missingGraphics = await recoverMissingArxivGraphics({ $, arxivId, sourceSha256: sha256(html), directory })
+  assets.push(...missingGraphics.assets)
   const paper = parsePaper($.html(), { id, arxivId, htmlUrl })
   // The fingerprint describes the untouched downloaded source, before local asset rewriting.
   paper.source.sha256 = sha256(html)
+  if (missingGraphics.repairs.length) paper.source.repairs = [...(paper.source.repairs || []), ...missingGraphics.repairs]
   paper.assets = assets
   try {
     const existing = JSON.parse(await readFile(existingFile, 'utf8'))
     if (existing.source.sha256 === paper.source.sha256 && !force) {
+      const recoveredBodyChanged = missingGraphics.repairs.length && JSON.stringify(existing.blocks.map(b => b.en)) !== JSON.stringify(paper.blocks.map(b => b.en))
+      if (recoveredBodyChanged) {
+        if (existing.translation.model || existing.blocks.some(b => b.zh)) throw new Error('Missing graphic recovery would change an accepted translation source; existing checkpoint preserved')
+        await writeFile(existingFile, JSON.stringify(paper, null, 2) + '\n')
+        await updateCatalog(dataDir, paper)
+        return paper
+      }
       existing.assets = assets
       existing.authors = paper.authors
       existing.authorCredits = paper.authorCredits

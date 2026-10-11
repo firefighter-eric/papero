@@ -5,16 +5,22 @@ import { attachPublicationBibliography, publicationAuthors } from './publication
 const escape = value => String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;')
 const fingerprint = value => typeof value === 'string' && /^[a-f0-9]{64}$/.test(value)
 const css = `:root{color-scheme:light dark}body{margin:0 auto;padding:32px 24px;max-width:960px;font:18px/1.8 system-ui,sans-serif}header{margin-bottom:32px}h1,h2,h3,h4,h5,h6{line-height:1.3}a{color:inherit}img{max-width:100%;height:auto}figure{margin:24px 0}table{border-collapse:collapse;display:block;max-width:100%;overflow:auto}th,td{padding:6px 10px;border:1px solid #999}pre{overflow:auto;padding:16px;background:#8881}math[display="block"]{display:block;overflow:auto;margin:16px 0}annotation,annotation-xml{display:none}.ltx_eqn_table{width:100%}.paper-block{margin-bottom:16px}`
+const vectorMathCss = '.pdf-math{display:inline-block;vertical-align:middle;width:auto;max-width:none;margin:0 .03em}.paper-block:has(.pdf-math){overflow-x:auto}'
+  + '@media(prefers-color-scheme:dark){.pdf-math{filter:invert(1)}}'
+  + Array.from({ length: 298 }, (_, i) => `.pdf-math.pdf-math-h${i + 3}{height:${((i + 3) / 10).toFixed(1)}em}`).join('')
 
 export function renderReadingDocument(paper, language, blocks = paper.blocks) {
   let source
   try { source = new URL(paper.source.url) } catch { throw new Error(`Invalid publication source URL: ${paper.id}.`) }
   if (source.protocol !== 'https:' || source.username || source.password) throw new Error(`Invalid publication source URL: ${paper.id}.`)
   const title = language === 'zh' ? paper.titleZh || paper.title : paper.title
-  const sourceLabel = paper.source.kind === 'official-article' ? (language === 'zh' ? 'Qwen · 官方文章' : 'Qwen · Official article')
+  const sourceLabel = paper.source.kind === 'official-article' ? (paper.source.author
+    ? `${paper.source.author} · ${language === 'zh' ? '作者文章' : 'Author article'}`
+    : language === 'zh' ? 'Qwen · 官方文章' : 'Qwen · Official article')
     : paper.source.kind === 'official-paper' ? (language === 'zh' ? '官方论文' : 'Official paper') : 'arXiv'
   const translationNote = language === 'zh' ? '<p>机器翻译，未经人工审校。</p>' : ''
-  const prefix = `<!doctype html>\n<html lang="${language === 'zh' ? 'zh-CN' : 'en'}"><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' file:; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escape(title)}</title><style>${css}</style></head><body><header><h1>${escape(title)}</h1><p>${escape(publicationAuthors(paper).join(', '))}</p><p><a href="${escape(paper.source.url)}">${escape(sourceLabel)}</a></p>${translationNote}</header><article data-paper-id="${escape(paper.id)}" data-language="${language}">\n`
+  const mathCss = paper.source.conversion?.parameters?.mathMode === 'original-pdf-vectors' ? vectorMathCss : ''
+  const prefix = `<!doctype html>\n<html lang="${language === 'zh' ? 'zh-CN' : 'en'}"><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' file:; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escape(title)}</title><style>${css}${mathCss}</style></head><body><header><h1>${escape(title)}</h1><p>${escape(publicationAuthors(paper).join(', '))}</p><p><a href="${escape(paper.source.url)}">${escape(sourceLabel)}</a></p>${translationNote}</header><article data-paper-id="${escape(paper.id)}" data-language="${language}">\n`
   const parts = [prefix], offsets = []
   let byteOffset = Buffer.byteLength(prefix, 'utf8')
   for (const block of blocks) {

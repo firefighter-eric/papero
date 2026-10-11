@@ -4,6 +4,7 @@ import type { CSSProperties } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { PaperTags } from './PaperTags'
 import { paperAuthors } from '../lib/paper-bibliography'
+import { paperSourceName } from '../lib/paper-source'
 
 export function PaperHeader({ entry, paper, collapseProgress = 0 }: { entry: CatalogPaper; paper: PaperDocument | null; collapseProgress?: number }) {
   const [expanded, setExpanded] = useState(false)
@@ -55,7 +56,7 @@ export function PaperHeader({ entry, paper, collapseProgress = 0 }: { entry: Cat
       </details>
     </div> : <p className="paper-authors" lang="en">{authorNames}</p>}
     <p className="paper-metadata"><span>{paper?.year || entry.year}</span><span aria-hidden="true">·</span>
-      <span>{entry.sourceKind === 'official-paper' ? '官方论文' : entry.arxivId === null ? '官方文章' : `arXiv:${entry.arxivId}`}</span><span aria-hidden="true">·</span>
+      <span>{paperSourceName(entry)}</span><span aria-hidden="true">·</span>
       <span>{entry.access === 'source-only' ? '来源条目' : complete ? '机器翻译' : translated > 0 ? `机器翻译 · ${Math.round(translated / Math.max(1, total) * 100)}% 已完成` : '中文翻译待生成'}</span>
     </p>
     <PaperTags tags={entry.tags} />

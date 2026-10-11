@@ -71,6 +71,15 @@ describe('paper data validation', () => {
     expect(() => validateCatalog({ schemaVersion: 2, papers: [] })).toThrow(/schema version/)
   })
 
+  it('loads a semantic PDF algorithm block while rejecting unsupported block kinds', () => {
+    const document = paper()
+    document.blocks[0] = { ...document.blocks[0], kind: 'algorithm',
+      en: '<figure class="ltx_algorithm"><figcaption>Algorithm 1: Adam</figcaption><div class="algorithm-line"><math><mi>t</mi></math> ← 0</div></figure>',
+      zh: '<figure class="ltx_algorithm"><figcaption>算法 1：Adam</figcaption><div class="algorithm-line"><math><mi>t</mi></math> ← 0</div></figure>' }
+    expect(validatePaper(document, entry).blocks[0].kind).toBe('algorithm')
+    expect(() => validatePaper({ ...document, blocks: [{ ...document.blocks[0], kind: 'unsupported' }] })).toThrow(/unsupported/)
+  })
+
   it('accepts explicitly typed official articles without misrepresenting them as arXiv papers', () => {
     const articleEntry: CatalogPaper = {
       ...entry, id: 'qwen3-5-official-article', arxivId: null, sourceKind: 'official-article',

@@ -31,7 +31,7 @@ export interface PaperDataOptions {
 }
 
 const BLOCK_KINDS = new Set<PaperBlockKind>([
-  'heading', 'paragraph', 'figure', 'table', 'equation', 'reference', 'list', 'code',
+  'heading', 'paragraph', 'figure', 'table', 'equation', 'reference', 'list', 'code', 'algorithm',
 ])
 const ID_PATTERN = /^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,159}$/
 const MAX_CATALOG_BYTES = 2 * 1024 * 1024
@@ -211,6 +211,12 @@ export function validatePaper(value: unknown, expected?: CatalogPaper): PaperDoc
   if (source.publishedAt !== undefined) {
     string(source.publishedAt, 'paper.source.publishedAt', 80)
     if (!Number.isFinite(Date.parse(source.publishedAt))) invalid('paper.source.publishedAt must be a date.')
+  }
+  if (source.author !== undefined) nonempty(source.author, 'paper.source.author', 300)
+  if (source.publisher !== undefined) nonempty(source.publisher, 'paper.source.publisher', 300)
+  if (source.publishedDatePrecision !== undefined) {
+    if (source.publishedDatePrecision !== 'day' || typeof source.publishedAt !== 'string'
+      || !/^\d{4}-\d{2}-\d{2}$/.test(source.publishedAt)) invalid('Author article publication date must have day precision.')
   }
   if (source.language !== undefined) nonempty(source.language, 'paper.source.language', 80)
   if (source.media !== undefined) {
