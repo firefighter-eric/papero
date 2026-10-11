@@ -112,7 +112,7 @@ DeepSeek V4 的[官方模型卡](https://huggingface.co/deepseek-ai/DeepSeek-V4-
 
 用户于 **2026-10-11** 进一步明确要求将剩余 DeepSeek V3／R1／V4 与 MiniMax Sparse Attention 全部上线。本轮按该指示公开这四篇固定版本的完整英文与中文 HTML，共 1540 个对齐内容块、68 个正文引用素材，并保留已有十篇全文。上述 Kimi 作者授权确认仍只记录三篇 Kimi 固定版本；本轮发布指示不作为其他报告的作者授权确认，也未独立核验额外书面授权文件。原始来源和许可记录不变。
 
-公共库当前共有 14 篇中英全文、5209 个对齐内容块、191 个正文引用素材和 234 个发布文件；扩充七篇共 2882 块。所有译文仍标记 `humanReviewed: false`，保留实际主译与辅助校正模型，自动校验与定向校正不代表全篇人工审校。本地导入与公开发布继续分开处理。
+该次已发布快照共有 14 篇中英全文、5209 个对齐内容块、191 个正文引用素材和 234 个发布文件；扩充七篇共 2882 块。所有译文仍标记 `humanReviewed: false`，保留实际主译与辅助校正模型，自动校验与定向校正不代表全篇人工审校。本地导入与公开发布继续分开处理；下文的 Gemini／Gemma 七篇与 Chinchilla 根据用户后续明确发布指示纳入 22 条目快照。
 
 可重复的固定版本导入：
 
@@ -138,3 +138,49 @@ npm run library:translate -- \
 ```
 
 本批核验的本地实例为 `mlx-community` 的 MLX `4bit`、35B/A3B MoE，API ID 为 `qwen3.6-35b-a3b`，上下文 8192 token、服务并发 4。请求和纠错共享 4 个请求槽，实际输出预算由已确认上下文设为 4096 token；返回模型身份、参数、用量与响应通道照实记入每篇来源记录。最终可阅读正文仍导出为 HTML，公式保留原 MathML。
+
+## Gemini 与 Gemma 核心报告
+
+核验日期：2026-10-11。本地新增以下七篇固定版本。每篇已取得官方英文 HTML 及正文图表，来源 URL、原始 HTML SHA-256 与素材指纹保存在处理记录中。论文均标注 CC BY 4.0；Gemma 论文作者为 Gemma Team / Google DeepMind。这里记录的是论文许可，与模型权重许可分别处理。
+
+| 系列 | 报告原题 | 固定官方 HTML | 本地论文 ID |
+| --- | --- | --- | --- |
+| Gemini 1.0 | Gemini: A Family of Highly Capable Multimodal Models | [2312.11805v5](https://arxiv.org/html/2312.11805v5) | `gemini-1-0-technical-report` |
+| Gemini 1.5 | Gemini 1.5: Unlocking multimodal understanding across millions of tokens of context | [2403.05530v5](https://arxiv.org/html/2403.05530v5) | `gemini-1-5-technical-report` |
+| Gemini 2.5 | Gemini 2.5: Pushing the Frontier with Advanced Reasoning, Multimodality, Long Context, and Next Generation Agentic Capabilities. | [2507.06261v6](https://arxiv.org/html/2507.06261v6) | `gemini-2-5-technical-report` |
+| Gemma 1 | Gemma: Open Models Based on Gemini Research and Technology | [2403.08295v4](https://arxiv.org/html/2403.08295v4) | `gemma-1-technical-report` |
+| Gemma 2 | Gemma 2: Improving Open Language Models at a Practical Size | [2408.00118v3](https://arxiv.org/html/2408.00118v3) | `gemma-2-technical-report` |
+| Gemma 3 | Gemma 3 Technical Report | [2503.19786v1](https://arxiv.org/html/2503.19786v1) | `gemma-3-technical-report` |
+| Gemma 4 | Gemma 4 Technical Report | [2607.02770v2](https://arxiv.org/html/2607.02770v2) | `gemma-4-technical-report` |
+
+Gemini 2.5 报告同时介绍 Gemini 2.0，因此只收录一份完整报告。用户明确选择只收录 Gemini 核心论文，Gemini 3.x 模型卡未纳入本批；Gemma 也只收录主系列四篇技术报告。Gemma 4 的身份已与 [Google 官方模型卡的技术报告引用](https://ai.google.dev/gemma/docs/core/model_card_4)交叉核对。
+
+本批所有正文均来自官方 HTML。Gemma 顶部的作者脚注宏及 Gemma 2 表 21／22 的表头转换错误，在解析副本中定向修复；原始来源文件保持不变，修复依据记录在 `source.repairs`。表头以固定版本 [Gemma 2 PDF](https://arxiv.org/pdf/2408.00118v3)第 12／13 页为准，原数值行、图注与全部锚点保留。
+
+这些报告最初仅加入本地阅读库；用户于 2026-10-11 明确要求先发布已完成的 22 个条目，再继续新增 20 篇预训练论文，本次据此纳入公开快照。公开授权规则见 [AGENTS.md](../AGENTS.md)。
+
+七篇共 2600 个对齐内容块、115 个正文素材，已全部完成中英 HTML 导出。原始工作库通过来源 SHA-256、素材、公式、引用、内部链接和全文翻译严格校验；处理后本地快照共 21 篇、7809 块、306 素材和 370 文件。原有 14 篇的 233 个正文、元数据与素材文件逐文件哈希保持不变，目录仅增加本批条目。
+
+Gemini 1.0／2.5 全文由实际 GPT-6 Luna 子任务生成，使用 `reasoning_effort: low`。Gemini 1.5 与 Gemma 1／2／3／4 先由本机 `qwen3.6-35b-a3b`（MLX 4bit，8192 上下文，四路共享 API 队列，`reasoning_effort: none`）处理，保留已验收内容，再由实际 Luna 续译。更换模型必须显式传入 `allowModelChange: true`，冻结既有 Qwen 块、原标题和完整 API 来源；后续 Luna 仅处理缺失内容。每块保留实际模型，`codexFallback` 记录这次明确续译的来源指纹与历史。
+
+Luna 子任务不提供 API token 用量，本批不填造假的零值或借用 Qwen 参数。混合译文的 `usageScope: observed-api-models-only` 表示仅保留实际观测到的 Qwen API 统计；其原请求预算、重试和传输参数保存在 Qwen 历史中。定向检查修正了少数漏译、片段边界与图像块维度表述，仍标记 `humanReviewed: false`，不代表全篇人工审校。
+
+## Chinchilla
+
+核验日期：2026-10-11。用户输入的“Chillchila”按 Chinchilla 模型对应的 **Training Compute-Optimal Large Language Models** 导入，保留论文原题，别名用于检索。
+
+| 项目 | 固定来源 |
+| --- | --- |
+| 论文与版本 | [arXiv:2203.15556v1](https://arxiv.org/abs/2203.15556v1)，2022-03-29，Jordan Hoffmann 等 22 位作者 |
+| 英文正文 | [官方 HTML](https://arxiv.org/html/2203.15556v1)，含参考文献及附录 A–J |
+| 官方关联说明 | [Google DeepMind 的 Chinchilla 研究文章](https://deepmind.google/blog/an-empirical-analysis-of-compute-optimal-large-language-model-training/) |
+| 本地 ID | `chinchilla-training-compute-optimal` |
+| 标签 | Chinchilla、预训练、缩放定律；支持 Chillchila、DeepMind、Google／谷歌检索 |
+
+原始来源标注 **arXiv.org perpetual non-exclusive license**，按源页面如实记录，不沿用 Gemini／Gemma 的 CC BY 4.0 标记。最初用于本地阅读，后根据用户 2026-10-11 的明确发布指示纳入本次公开快照。
+
+原始英文 HTML 的 SHA-256 为 `69d724082e37672a65d292c60c84962aab430aba6cb3618b35477fe9829dd3cf`。导入包含 244 个内容块、52 个目录项、19 张表、11 个独立公式块、212 个 MathML 公式及 14 个图表素材。SVG 保留原始下载副本与指纹，供阅读的副本经过既有清洗流程；公式、代码与英文原文的科学数据保持固定版本来源。
+
+244 个内容块已全部生成对齐的中文 HTML。正文和标题由实际 GPT-6 Luna 子任务生成，记录 `provider: Codex subagent`、`reasoning_effort: low`、实际完成时间和来源／译文指纹；原样保留的公式、作者和参考文献块不虚构翻译模型。没有可核验的 Luna API 用量，记录中不填造 token 数或费用。关键结果、公式变量及表格单元格经过有限语义抽查，24 个内容块保留定向修订的模型、时间和前一版译文指纹；额外检查所有片段中的 Chinchilla／Gopher／SentencePiece 专名是否保留。机器译文仍标记 `humanReviewed: false`，未作全文人工审校。
+
+原始工作库与最终中英 HTML 均通过严格数据校验，构建后库共 22 个全文条目、8053 块、320 素材和 387 文件。添加前 21 个条目的 369 个正文、元数据和素材文件逐文件哈希不变。实际阅读器已检查桌面／手机显示、公式单份渲染、目录跳转、中英双向同步滚动、交换／单栏和标签检索；页面无加载错误，手机页面宽度未超出视口。此完整快照纳入用户明确授权的本次发布，新增 20 篇预训练论文仍在本地工作目录中处理。

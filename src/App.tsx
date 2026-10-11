@@ -17,14 +17,14 @@ export default function App() {
   const [preferences, setPreferences] = usePreferences()
   const mobile = useMediaQuery('(max-width: 760px)')
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [position, setPosition] = useState<ReadingPosition>({ progress: 0, sectionId: null })
+  const [position, setPosition] = useState<ReadingPosition>({ progress: 0, sectionId: null, headerCollapsed: false })
   const reader = useRef<PaperReaderHandle>(null)
   const paper = library.document.value?.id === library.selected?.id ? library.document.value : null
   const remoteData = /^https?:\/\//i.test(getPaperDataBaseUrl())
   const onPosition = useCallback((next: ReadingPosition) => setPosition(next), [])
 
   useEffect(() => {
-    setPosition({ progress: 0, sectionId: null })
+    setPosition({ progress: 0, sectionId: null, headerCollapsed: false })
   }, [library.selected?.id])
 
   useEffect(() => {
@@ -76,7 +76,8 @@ export default function App() {
         : library.catalog.status === 'error' ? <ReaderState kind="error" error={library.catalog.error} missing={library.isMissing} onRetry={library.reloadCatalog} />
           : catalogEmpty || !library.selected ? <ReaderState kind="empty" onRetry={library.reloadCatalog} />
             : <div className="paper-workspace">
-              <PaperHeader entry={library.selected} paper={paper} />
+              <PaperHeader key={library.selected.id} entry={library.selected} paper={paper}
+                collapsed={Boolean(paper && position.headerCollapsed)} />
               {library.selected.access === 'source-only' ? <PaperSource entry={library.selected} /> : <>
                 {library.document.status === 'error' ? <ReaderState kind="error" scope="paper" error={library.document.error} onRetry={library.reloadPaper} />
                   : paper ? <PaperReader key={paper.id} ref={reader} paper={paper} entry={library.selected} preferences={preferences} onPosition={onPosition} />

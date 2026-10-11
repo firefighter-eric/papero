@@ -4,7 +4,7 @@ import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 import { load } from 'cheerio'
-import { applyCodexTranslations, createCodexTranslationManifest } from './apply-codex-translations.mjs'
+import { applyCodexTranslations, assertCodexFallbackReceipt, createCodexTranslationManifest } from './apply-codex-translations.mjs'
 import { catalogEntry, sanitizeHtml, sha256 } from './paper-lib.mjs'
 import { prepareData } from './prepare-data.mjs'
 import { verifyReleaseData } from './verify-release-data.mjs'
@@ -221,6 +221,10 @@ test('strict release checks Codex model, exact observed parameters and identity 
       value => { value.blocks[1].translation.modelIdentity.apiModelId = 'gpt-6-sol' },
       value => { delete value.blocks[1].translation.provider },
       value => { value.blocks[1].translation.promptSha256 = 'f'.repeat(64) },
+      value => { value.blocks[1].translation.sourcePaperSha256 = 'f'.repeat(64) },
+      value => { value.blocks[1].translation.translatedSha256 = 'f'.repeat(64) },
+      value => { value.blocks[1].translation.usage = { promptTokens: 0, completionTokens: 0 } },
+      value => { value.blocks[1].translation.usageByModel = { 'gpt-6-luna': { promptTokens: 0, completionTokens: 0 } } },
     ]) {
       const changed = structuredClone(complete); mutate(changed)
       await assert.rejects(check(changed), /provenance|unobserved API token usage/)
@@ -264,6 +268,198 @@ test('declared Codex histories reject unobserved API usage, including zero value
       changed.translation.modelHistory[0][key] = { promptTokens: 0, completionTokens: 0 }
       await assert.rejects(check(changed), /unobserved API token usage/)
       delete changed.translation.modelHistory[0][key]
+    }
+  })
+})
+
+const fallbackAt = '2026-01-01T00:04:00.000Z', fallbackTranslatedAt = '2026-01-01T00:05:00.000Z'
+function qwenCheckpoint(paper) {
+  const localModel = 'qwen3.6-35b-a3b', provider = 'LM Studio local API'
+  const identity = { apiModelId: localModel, displayName: 'Qwen3.6 35B A3B', publisher: 'mlx-community', format: 'mlx',
+    quantization: '4bit', parameters: '35B', architecture: 'qwen3_5_moe', installedModelKey: localModel,
+    contextLength: 8192, sizeBytes: 20429166969, verifiedAt: date }
+  const parameters = { temperature: 0.1, top_p: 0.9, max_tokens: 4096, seed: 42, reasoning_effort: 'none', stream: false }
+  const requestBudget = { maxTokens: 4096, batchSourceCharacters: 3000, maximumCharacters: 3000, maximumRecords: 40,
+    maximumUnitCharacters: 6000, maximumContextCharacters: 1200, maximumContextPerBlock: 1200, maximumSingleLongUnitContext: 300 }
+  const initialPrompt = sha256('observed synthetic initial LM Studio prompt'), resumedPrompt = sha256('observed synthetic resumed LM Studio prompt')
+  const history = { model: localModel, provider, modelIdentity: identity, parameters, requestBudget,
+    promptSha256: initialPrompt, startedAt: date, reason: 'initial-model', coverageAtStart: { complete: 0, total: 4 } }
+  const resumedIdentity = { ...identity, verifiedAt: '2026-01-01T00:02:00.000Z' }
+  const changed = structuredClone(paper)
+  changed.titleZh = 'Qwen 已接受的合成测试标题'
+  changed.blocks[0].zh = changed.blocks[0].en.replace('Introduction', '引言')
+  changed.blocks[0].translation = { status: 'machine', model: localModel, provider, modelIdentity: structuredClone(identity),
+    parameters: structuredClone(parameters), requestBudget: structuredClone(requestBudget), sourceSha256: sha256(changed.blocks[0].en),
+    promptSha256: initialPrompt, translatedAt, responseChannels: ['reasoning_content'],
+    corrections: { method: 'isolated-fragment-retranslation', unitIds: ['block-001:0'], promptSha256: sha256('observed synthetic correction') } }
+  changed.blocks[3].zh = changed.blocks[3].en
+  changed.blocks[3].translation = { status: 'preserved', model: null }
+  changed.sections[0].titleZh = '1. 引言'
+  const usage = { promptTokens: 123, completionTokens: 45, observedReasoningTokens: 0, reasoningUsageResponses: 1 }
+  changed.translation = { status: 'pending', model: localModel, provider, humanReviewed: false, method: 'Observed synthetic LM Studio fragment translation',
+    parameters, modelIdentity: resumedIdentity, requestBudget, promptSha256: resumedPrompt, createdAt: date, updatedAt: '2026-01-01T00:03:00.000Z',
+    coverage: { complete: 2, total: 4 }, modelsUsed: [localModel], modelIdentities: { [localModel]: resumedIdentity },
+    usage, usageByModel: { [localModel]: structuredClone(usage) }, modelHistory: [history,
+      { ...structuredClone(history), modelIdentity: resumedIdentity, promptSha256: resumedPrompt, startedAt: resumedIdentity.verifiedAt,
+        reason: 'resume-model', coverageAtStart: { complete: 2, total: 4 } }],
+    concurrency: 4, literalTransport: 'opaque-model-delimiters-v2', correctionPromptSha256: sha256('observed synthetic isolated prompt'),
+    retryPolicy: { attemptsPerRequest: 3, seeds: [42, 43, 44], splitFailedRequests: true } }
+  return changed
+}
+
+test('explicit fallback freezes real Qwen contributions and resumes Luna without inventing Luna API usage', async () => {
+  await fixture(async ({ directory, dataDir, paper, save, draft }) => {
+    const local = qwenCheckpoint(paper); await save(local)
+    const manifest = createCodexTranslationManifest(local, { prompt, createdAt: fallbackAt, allowModelChange: true })
+    const fallbackDraft = ids => ({ ...draft(ids), promptSha256: manifest.promptSha256, translatedAt: fallbackTranslatedAt })
+    const first = await applyCodexTranslations({ dataDir, id: paper.id, manifest, drafts: [fallbackDraft(['block-002:0', 'block-002:1'])], allowModelChange: true })
+    const receipt = assertCodexFallbackReceipt(first)
+    assert.deepEqual(receipt.baseline.translation, local.translation)
+    assert.equal(JSON.stringify(first.blocks[0]), JSON.stringify(local.blocks[0]))
+    assert.equal(JSON.stringify(first.blocks[3]), JSON.stringify(local.blocks[3]))
+    for (const key of ['usage', 'usageByModel']) assert.equal(JSON.stringify(first.translation[key]), JSON.stringify(local.translation[key]))
+    assert.equal(JSON.stringify(first.translation.modelHistory.slice(0, -1)), JSON.stringify(local.translation.modelHistory))
+    assert.deepEqual(first.translation.modelIdentities['qwen3.6-35b-a3b'], local.translation.modelIdentity)
+    assert.equal(first.titleZh, local.titleZh)
+    assert.deepEqual(first.translation.titleTranslation, { model: 'qwen3.6-35b-a3b', provider: 'LM Studio local API',
+      sourceSha256: sha256(local.title), translatedSha256: sha256(local.titleZh) })
+    assert.equal(first.translation.usageScope, 'observed-api-models-only')
+    assert.equal(first.translation.requestBudget, undefined)
+    for (const key of ['literalTransport', 'correctionPromptSha256', 'concurrency', 'retryPolicy']) {
+      assert.equal(first.translation[key], undefined)
+      assert.deepEqual(receipt.baseline.translation[key], local.translation[key])
+    }
+    assert.equal(first.translation.usageByModel['gpt-6-luna'], undefined)
+    assert.equal(first.translation.modelHistory.at(-1).usage, undefined)
+    assert.equal(first.translation.modelHistory.at(-1).requestBudget, undefined)
+    assert.deepEqual(first.translation.modelsUsed, ['qwen3.6-35b-a3b', 'gpt-6-luna'])
+    assert.deepEqual(createCodexTranslationManifest(first, { prompt, createdAt: fallbackAt }), manifest)
+    // Explicit authorization is frozen in the receipt; continuation of that
+    // exact Luna manifest does not need to relabel or replace the original API run.
+    const second = await applyCodexTranslations({ dataDir, id: paper.id, manifest, drafts: [fallbackDraft(['block-003:0'])] })
+    assert.equal(second.translation.status, 'machine')
+    assert.deepEqual(second.translation.coverage, { complete: 4, total: 4 })
+    assert.equal(second.translation.modelHistory.length, local.translation.modelHistory.length + 1)
+    assert.deepEqual(second.translation.codexFallback, receipt)
+    assert.equal(JSON.stringify(second.blocks[0]), JSON.stringify(local.blocks[0]))
+    const exported = await prepareData({ dataDir, outDir: path.join(directory, 'mixed'), include: true })
+    assert.equal((await verifyReleaseData({ dataDir: exported.output, report: () => {} })).completePapers, 1)
+  })
+})
+
+test('fallback remains opt-in and refuses unknown or inconsistent existing Qwen API provenance', async () => {
+  await fixture(async ({ dataDir, filename, paper, save, draft }) => {
+    const local = qwenCheckpoint(paper); await save(local)
+    const options = { prompt, createdAt: fallbackAt, allowModelChange: true }
+    const manifest = createCodexTranslationManifest(local, options)
+    const drafts = [{ ...draft(['block-003:0']), translatedAt: fallbackTranslatedAt }]
+    await assert.rejects(applyCodexTranslations({ dataDir, id: paper.id, manifest, drafts }), /another model run/)
+    for (const mutate of [
+      value => { value.translation.model = 'qwen3.8-27b-splash' },
+      value => { value.translation.provider = 'Codex subagent' },
+      value => { value.translation.modelIdentity.architecture = 'unknown' },
+      value => { value.translation.usageByModel['gpt-6-luna'] = { promptTokens: 0, completionTokens: 0 } },
+      value => { value.translation.usage.promptTokens++ },
+      value => { value.translation.modelHistory[0].provider = 'fake API' },
+      value => { value.translation.modelHistory[0].parameters.seed++ },
+      value => { value.blocks[0].translation.provider = 'fake API' },
+      value => { value.blocks[0].translation.modelIdentity.apiModelId = 'unknown' },
+      value => { value.blocks[0].translation.sourceSha256 = 'f'.repeat(64) },
+      value => { value.blocks[0].translation.status = 'preserved' },
+      value => { value.blocks[0].translation.parameters.temperature = 0.9 },
+      value => { value.blocks[0].translation.translatedAt = '2025-01-01T00:00:00.000Z' },
+    ]) {
+      const changed = structuredClone(local); mutate(changed); await save(changed)
+      const before = await readFile(filename, 'utf8')
+      assert.throws(() => createCodexTranslationManifest(changed, options), /Qwen fallback provenance/)
+      await assert.rejects(applyCodexTranslations({ dataDir, id: paper.id, manifest, drafts, allowModelChange: true }), /Qwen fallback provenance/)
+      assert.equal(await readFile(filename, 'utf8'), before)
+    }
+  })
+})
+
+test('frozen fallback refuses edited accepted Qwen content, title, API history, manifest and invented Luna usage', async () => {
+  await fixture(async ({ dataDir, filename, paper, save, draft }) => {
+    const local = qwenCheckpoint(paper); await save(local)
+    const manifest = createCodexTranslationManifest(local, { prompt, createdAt: fallbackAt, allowModelChange: true })
+    const fallbackDraft = ids => ({ ...draft(ids), translatedAt: fallbackTranslatedAt })
+    const first = await applyCodexTranslations({ dataDir, id: paper.id, manifest, drafts: [fallbackDraft(['block-002:0', 'block-002:1'])], allowModelChange: true })
+    for (const mutate of [
+      value => { value.blocks[0].zh += '额外内容' },
+      value => { value.blocks[0].translation.parameters.seed++ },
+      value => { value.titleZh += '额外内容' },
+      value => { value.translation.titleTranslation.model = 'gpt-6-luna' },
+      value => { value.translation.usage.promptTokens++ },
+      value => { value.translation.usageByModel['gpt-6-luna'] = { promptTokens: 0, completionTokens: 0 } },
+      value => { value.translation.usageScope = 'all-models' },
+      value => { value.translation.modelHistory[0].parameters.seed++ },
+      value => { value.translation.modelHistory.at(-1).usage = { promptTokens: 0, completionTokens: 0 } },
+      value => { value.translation.requestBudget = local.translation.requestBudget },
+      value => { value.translation.manifestSha256 = 'f'.repeat(64) },
+    ]) {
+      const changed = structuredClone(first); mutate(changed); await save(changed)
+      const before = await readFile(filename, 'utf8')
+      assert.throws(() => assertCodexFallbackReceipt(changed), /fallback receipt|Qwen fallback provenance/)
+      await assert.rejects(applyCodexTranslations({ dataDir, id: paper.id, manifest, drafts: [fallbackDraft(['block-003:0'])] }), /fallback receipt|Qwen fallback provenance/)
+      assert.equal(await readFile(filename, 'utf8'), before)
+    }
+    await save(first)
+    await assert.rejects(applyCodexTranslations({ dataDir, id: paper.id, manifest, drafts: [fallbackDraft(['__title:0'])] }), /replace an accepted/)
+    await assert.rejects(applyCodexTranslations({ dataDir, id: paper.id, manifest, drafts: [fallbackDraft(['block-001:0'])] }), /replace an accepted/)
+    const changedManifest = structuredClone(manifest); changedManifest.prompt += ' changed'; changedManifest.promptSha256 = sha256(changedManifest.prompt)
+    await assert.rejects(applyCodexTranslations({ dataDir, id: paper.id, manifest: changedManifest, drafts: [fallbackDraft(['block-003:0'])] }), /manifest changed/)
+  })
+})
+
+test('allowModelChange cannot excuse fabricated API fields on a native Luna continuation', async () => {
+  await fixture(async ({ dataDir, paper, save, draft, apply, manifest }) => {
+    const first = await apply([draft(['__title:0', 'block-001:0'])])
+    for (const metadata of [{ usage: { promptTokens: 0, completionTokens: 0 } }, { modelHistory: [] }, { requestBudget: { maxTokens: 4096 } }]) {
+      const changed = structuredClone(first); Object.assign(changed.translation, metadata); await save(changed)
+      await assert.rejects(applyCodexTranslations({ dataDir, id: paper.id, manifest, drafts: [draft(['block-003:0'])], allowModelChange: true }), /invent or replace/)
+    }
+  })
+})
+
+test('initial API history starts before checkpoint creation while resumes and accepted outputs remain ordered', async () => {
+  await fixture(async ({ dataDir, paper, save, draft }) => {
+    const local = qwenCheckpoint(paper)
+    // Actual Gemma 2 initialization records .476Z then createdAt .477Z.
+    local.translation.createdAt = '2026-01-01T00:00:00.001Z'
+    await save(local)
+    const options = { prompt, createdAt: fallbackAt, allowModelChange: true }
+    const manifest = createCodexTranslationManifest(local, options)
+    assert.equal(manifest.modelChange.translation.modelHistory[0].startedAt, date)
+    assert.equal(manifest.modelChange.translation.createdAt, local.translation.createdAt)
+    const accepted = await applyCodexTranslations({ dataDir, id: paper.id, manifest,
+      drafts: [{ ...draft(['block-003:0']), translatedAt: fallbackTranslatedAt }], allowModelChange: true })
+    assert.deepEqual(accepted.translation.codexFallback.baseline.translation, local.translation)
+    for (const mutate of [
+      value => { value.translation.modelHistory[0].startedAt = '2026-01-01T00:00:00.002Z' },
+      value => { value.translation.modelHistory[1].startedAt = date },
+      value => { value.blocks[0].translation.translatedAt = date },
+      value => { value.translation.updatedAt = '2025-12-31T23:59:59.999Z' },
+      value => { value.translation.modelHistory[1].coverageAtStart.complete = 3 },
+    ]) {
+      const changed = structuredClone(local); mutate(changed)
+      assert.throws(() => createCodexTranslationManifest(changed, options), /Qwen fallback provenance/)
+    }
+  })
+})
+
+test('native Luna continuation rejects fabricated block counters and changed source-paper hashes without writes', async () => {
+  await fixture(async ({ filename, save, draft, apply }) => {
+    const first = await apply([draft(['__title:0', 'block-001:0'])])
+    for (const mutate of [
+      value => { value.blocks[0].translation.usage = { promptTokens: 0, completionTokens: 0 } },
+      value => { value.blocks[0].translation.usageByModel = { 'gpt-6-luna': { promptTokens: 0, completionTokens: 0 } } },
+      value => { value.blocks[0].translation.sourcePaperSha256 = 'f'.repeat(64) },
+      value => { value.blocks[0].translation.translatedSha256 = 'f'.repeat(64) },
+    ]) {
+      const changed = structuredClone(first); mutate(changed); await save(changed)
+      const before = await readFile(filename, 'utf8')
+      await assert.rejects(apply([draft(['block-003:0'])]), /provenance is stale/)
+      assert.equal(await readFile(filename, 'utf8'), before)
     }
   })
 })

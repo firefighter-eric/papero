@@ -131,12 +131,116 @@ export function sanitizeSvg(svg) {
   return $.xml()
 }
 
+const observedGemmaVersions = new Set(['2403.08295v4', '2408.00118v3', '2503.19786v1', '2607.02770v2'])
+
+function repairGemmaAuthorFootnote($, article, arxivId) {
+  const textMacro = article.children('div.ltx_para').children('span.ltx_ERROR').filter((_, node) => $(node).text() === '\\authfootnotetext')
+  const markMacro = article.find('.ltx_authors .ltx_personname > span.ltx_ERROR').filter((_, node) => $(node).text() === '\\authfootnotemark')
+  if (!textMacro.length && !markMacro.length) return null
+  const note = textMacro.next('p.ltx_p'), noteText = note[0]?.children?.[0], markText = markMacro[0]?.next
+  const author = markMacro.parent().clone(); author.find('span.ltx_ERROR').remove()
+  if (textMacro.length !== 1 || markMacro.length !== 1 || !note.attr('id')
+    || noteText?.type !== 'text' || !/^1See Contributions and Acknowledgments section for full author list\./.test(noteText.data)
+    || markText?.type !== 'text' || !/^1\s*$/.test(markText.data)
+    || author.text().trim() !== 'Google DeepMind1') throw new Error(`Unrecognized Gemma author-footnote structure: ${arxivId}`)
+  const sourceIds = [textMacro.attr('id'), markMacro.attr('id'), note.attr('id')].filter(Boolean)
+  // The failed macro's numeric argument is an actual footnote marker, not
+  // part of the author name or the translatable explanatory sentence.
+  noteText.data = noteText.data.slice(1)
+  const noteMarker = $('<sup>').addClass('ltx_note_mark').text('1')
+  if (textMacro.attr('id')) noteMarker.attr('id', textMacro.attr('id'))
+  note.prepend(' ').prepend(noteMarker)
+  textMacro.remove()
+  const authorMarker = $('<sup>').addClass('ltx_note ltx_note_mark')
+  if (markMacro.attr('id')) authorMarker.attr('id', markMacro.attr('id'))
+  authorMarker.append($('<a>').attr('href', `#${note.attr('id')}`).text('1'))
+  markMacro.replaceWith(authorMarker)
+  markText.data = markText.data.slice(1)
+  return { method: 'repair-observed-latexml-author-footnote', sourceIds }
+}
+
+const gemma2HeaderRepairs = [
+  { id: 'S8.T21', headerRows: 9, dataRows: 3, columns: 5, pdfPage: 12,
+    macroCells: [[0, 1], [2, 1], [4, 1], [6, 1]],
+    rows: [['', 'Challenges', '', '', ''], ['passed', '', '', '', ''], ['end-to-end', 'Challenges', '', '', ''],
+      ['with success on', '', '', '', ''], ['all milestones', 'Total successful', '', '', ''],
+      ['milestones over', '', '', '', ''], ['all challenges', 'Expert bits', '', '', ''],
+      ['required to', '', '', '', ''], ['solve all tasks', '', '', '', '']],
+    pieces: [[], [[0, 1], [1, 0], [2, 0]], [[2, 1], [3, 0], [4, 0]], [[4, 1], [5, 0], [6, 0]], [[6, 1], [7, 0], [8, 0]]] },
+  { id: 'S8.T22', headerRows: 4, dataRows: 4, columns: 8, pdfPage: 13,
+    macroCells: [[0, 1], [1, 1], [2, 5]],
+    rows: [['', 'Personal', '', '', '', '', '', ''], ['connection', 'Speak', '', '', '', '', '', ''],
+      ['again', 'Funny', 'Interesting', 'Kind', 'Trustworthy', 'Good', '', ''], ['listener', '', '', '', '', '', '', '']],
+    pieces: [[], [[0, 1], [1, 0]], [[1, 1], [2, 0]], [[2, 1]], [[2, 2]], [[2, 3]], [[2, 4]], [[2, 5], [3, 0]]] },
+]
+
+function repairGemma2TableHeaders($, article, arxivId) {
+  if (arxivId !== '2408.00118v3') return []
+  const repairs = []
+  for (const spec of gemma2HeaderRepairs) {
+    const figure = article.find('figure.ltx_table').filter((_, node) => $(node).attr('id') === spec.id)
+    const table = figure.children('table'), rows = table.children('tbody').children('tr')
+    const macros = table.find('span.ltx_ERROR').filter((_, node) => $(node).text() === '\\CellWithForceBreak')
+    if (!macros.length) continue
+    const headerRows = rows.slice(0, spec.headerRows)
+    const macroCells = headerRows.toArray().flatMap((row, rowNumber) => $(row).children('td').toArray().flatMap((cell, columnNumber) => {
+      const count = $(cell).find('span.ltx_ERROR').filter((_, node) => $(node).text() === '\\CellWithForceBreak').length
+      return Array.from({ length: count }, () => [rowNumber, columnNumber])
+    }))
+    const values = headerRows.toArray().map(row => $(row).children('td').toArray().map(cell => {
+      const copy = $(cell).clone(); copy.find('span.ltx_ERROR').filter((_, node) => $(node).text() === '\\CellWithForceBreak').remove()
+      return copy.text().replace(/\s+/g, ' ').trim()
+    }))
+    if (figure.length !== 1 || table.length !== 1 || rows.length !== spec.headerRows + spec.dataRows
+      || macros.length !== spec.macroCells.length || JSON.stringify(macroCells) !== JSON.stringify(spec.macroCells)
+      || JSON.stringify(values) !== JSON.stringify(spec.rows)
+      || rows.toArray().some(row => $(row).children('td').length !== spec.columns)) {
+      throw new Error(`Unrecognized Gemma 2 table-header structure: ${spec.id}`)
+    }
+    const sourceIds = headerRows.find('[id]').add(headerRows).map((_, node) => $(node).attr('id')).get()
+    const rebuilt = $('<tr>').attr({ ...headerRows[0].attribs })
+    const cells = spec.pieces.map((pieces, column) => {
+      const original = $(headerRows[0]).children('td').eq(column)
+      const cell = $('<th>').attr({ ...original[0].attribs })
+      for (const [index, [rowNumber, columnNumber]] of pieces.entries()) {
+        if (index) cell.append(' <br>')
+        const fragment = $(headerRows[rowNumber]).children('td').eq(columnNumber).clone()
+        fragment.find('span.ltx_ERROR').filter((_, node) => $(node).text() === '\\CellWithForceBreak').text('').removeAttr('class')
+        const wrapper = $('<span>').append(fragment.contents())
+        if (fragment.attr('id') && fragment.attr('id') !== cell.attr('id')) wrapper.attr('id', fragment.attr('id'))
+        cell.append(wrapper)
+      }
+      rebuilt.append(cell)
+      return cell
+    })
+    // Empty cells and surplus source rows still have addressable IDs. Keep
+    // them as empty anchors in the blank model header; no old ID is lost.
+    const retained = new Set(rebuilt.find('[id]').add(rebuilt).map((_, node) => $(node).attr('id')).get())
+    for (const sourceId of sourceIds) if (!retained.has(sourceId)) {
+      cells[0].append($('<span>').attr('id', sourceId))
+      retained.add(sourceId)
+    }
+    headerRows.first().before(rebuilt)
+    headerRows.remove()
+    repairs.push({ method: 'rebuild-observed-latexml-table-header', sourceId: spec.id,
+      referenceUrl: `https://arxiv.org/pdf/${arxivId}#page=${spec.pdfPage}`, referencePdfPage: spec.pdfPage,
+      headerRowsBefore: spec.headerRows, headerRowsAfter: 1, dataRows: spec.dataRows, columns: spec.columns })
+  }
+  return repairs
+}
+
 export function parsePaper(html, { id, arxivId, htmlUrl, fetchedAt = new Date().toISOString() }) {
   const $ = load(html)
   const article = $('article.ltx_document').first()
   if (!article.length) throw new Error('Source does not contain an arXiv LaTeXML article; no substitute was imported.')
   const title = article.find('h1.ltx_title_document').first().text().trim()
   if (!title) throw new Error('The arXiv article has no title.')
+  const repairs = []
+  if (observedGemmaVersions.has(arxivId) && /^Gemma(?:\b|:)/.test(title)) {
+    const footnoteRepair = repairGemmaAuthorFootnote($, article, arxivId)
+    if (footnoteRepair) repairs.push(footnoteRepair)
+    repairs.push(...repairGemma2TableHeaders($, article, arxivId))
+  }
   const authorCredits = article.find('.ltx_personname').map((_, node) => {
     const copy = $(node).clone(); copy.find('.ltx_note').remove(); return copy.text().trim()
   }).get()
@@ -178,7 +282,7 @@ export function parsePaper(html, { id, arxivId, htmlUrl, fetchedAt = new Date().
     year: yearCode + (yearCode >= 91 ? 1900 : 2000),
     tags: mergePaperTags(id, id === 'attention-is-all-you-need' ? ['Transformer', '注意力机制', '机器翻译'] : /^Qwen/.test(title) ? ['Qwen', /-VL\b/i.test(title) ? '视觉语言模型' : '大语言模型'] : []),
     abstract: article.find('.ltx_abstract p').text().replace(/\s+/g, ' ').trim(), abstractZh: null,
-    source: { kind: 'arxiv', url: `https://arxiv.org/abs/${arxivId}`, htmlUrl, fetchedAt, sha256: sha256(html), license: sourceLicense.text().replace('License:', '').trim() || null, licenseUrl: sourceLicense.attr('href') || null },
+    source: { kind: 'arxiv', url: `https://arxiv.org/abs/${arxivId}`, htmlUrl, fetchedAt, sha256: sha256(html), license: sourceLicense.text().replace('License:', '').trim() || null, licenseUrl: sourceLicense.attr('href') || null, ...(repairs.length ? { repairs } : {}) },
     translation: { status: 'pending', model: null, coverage: { complete: 0, total: blocks.length }, humanReviewed: false },
     sections, blocks,
     statistics: { blockCount: blocks.length, sectionCount: sections.length, wordCount: article.text().split(/\s+/).length },
@@ -245,11 +349,33 @@ const legacyModelPattern = /\b(?:Qwen\d+(?:\.\d+)*(?:[-_][A-Za-z0-9.]+)*|(?:GPT|
 // decimal versions and full checkpoint suffixes together; an embedded V3 or K2
 // numeral is otherwise invisible to the ordinary numeric-token guard.
 const reportModelFamilies = String.raw`(?:DeepSeek[-_ ]?[VR]\d+(?:\.\d+)*(?:[-_][A-Za-z0-9.]+)*|Kimi[-_ ]?K\d+(?:\.\d+)*(?:[-_][A-Za-z0-9.]+)*|MiniMax[-_ ]?M\d+(?:\.\d+)*(?:[-_][A-Za-z0-9.]+)*|K(?:1\.5|2(?:\.[56])?|3)(?:[-_][A-Za-z0-9.]+)*(?!\.\d))`
-const modelPattern = new RegExp(String.raw`\b${reportModelFamilies}\b|${legacyModelPattern.source}`, 'gi')
+// Gemini 1.0/1.5/2.5 reports use space-separated names, short versioned
+// aliases, and complete API checkpoint names (including Flash-8B / Flash-Lite).
+// A space may introduce only a known model tier, never arbitrary prose.
+const geminiTier = String.raw`(?:Flash(?:[-_]Lite)?|Pro|Ultra|Nano)`
+const geminiVersion = String.raw`\d+(?:\.(?:\d+|X))*`
+const geminiModelFamilies = String.raw`(?:Gemini(?:[-_\s]?${geminiVersion}(?:[-_\s]${geminiTier})?|[-_\s]${geminiTier})(?:[-_][A-Za-z0-9.]+)*|(?:1\.0|1\.5|2\.0|2\.5)[-_\s]${geminiTier}(?:[-_][A-Za-z0-9.]+)*)`
+const gemmaSeparator = String.raw`(?:[-_]|\s+)`
+const gemmaSize = String.raw`(?:E\d+B|\d+(?:\.\d+)?B(?:-A\d+B)?)`
+const gemmaStage = String.raw`(?:IT|PT)`
+// Actual reports use both size-first and stage-first names. Permit at most
+// one of each space-separated suffix, so adjacent table scores stay separate.
+const gemmaModelFamilies = String.raw`Gemma${gemmaSeparator}?(?:${gemmaSize}(?:${gemmaSeparator}${gemmaStage})?|\d+(?:\.\d+)*n?(?:${gemmaSeparator}${gemmaSize}(?:${gemmaSeparator}${gemmaStage})?|${gemmaSeparator}${gemmaStage}(?:${gemmaSeparator}${gemmaSize})?)?|${gemmaStage}(?:${gemmaSeparator}${gemmaSize})?)(?:[-_][A-Za-z0-9.]+)*`
+const modelPattern = new RegExp(String.raw`\b${gemmaModelFamilies}\b|\b${geminiModelFamilies}\b|\b${reportModelFamilies}\b|${legacyModelPattern.source}`, 'gi')
+// These report tables split brand, tier and training stage into separate
+// text nodes (including Gemma 2 Table 17's PT / IT headings). Protect exact
+// labels without locking "it", "IT infrastructure", or "flash memory" prose.
+const isolatedModelLabel = /^(?:Gemini|Gemma|Ultra|Pro|Flash(?:-Lite)?|Nano(?:-\d+)?|PT|IT)$/
 
 // Prose en/em dashes separate words; true identifier hyphens remain hyphens.
 const identifierText = (text) => text.normalize('NFKC').replace(/[\u2013\u2014\u2015]/g, ' ').replace(/[\u2010\u2011]/g, '-')
-export const technicalIdentifiers = (text) => (identifierText(text).match(modelPattern) || []).map(value => value.replace(/-(?:level|scale|sized|based|like)$/i, ''))
+export const technicalIdentifiers = (text) => {
+  const normalized = identifierText(text)
+  const identifiers = (normalized.match(modelPattern) || []).map(value => value.replace(/-(?:level|scale|sized|based|like)$/i, ''))
+  const label = normalized.trim()
+  if (!identifiers.length && isolatedModelLabel.test(label)) identifiers.push(label)
+  return identifiers
+}
 
 const benchmarkLanguageCodes = new Set('af ar az be bg bn ca cs cy da de el en es et eu fa fi fr gu he hi hr hu hy id it ja ka kk kn ko lt lv mk ml mr ms ne nl no pa pl pt ro ru sk sl so sq sr sv sw ta te th tl tr uk ur uz vi zh zh-Hans zh-Hant'.split(' '))
 // Exact language/script labels observed in the report's Table 36. This is a
@@ -265,6 +391,7 @@ function isBenchmarkLanguageList(text) {
 }
 
 export function isTechnicalLabelOnly(text) {
+  if (isolatedModelLabel.test(identifierText(text).trim())) return true
   if (isBenchmarkLanguageList(text) || isIsoBenchmarkLanguageList(text)) return true
   const residual = identifierText(text).replace(/(?<![A-Za-z0-9_])(?:C\+\+|C#|Python|JAVA|PHP|TypeScript|Bash|JavaScript|CoT|\d+-shot|MBPP-\d+shot)(?![A-Za-z0-9_])/gi, '').replace(modelPattern, '')
   return /[A-Za-z]/.test(text) && !/[A-Za-z\u3400-\u9fff]/.test(residual)
@@ -287,9 +414,12 @@ function calendarDates(text) {
     if (value === ' ') dates[dates.length - 1] += suffix
     return value
   }
-  let clean = text
+  // Version numbers belong to model identifiers. In prose such as
+  // "Gemma 2 may be used", "2 may" is not the calendar date 2 May.
+  // Identifiers are checked separately before calendar normalization.
+  let clean = text.replace(new RegExp(`(?:${modelPattern.source})[\\u2013\\u2014\\u2015]`, 'gi'), ' ').replace(modelPattern, ' ')
     .replace(new RegExp(`\\b(${monthPattern})\\s+((?:19|20)\\d{2})([a-z])\\b`, 'g'), (whole, month, year, suffix) => bibliographyDate(whole, year, monthNumber(month), suffix))
-    .replace(/\b((?:19|20)\d{2})([a-z])\s*年\s*(\d{1,2})\s*月(?!\s*\d)/g, (whole, year, suffix, month) => bibliographyDate(whole, year, month, suffix))
+    .replace(/\b((?:19|20)\d{2})([a-z])\s*年\s*(\d{1,2})\s*月(?!\s*\d{1,2}\s*[日号])/g, (whole, year, suffix, month) => bibliographyDate(whole, year, month, suffix))
     .replace(/\b((?:19|20)\d{2})\s*年\s*(\d{1,2})\s*月([a-z])\b/g, (whole, year, month, suffix) => bibliographyDate(whole, year, month, suffix))
     .replace(new RegExp(`\\b(${monthPattern})\\s+(\\d{1,2})(?:st|nd|rd|th)?[,]?\\s+((?:19|20)\\d{2})\\b`, 'gi'), (whole, month, day, year) => replace(whole, year, monthNumber(month), day))
     .replace(new RegExp(`\\b(\\d{1,2})(?:st|nd|rd|th)?\\s+(${monthPattern})[,]?\\s+((?:19|20)\\d{2})\\b`, 'gi'), (whole, day, month, year) => replace(whole, year, monthNumber(month), day))
@@ -297,7 +427,10 @@ function calendarDates(text) {
     .replace(/\b((?:19|20)\d{2})[-/](\d{1,2})[-/](\d{1,2})\b/g, replace)
   clean = clean
     .replace(new RegExp(`\\b(${monthPattern})\\s+((?:19|20)\\d{2})\\b`, 'gi'), (whole, month, year) => replace(whole, year, monthNumber(month)))
-    .replace(/\b((?:19|20)\d{2})\s*年\s*(\d{1,2})\s*月(?!\s*\d)/g, (whole, year, month) => replace(whole, year, month))
+    // Flattened table cells can put the next year or a score immediately
+    // after a complete year/month. Only an explicit day suffix extends it
+    // into a full date; unrelated following numbers retain their own guards.
+    .replace(/\b((?:19|20)\d{2})\s*年\s*(\d{1,2})\s*月(?!\s*\d{1,2}\s*[日号])/g, (whole, year, month) => replace(whole, year, month))
   // Month/day dates have no implied year. Keep them in a separate canonical
   // namespace, and handle full dates first so a year can never be discarded.
   const yearlessDate = (whole, month, day) => {

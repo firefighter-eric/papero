@@ -19,7 +19,7 @@ const EMPTY_METRICS: ScrollMetrics = { position: 0, viewport: 0, total: 0, track
 /** A visible control for the native scrolling viewport, including on macOS overlay-scrollbar settings. */
 export function ScrollRail({ getPane, controls, label }: Props) {
   const rail = useRef<HTMLDivElement>(null)
-  const drag = useRef<{ pointerId: number; y: number; position: number } | null>(null)
+  const drag = useRef<{ pointerId: number; y: number; lastY: number; position: number } | null>(null)
   const [metrics, setMetrics] = useState(EMPTY_METRICS)
   const [dragging, setDragging] = useState(false)
   const maximum = Math.max(0, metrics.total - metrics.viewport)
@@ -28,6 +28,16 @@ export function ScrollRail({ getPane, controls, label }: Props) {
   const thumbTop = maximum > 0 ? Math.max(0, Math.min(travel, metrics.position / maximum * travel)) : 0
   const scrollable = maximum > 1 && travel > 0
   const percent = maximum ? Math.round(metrics.position / maximum * 100) : 0
+
+  useLayoutEffect(() => {
+    const current = drag.current
+    const pane = getPane()
+    if (current && pane) {
+      // Header folding changes the track length during a drag; continue from the current pointer and anchor.
+      current.y = current.lastY
+      current.position = pane.scrollTop
+    }
+  }, [metrics.viewport, metrics.total, metrics.track, getPane])
 
   useLayoutEffect(() => {
     const pane = getPane()
@@ -66,7 +76,7 @@ export function ScrollRail({ getPane, controls, label }: Props) {
       const offset = event.clientY - event.currentTarget.getBoundingClientRect().top - thumbHeight / 2
       pane.scrollTop = Math.max(0, Math.min(travel, offset)) / travel * maximum
     }
-    drag.current = { pointerId: event.pointerId, y: event.clientY, position: pane.scrollTop }
+    drag.current = { pointerId: event.pointerId, y: event.clientY, lastY: event.clientY, position: pane.scrollTop }
     event.currentTarget.setPointerCapture(event.pointerId)
     setDragging(true)
   }
@@ -75,6 +85,7 @@ export function ScrollRail({ getPane, controls, label }: Props) {
     const pane = getPane()
     const current = drag.current
     if (!pane || !current || current.pointerId !== event.pointerId || !travel) return
+    current.lastY = event.clientY
     pane.scrollTop = Math.max(0, Math.min(maximum, current.position + (event.clientY - current.y) / travel * maximum))
   }
 

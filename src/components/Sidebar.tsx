@@ -1,4 +1,4 @@
-import { BookOpen, Database, Search, X } from 'lucide-react'
+import { Database, Search, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import type { CatalogPaper, PaperSection } from '../types'
 import { PaperTags } from './PaperTags'
@@ -53,7 +53,7 @@ export function Sidebar({ papers, selectedId, sections, activeSection, mobile, o
       aria-label="论文库与本文目录" aria-hidden={mobile && !open ? true : undefined}
       role={mobile ? 'dialog' : undefined} aria-modal={mobile && open ? true : undefined} onKeyDown={onKeyDown}>
       <div className="brand-row">
-        <div className="brand"><BookOpen size={34} strokeWidth={1.5} aria-hidden="true" /><span>papero</span></div>
+        <div className="brand"><span className="brand-mark" aria-hidden="true" /><span className="brand-wordmark">papero</span></div>
         {mobile && <button className="icon-button drawer-close" onClick={onClose} aria-label="关闭论文库"><X size={21} /></button>}
       </div>
       <p className="brand-caption">论文阅读，让理解更近一步</p>

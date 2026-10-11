@@ -20,8 +20,20 @@
 | Kimi K2.5 | Kimi、预训练、后训练 | [2602.02276v2](https://arxiv.org/html/2602.02276v2)：§2 预训练；§4.4 后训练。 |
 | Kimi K3 | Kimi、预训练、后训练 | [2607.24653v2](https://arxiv.org/html/2607.24653v2)：§3 预训练；§4 后训练。 |
 | MiniMax Sparse Attention | MiniMax、模型架构、预训练 | [2606.13392v2](https://arxiv.org/html/2606.13392v2)：§5 PT / CPT 实验；§7 中 RL 为未来工作，不标后训练。原题和 M3 关联架构论文身份继续保留。 |
+| Gemini 1.0 | Gemini、预训练、后训练 | [2312.11805v5](https://arxiv.org/html/2312.11805v5)：§4 预训练数据；§6 后训练模型。 |
+| Gemini 1.5 | Gemini、预训练、后训练 | [2403.05530v5](https://arxiv.org/html/2403.05530v5)：§4 训练与数据；§9.3.1 预训练、§9.3.2 监督微调。 |
+| Gemini 2.5 | Gemini、预训练、后训练 | [2507.06261v6](https://arxiv.org/html/2507.06261v6)：§2 模型训练与数据；§2.4 后训练。报告同时介绍 Gemini 2.0，不重复收录同一报告。 |
+| Gemma 1 | Gemma、预训练、后训练 | [2403.08295v4](https://arxiv.org/html/2403.08295v4)：§4 预训练；§5 指令微调。 |
+| Gemma 2 | Gemma、预训练、后训练 | [2408.00118v3](https://arxiv.org/html/2408.00118v3)：§3 预训练；§4 后训练。 |
+| Gemma 3 | Gemma、预训练、后训练 | [2503.19786v1](https://arxiv.org/html/2503.19786v1)：§2.2 预训练；§3 指令微调。 |
+| Gemma 4 | Gemma、预训练、后训练 | [2607.02770v2](https://arxiv.org/html/2607.02770v2)：§2.4 预训练；§3 指令微调。 |
+| Training Compute-Optimal Large Language Models（Chinchilla） | Chinchilla、预训练、缩放定律 | [2203.15556v1](https://arxiv.org/html/2203.15556v1)：§1 建模最终预训练损失；§3 估计固定计算预算下参数量与训练 token 的最优分配及缩放关系；§4–4.1 介绍 Chinchilla 的训练。[DeepMind 官方说明](https://deepmind.google/blog/an-empirical-analysis-of-compute-optimal-large-language-model-training/)确认模型与计算最优缩放研究的关联。 |
 
 Attention 的监督机器翻译训练没有沿用当前大语言模型的预训练／后训练阶段划分，因此使用监督训练标签。
+
+Gemini 与 Gemma 是独立系列，家族筛选只读取显式标签。Gemma 1 的标题含有 Gemini，不会因此归入 Gemini；搜索 Google／谷歌可同时找到两个系列。
+
+Chinchilla 也是独立系列，仅为 `chinchilla-training-compute-optimal` 显式登记“Chinchilla、预训练、缩放定律”。原论文标题不含 Chinchilla，仍可通过系列标签搜索；Chillchila 是用户输入的检索别名，DeepMind／Google／谷歌是来源机构的检索别名，不改变原题或作者。其他论文引用 Chinchilla 或讨论缩放关系，不会因此自动获得该系列或研究标签。缩放定律可作为研究类别筛选；与预训练组合时，可选择预训练类别并搜索“缩放定律”或“scaling laws”。论文提到下游微调成本，不据此添加后训练标签。
 
 ## 导入与发布
 

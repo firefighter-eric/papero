@@ -3,6 +3,7 @@ import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { load } from 'cheerio'
 import { inspectPublicData } from './prepare-data.mjs'
+import { assertCodexFallbackReceipt } from './apply-codex-translations.mjs'
 import { assertTranslationFidelity, catalogEntry, sanitizeHtml, sanitizeSvg, sha256, translationUnits, validArxivId, visibleProseText, scientificSignature } from './paper-lib.mjs'
 
 const fingerprint = value => typeof value === 'string' && /^[a-f0-9]{64}$/.test(value)
@@ -114,11 +115,13 @@ function assertSource(paper) {
     if (paper.arxivId !== null || source.url !== 'https://qwen.ai/blog?id=qwen3.5' || source.htmlUrl !== source.url
       || source.payloadUrl !== 'https://qwen.ai/api/v2/article/?language=en-US&path=qwen3.5&type=qwen_ai'
       || !timestamp(source.publishedAt) || source.language !== 'en-US') throw new Error(`Invalid official article provenance: ${paper.id}.`)
+
   } else throw new Error(`Unsupported release source kind: ${kind}.`)
 }
 
 function assertTranslationMetadata(paper) {
   const t = paper.translation
+  const codexFallback = assertCodexFallbackReceipt(paper)
   if (t?.status !== 'machine' || !nonempty(paper.titleZh) || t.coverage?.complete !== paper.blocks.length || t.coverage?.total !== paper.blocks.length
     || paper.blocks.some(block => !nonempty(block.zh))) throw new Error(`Release translation incomplete: ${paper.id}.`)
   if (t.humanReviewed !== false) throw new Error(`Machine translation must remain marked humanReviewed=false: ${paper.id}.`)
@@ -129,7 +132,7 @@ function assertTranslationMetadata(paper) {
 
   // A declared history cannot supply API counters that Codex subagent runs do not expose.
   const codexHistory = Array.isArray(t.modelHistory) ? t.modelHistory.filter(run => run?.provider === 'Codex subagent') : []
-  if (((t.provider === 'Codex subagent' || codexHistory.length) && (t.usage !== undefined || t.usageByModel !== undefined))
+  if ((!codexFallback && (t.provider === 'Codex subagent' || codexHistory.length) && (t.usage !== undefined || t.usageByModel !== undefined))
     || codexHistory.some(run => run.usage !== undefined || run.usageByModel !== undefined)) {
     throw new Error(`Codex translation cannot claim unobserved API token usage: ${paper.id}.`)
   }
@@ -143,9 +146,16 @@ function assertTranslationMetadata(paper) {
   }
   const models = new Set(t.modelsUsed)
   const exactKeys = object => Object.keys(object).length === models.size && Object.keys(object).every(model => models.has(model))
-  if (!exactKeys(t.modelIdentities) || !exactKeys(t.usageByModel)) throw new Error(`Model identity or usage keys disagree with declared models: ${paper.id}.`)
+  const usageModels = codexFallback
+    ? new Set(t.modelHistory.filter(run => run.provider !== 'Codex subagent').map(run => run.model))
+    : models
+  const exactUsageKeys = Object.keys(t.usageByModel).length === usageModels.size && Object.keys(t.usageByModel).every(model => usageModels.has(model))
+  if (!exactKeys(t.modelIdentities) || !exactUsageKeys) throw new Error(`Model identity or usage keys disagree with declared models: ${paper.id}.`)
   for (const model of models) {
     if (!validIdentity(t.modelIdentities[model], model)) throw new Error(`Invalid declared model identity: ${paper.id}/${model}.`)
+    // A validated continuation receipt freezes the observed local API counters.
+    // Codex subagent token usage remains unknown and has no invented zero entry.
+    if (codexFallback && !usageModels.has(model)) continue
     const usage = t.usageByModel[model]
     const usageKeys = new Set(['promptTokens', 'completionTokens', 'observedReasoningTokens', 'reasoningUsageResponses'])
     if (!record(usage) || !Number.isSafeInteger(usage.promptTokens) || !Number.isSafeInteger(usage.completionTokens)
@@ -234,6 +244,8 @@ export async function verifyReleaseData({ dataDir = 'paper-data', report = value
       if (metadata?.status === 'machine' && (metadata.provider === 'Codex subagent' || (!modelHistory && paper.translation.provider === 'Codex subagent'))) {
         if (metadata.provider !== 'Codex subagent' || !validProviderIdentity(metadata.modelIdentity, metadata.model, metadata.provider)
           || !validParameters(metadata.parameters, metadata.provider, metadata.model) || !validBudget(metadata.requestBudget, metadata.parameters)
+          || metadata.sourcePaperSha256 !== paper.source.sha256 || metadata.translatedSha256 !== sha256(block.zh)
+          || ['usage', 'usageByModel', 'requestBudget'].some(key => metadata[key] !== undefined)
           || (!modelHistory && metadata.promptSha256 !== paper.translation.promptSha256)
           || Date.parse(metadata.translatedAt) < Date.parse(paper.translation.createdAt)
           || Date.parse(metadata.translatedAt) > Date.parse(paper.translation.updatedAt)) {
