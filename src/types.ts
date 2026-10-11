@@ -10,6 +10,7 @@ export type PaperBlockKind =
   | 'reference'
   | 'list'
   | 'code'
+  | 'algorithm'
 
 interface CatalogPaperMetadata {
   id: string
@@ -108,6 +109,9 @@ export interface PaperSource {
   licenseUrl?: string | null
   payloadUrl?: string
   publishedAt?: string
+  publishedDatePrecision?: 'day'
+  author?: string
+  publisher?: string
   language?: string
   media?: { kind: 'video'; url: string; sourceId: string }[]
   format?: 'pdf'

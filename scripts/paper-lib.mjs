@@ -590,7 +590,7 @@ export function assertTranslationFidelity(source, translated) {
   }
   // Stage and Phase both translate as 阶段. An explicit shared label such as
   // "Phase 4 and 5" supplies two references, not an unrelated free score.
-  const expandStageLists = text => text.replace(/\b(Stage|Phase)\s+(\d+)((?:\s*(?:,\s*(?:and\s+)?|and\s+|&\s*)\d+\b)+)(?=\s*(?:[.,);:]|$))/gi,
+  const expandStageLists = text => text.replace(/\b(Stage|Phase)\s+(\d+)(?![\d.])((?:\s*(?:,\s*(?:and\s+)?|and\s+|&\s*)\d+\b(?!\.))+)(?=\s*(?:[.,);:]|$))/gi,
     (_, label, first, rest) => `${label} ${first} ${rest.replace(/\d+/g, value => `${label} ${value}`)}`)
   sourceNumericText = expandStageLists(sourceNumericText)
   targetNumericText = expandStageLists(targetNumericText)

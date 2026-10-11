@@ -130,3 +130,38 @@ test('reimport validates recovered SVG original bytes separately from sanitized 
   await assert.rejects(importArxiv(options), /sanitized SVG fingerprint mismatch/)
   assert.equal(requests, 3)
 })
+
+test('same-basename assets from different source URLs receive stable distinct files without changing scientific content', async t => {
+  const directory = await workspace(t)
+  const firstUrl = `${fixedVersion}/figures/imagenet/i1k.png`
+  const secondUrl = `${fixedVersion}/tables/i1k.png`
+  const firstBytes = Buffer.from('first image bytes')
+  const secondBytes = Buffer.from('second image bytes')
+  const html = `<div id="watermark-tr">arXiv:${fixedVersion}</div><article class="ltx_document"><h1 class="ltx_title ltx_title_document">Asset collision</h1><section id="S1"><h2 class="ltx_title">Results</h2><figure id="F1"><img src="${firstUrl}" alt="ImageNet results"><figcaption>First figure.</figcaption></figure><figure id="F2"><img src="${secondUrl}" alt="Table results"><figcaption>Second figure.</figcaption></figure><p>The model uses <math><mn>2</mn></math> settings.</p></section></article>`
+  const originalFetch = globalThis.fetch
+  globalThis.fetch = async value => {
+    const url = String(value)
+    if (url === `https://arxiv.org/html/${fixedVersion}`) return new Response(html, { headers: { 'content-type': 'text/html' } })
+    if (url === `https://arxiv.org/html/${firstUrl}`) return new Response(firstBytes)
+    if (url === `https://arxiv.org/html/${secondUrl}`) return new Response(secondBytes)
+    throw new Error(`Unexpected network request: ${url}`)
+  }
+  t.after(() => { globalThis.fetch = originalFetch })
+  const options = { dataDir: directory, id: 'asset-collision', arxivId: fixedVersion }
+  const imported = await importArxiv(options)
+  assert.equal(imported.assets.length, 2)
+  assert.notEqual(imported.assets[0].filename, imported.assets[1].filename)
+  assert.ok(imported.assets.every(asset => /^[a-zA-Z0-9._-]+$/.test(asset.filename)))
+  assert.deepEqual(imported.assets.map(asset => asset.sourceUrl), [
+    `https://arxiv.org/html/${firstUrl}`,
+    `https://arxiv.org/html/${secondUrl}`,
+  ])
+  assert.deepEqual(imported.assets.map(asset => asset.sha256), [sha256(firstBytes), sha256(secondBytes)])
+  assert.equal(imported.source.sha256, sha256(html))
+  assert.equal(imported.blocks.find(block => block.kind === 'paragraph').en, '<p>The model uses <math><mn>2</mn></math> settings.</p>')
+  assert.deepEqual(imported.blocks.filter(block => block.kind === 'figure').map(block => block.en.match(/<img[^>]+src="([^"]+)"/)?.[1]), imported.assets.map(asset => `assets/${asset.filename}`))
+  const firstNames = imported.assets.map(asset => asset.filename)
+  const again = await importArxiv(options)
+  assert.deepEqual(again.assets.map(asset => asset.filename), firstNames)
+  assert.deepEqual(again.assets.map(asset => asset.sha256), [sha256(firstBytes), sha256(secondBytes)])
+})

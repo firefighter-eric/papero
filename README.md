@@ -19,13 +19,22 @@ npm ci
 DATA_DIR=paper-data npm run dev
 ```
 
-阅读器通过 `/paper-data` 加载目录。全文条目的英文与中文正文分别保存为 `en.html` 和 `zh.html`，可以单独打开；公式使用原生 MathML，图表与正文放在一起。小型 `paper.json` 只保存标题、目录、段落定位和来源记录，不保存正文字符串。阅读器按相同段落标记对齐两份 HTML。仅来源条目提供官方原文与摘要页链接，不加载正文。
+阅读器通过 `/paper-data` 加载目录。全文条目的英文与中文正文分别保存为 `en.html` 和 `zh.html`，可以单独打开；公式优先使用原生 MathML；Adam v9 的 PDF 数学表达使用原始字形矢量，图表与正文放在一起。小型 `paper.json` 只保存标题、目录、段落定位和来源记录，不保存正文字符串。阅读器按相同段落标记对齐两份 HTML。仅来源条目提供官方原文与摘要页链接，不加载正文。
 
-公开处理库 `paper-data/` 包含 **42 个中英全文条目**（41 篇论文及 Qwen3.5 官方文章），共 **16685 个对齐内容块、1032 个正文素材、1159 个处理后文件**。这次按用户明确要求，等新增二十篇完整翻译后一次发布；原有二十二个条目的 386 个正文、元数据和素材文件保持 SHA-256 一致。
+公开处理库 `paper-data/` 包含 **54 个中英全文条目**（52 篇论文、Qwen3.5 官方文章及 Muon 作者文章），共 **19272 个对齐内容块、1561 个正文素材、1724 个处理后文件**。本轮按用户明确发布要求加入十二个优化器条目；原有四十二个条目的 1158 个正文、元数据和素材文件保持 SHA-256 一致，公共目录更新为 54 项。
 
-已有报告涵盖 Attention、Qwen、DeepSeek、Kimi、MiniMax、Gemini、Gemma 和 Chinchilla。新增二十篇包括 Llama 1／2／3、OLMo 2／3、FineWeb、DataComp-LM、DoReMi、Scaling Laws、DeepSeekMoE、DeepSeek LLM、μP、GPT-2／3、BERT、T5、RefinedWeb、Dolma、Switch Transformers 和 CLIP。固定版本、来源及各系列记录见 [论文来源](docs/paper-sources.md)。Qwen3.5 明确标注为官方文章；GPT-2 来自官方 PDF，转换为完整英文 HTML 后翻译，标注为官方论文。
+已有报告涵盖 Attention、Qwen、DeepSeek、Kimi、MiniMax、Gemini、Gemma 和 Chinchilla。上一轮预训练扩展包括 Llama 1／2／3、OLMo 2／3、FineWeb、DataComp-LM、DoReMi、Scaling Laws、DeepSeekMoE、DeepSeek LLM、μP、GPT-2／3、BERT、T5、RefinedWeb、Dolma、Switch Transformers 和 CLIP。固定版本、来源及各系列记录见 [论文来源](docs/paper-sources.md)。Qwen3.5 明确标注为官方文章；GPT-2 来自官方 PDF，转换为完整英文 HTML 后翻译，标注为官方论文。
 
 新增论文保留已验收的本机 Qwen3.6 35B A3B 译文，缺失部分由实际 GPT-6 Luna（低思考）任务补齐；每块记录实际贡献及来源指纹。Llama 3、OLMo 3、μP 和 GPT-2 使用 Luna；Llama 1 和 Scaling Laws 使用 Qwen 并保留定向辅助修正记录；其余新增论文逐块记录两个模型的贡献。全部译文标记为机器翻译、`humanReviewed: false`，未经全篇人工审校。有限抽查发现的限定词遗漏、数值和公式衔接问题已经定向修正。
+
+本轮新增 12 个优化器条目（11 篇论文及 Muon 作者文章），包括 AdamW、Adam、Muon、Shampoo、SOAP、Adafactor、Lion、Dion，以及矩阵优化理论与对照实验。新增“优化器”“矩阵优化”“显存优化”“分布式训练”标签，并支持算法系列组合筛选；完整来源、固定版本、翻译和 Adam PDF 公式处理说明见 [优化器收录记录](docs/optimizer-papers.md)。所有条目均完成英文和中文 HTML，按用户本次“发布”授权加入公共库。
+
+将完整本地工作库导出为独立 HTML 并预览：
+
+```sh
+node scripts/prepare-data.mjs --include --data-dir data --out-dir .cache/local-library
+DATA_DIR=.cache/local-library/paper-data npm run dev
+```
 
 Kimi 三篇中文全文的公开依据是用户于 2026-10-11 确认已获得作者授权；原许可标注及具体记录保留在 [来源记录](docs/paper-sources.md)。
 
@@ -45,6 +54,8 @@ python scripts/convert-pdf.py --pdf data/imports/gpt-2/source.pdf \
   --out-dir data/imports/gpt-2/converted
 npm run paper:import-pdf -- --help
 ```
+
+Adam v9 配方为 `paper-metadata/pdf-recipes/adam-stochastic-optimization.json`。该固定版本的官方 HTML 转换失败，arXiv 源码包仅是 PDF 包装器，未包含数学 TeX。配方启用 `original-pdf-vectors`：通过已安装的 `pdftocairo` 保留数学字形与分式线条，正文、算法说明和引用仍为可翻译的语义 HTML；需要时通过 `PDFTOCAIRO` 指定工具路径。长公式保留字号并允许横向滚动。这一回退不提供 MathML 的公式语义或公式文本检索。
 
 PDF 导入器需要转换目录、原始 PDF、布局配方和来源身份元数据；核对 PDF／HTML／素材指纹、所有来源页和字符覆盖后才注册。随后使用相同翻译及 HTML 导出流程。原 PDF、模型响应和转换中间结果保留在本地工作目录。
 
@@ -150,7 +161,7 @@ DATA_DIR=.cache/local-library/paper-data npm run dev
 npm run paper:verify -- --strict-translation --require-data
 ```
 
-该命令生成 `.cache/local-library/paper-data/`，不会上传或更新公开库。公共库使用显式审查的目录，本次公开快照包含 42 个全文条目。添加论文、修改界面和构建本地库不等于发布授权；只有用户明确要求发布时才推送 GitHub 或部署 Vercel。用于组装的公共元数据暂存目录属于被忽略的临时材料，不是自动发布本地全文的通道。校验处理后快照再构建：
+该命令生成 `.cache/local-library/paper-data/`，不会上传或更新公开库。公共库使用显式审查的目录，本次公开快照包含 54 个全文条目。添加论文、修改界面和构建本地库不等于发布授权；只有用户明确要求发布时才推送 GitHub 或部署 Vercel。用于组装的公共元数据暂存目录属于被忽略的临时材料，不是自动发布本地全文的通道。校验处理后快照再构建：
 
 ```sh
 node scripts/verify-release-data.mjs --data-dir paper-data

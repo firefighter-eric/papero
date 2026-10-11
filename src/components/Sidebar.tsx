@@ -5,6 +5,7 @@ import { PaperTags } from './PaperTags'
 import { matchesPaperFilters, PAPER_FAMILIES, RESEARCH_TAGS, tagLabel } from '../lib/paper-tags'
 import { useNavigationDrawer } from '../hooks/useNavigationDrawer'
 import { shortPaperAuthors } from '../lib/paper-bibliography'
+import { paperSourceName } from '../lib/paper-source'
 
 interface Props {
   papers: CatalogPaper[]
@@ -84,7 +85,7 @@ export function Sidebar({ papers, selectedId, mobile, open, collapsed, remoteDat
             onClick={() => { onSelect(paper.id); if (mobile) onClose() }}>
             <span className="paper-card-title">{paper.title}</span>
             {paper.titleZh && <span className="paper-card-title-zh" lang="zh-CN">{paper.titleZh}</span>}
-            <span className="paper-card-meta">{paper.arxivId === null && <>{paper.sourceKind === 'official-paper' ? '官方论文' : '官方文章'}<span aria-hidden="true"> · </span></>}
+            <span className="paper-card-meta">{paper.arxivId === null && <>{paperSourceName(paper)}<span aria-hidden="true"> · </span></>}
               {shortPaperAuthors(paper)}<span aria-hidden="true"> · </span>{paper.year}
               {paper.access === 'source-only' && <><span aria-hidden="true"> · </span>来源条目</>}</span>
             <PaperTags tags={paper.tags} compact />

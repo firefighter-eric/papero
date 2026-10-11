@@ -582,6 +582,13 @@ test('explicit Stage and Phase references retain quantities across translated ta
   assert.throws(() => assertTranslationFidelity('Stage 2 has 5 layers.', '阶段5有2层。'), /Stage reference/)
 })
 
+test('a score following a shared Stage list cannot become an invented fractional stage', () => {
+  const source = 'The value is 0.9 for stage 1 and 2, and 0.0 for stage 3.'
+  assert.doesNotThrow(() => assertTranslationFidelity(source, '阶段1和阶段2的值为0.9，阶段3的值为0.0。'))
+  assert.throws(() => assertTranslationFidelity(source, '阶段1和阶段2的值为0.9，阶段0的值为0.0。'), /Stage reference/)
+  assert.throws(() => assertTranslationFidelity(source, '阶段1和阶段2的值为0.9，阶段3的值为0.1。'), /Numeric value/)
+})
+
 test('source listings are preserved and marker context has exact node boundaries and formulas', () => {
   const html = '<article class="ltx_document"><h1 class="ltx_title_document">Code example</h1><section id="S1"><h2>Code</h2><pre>model.generate(x)</pre><p>Even with <math alttext="k=n"><mi>k</mi><mo>=</mo><mi>n</mi></math> the score improves.</p></section></article>'
   const paper = parsePaper(html, { id: 'code', arxivId: '2505.09388v1' })

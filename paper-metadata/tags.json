@@ -42,6 +42,18 @@
     "refinedweb-dataset": ["Falcon", "预训练", "预训练数据"],
     "dolma-pretraining-corpus": ["Dolma", "预训练", "预训练数据", "数据混合"],
     "switch-transformers": ["Switch Transformer", "模型架构", "预训练", "监督训练", "训练优化", "MoE"],
-    "clip-pretraining": ["CLIP", "预训练", "多模态", "对比学习"]
+    "clip-pretraining": ["CLIP", "预训练", "多模态", "对比学习"],
+    "adamw-decoupled-weight-decay": ["AdamW", "优化器", "训练优化"],
+    "muon-scalable-llm-training": ["Muon", "优化器", "训练优化", "预训练", "矩阵优化", "分布式训练"],
+    "muon-original-design": ["Muon", "优化器", "训练优化", "矩阵优化"],
+    "adam-stochastic-optimization": ["Adam", "优化器", "训练优化"],
+    "shampoo-tensor-optimization": ["Shampoo", "优化器", "训练优化", "矩阵优化"],
+    "soap-shampoo-adam": ["SOAP", "优化器", "训练优化", "预训练", "矩阵优化"],
+    "old-optimizer-new-norm": ["优化器", "训练优化", "矩阵优化"],
+    "soap-muon-pretraining-scales": ["SOAP", "Muon", "优化器", "训练优化", "预训练", "矩阵优化", "分布式训练"],
+    "polar-express-muon": ["Muon", "优化器", "训练优化", "矩阵优化"],
+    "adafactor-sublinear-memory": ["Adafactor", "优化器", "训练优化", "显存优化"],
+    "lion-symbolic-optimizer": ["Lion", "优化器", "训练优化", "显存优化"],
+    "dion-distributed-orthonormalized-updates": ["Dion", "优化器", "训练优化", "预训练", "矩阵优化", "显存优化", "分布式训练"]
   }
 }

@@ -9,5 +9,6 @@ if (registry.schemaVersion !== 1 || !registry.papers || typeof registry.papers !
 /** Merge evidenced classification labels with existing topic labels without changing the checkpoint. */
 export function mergePaperTags(id, existingTags = []) {
   const classification = Object.hasOwn(registry.papers, id) ? registry.papers[id] : []
-  return [...new Set([...classification, ...existingTags])]
+  const retained = id === 'muon-original-design' ? existingTags.filter(tag => tag !== '官方文章') : existingTags
+  return [...new Set([...classification, ...retained])]
 }

@@ -1,0 +1,759 @@
+{
+  "title": "Adam: A Method for Stochastic Optimization",
+  "pages": [
+    {
+      "page": 1,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            50,
+            595,
+            78
+          ],
+          "reason": "Repeated conference header"
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            755,
+            595,
+            790
+          ],
+          "reason": "Printed page number"
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            190,
+            55,
+            610
+          ],
+          "reason": "Vertical arXiv watermark; pinned identifier is preserved in paper metadata"
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            95,
+            105,
+            500,
+            140
+          ],
+          "reason": "Paper title is preserved in the document title and semantic h1"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            90,
+            140,
+            555,
+            195
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            90,
+            195,
+            555,
+            400
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            90,
+            400,
+            555,
+            755
+          ]
+        }
+      ]
+    },
+    {
+      "page": 2,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            50,
+            595,
+            78
+          ],
+          "reason": "Repeated conference header"
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            755,
+            595,
+            790
+          ],
+          "reason": "Printed page number"
+        },
+        {
+          "kind": "algorithm",
+          "caption": [
+            100,
+            112,
+            510,
+            176
+          ],
+          "bounds": [
+            100,
+            176,
+            510,
+            370
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            90,
+            370,
+            555,
+            755
+          ]
+        }
+      ]
+    },
+    {
+      "page": 3,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            50,
+            595,
+            78
+          ],
+          "reason": "Repeated conference header"
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            755,
+            595,
+            790
+          ],
+          "reason": "Printed page number"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            90,
+            80,
+            555,
+            755
+          ]
+        }
+      ]
+    },
+    {
+      "page": 4,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            50,
+            595,
+            78
+          ],
+          "reason": "Repeated conference header"
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            755,
+            595,
+            790
+          ],
+          "reason": "Printed page number"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            90,
+            80,
+            555,
+            755
+          ]
+        }
+      ]
+    },
+    {
+      "page": 5,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            50,
+            595,
+            78
+          ],
+          "reason": "Repeated conference header"
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            755,
+            595,
+            790
+          ],
+          "reason": "Printed page number"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            90,
+            80,
+            555,
+            755
+          ]
+        }
+      ]
+    },
+    {
+      "page": 6,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            50,
+            595,
+            78
+          ],
+          "reason": "Repeated conference header"
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            755,
+            595,
+            790
+          ],
+          "reason": "Printed page number"
+        },
+        {
+          "kind": "figure",
+          "number": 1,
+          "bounds": [
+            118,
+            100,
+            470,
+            275
+          ],
+          "caption": [
+            100,
+            282,
+            510,
+            311
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            90,
+            80,
+            555,
+            95
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            90,
+            311,
+            555,
+            755
+          ]
+        }
+      ]
+    },
+    {
+      "page": 7,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            50,
+            595,
+            78
+          ],
+          "reason": "Repeated conference header"
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            755,
+            595,
+            790
+          ],
+          "reason": "Printed page number"
+        },
+        {
+          "kind": "figure",
+          "number": 2,
+          "bounds": [
+            120,
+            95,
+            480,
+            286
+          ],
+          "caption": [
+            100,
+            291,
+            510,
+            329
+          ]
+        },
+        {
+          "kind": "figure",
+          "number": 3,
+          "bounds": [
+            120,
+            365,
+            480,
+            538
+          ],
+          "caption": [
+            100,
+            548,
+            510,
+            579
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            90,
+            80,
+            555,
+            95
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            90,
+            579,
+            555,
+            755
+          ]
+        }
+      ]
+    },
+    {
+      "page": 8,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            50,
+            595,
+            78
+          ],
+          "reason": "Repeated conference header"
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            755,
+            595,
+            790
+          ],
+          "reason": "Printed page number"
+        },
+        {
+          "kind": "figure",
+          "number": 4,
+          "bounds": [
+            100,
+            78,
+            490,
+            261
+          ],
+          "caption": [
+            100,
+            264,
+            510,
+            310
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            90,
+            310,
+            555,
+            755
+          ]
+        }
+      ]
+    },
+    {
+      "page": 9,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            50,
+            595,
+            78
+          ],
+          "reason": "Repeated conference header"
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            755,
+            595,
+            790
+          ],
+          "reason": "Printed page number"
+        },
+        {
+          "kind": "algorithm",
+          "caption": [
+            100,
+            115,
+            510,
+            164
+          ],
+          "bounds": [
+            100,
+            164,
+            510,
+            329
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            90,
+            329,
+            555,
+            755
+          ]
+        }
+      ]
+    },
+    {
+      "page": 10,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            50,
+            595,
+            78
+          ],
+          "reason": "Repeated conference header"
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            755,
+            595,
+            790
+          ],
+          "reason": "Printed page number"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            90,
+            80,
+            555,
+            300
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            90,
+            300,
+            555,
+            755
+          ],
+          "references": true
+        }
+      ]
+    },
+    {
+      "page": 11,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            50,
+            595,
+            78
+          ],
+          "reason": "Repeated conference header"
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            755,
+            595,
+            790
+          ],
+          "reason": "Printed page number"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            90,
+            80,
+            555,
+            755
+          ],
+          "references": true
+        }
+      ]
+    },
+    {
+      "page": 12,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            50,
+            595,
+            78
+          ],
+          "reason": "Repeated conference header"
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            755,
+            595,
+            790
+          ],
+          "reason": "Printed page number"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            90,
+            80,
+            555,
+            755
+          ]
+        }
+      ]
+    },
+    {
+      "page": 13,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            50,
+            595,
+            78
+          ],
+          "reason": "Repeated conference header"
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            755,
+            595,
+            790
+          ],
+          "reason": "Printed page number"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            90,
+            80,
+            555,
+            755
+          ]
+        }
+      ]
+    },
+    {
+      "page": 14,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            50,
+            595,
+            78
+          ],
+          "reason": "Repeated conference header"
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            755,
+            595,
+            790
+          ],
+          "reason": "Printed page number"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            90,
+            80,
+            555,
+            755
+          ]
+        }
+      ]
+    },
+    {
+      "page": 15,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            50,
+            595,
+            78
+          ],
+          "reason": "Repeated conference header"
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            755,
+            595,
+            790
+          ],
+          "reason": "Printed page number"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            90,
+            80,
+            555,
+            755
+          ]
+        }
+      ]
+    }
+  ],
+  "anchorTargets": {
+    "page.1": {
+      "sourceId": "pdf-p1-block-001",
+      "pdfPage": 1,
+      "textPrefix": "Diederik P. Kingma* Jimmy Lei Ba University o"
+    },
+    "page.2": {
+      "sourceId": "pdf-p2-block-008",
+      "pdfPage": 2,
+      "textPrefix": "Algorithm 1: Adam, our proposed algorithm for"
+    },
+    "page.3": {
+      "sourceId": "pdf-p3-block-016",
+      "pdfPage": 3,
+      "textPrefix": "otherwise. The first case only happens in the"
+    },
+    "page.4": {
+      "sourceId": "pdf-p4-block-026",
+      "pdfPage": 4,
+      "textPrefix": "4 CONVERGENCE ANALYSIS"
+    },
+    "page.5": {
+      "sourceId": "pdf-p5-block-038",
+      "pdfPage": 5,
+      "textPrefix": "from first-order information. The Sum-of-Func"
+    },
+    "page.6": {
+      "sourceId": "pdf-p6-block-051",
+      "pdfPage": 6,
+      "imageSrc": "assets/figure-1.png"
+    },
+    "page.7": {
+      "sourceId": "pdf-p7-block-059",
+      "pdfPage": 7,
+      "imageSrc": "assets/figure-2.png"
+    },
+    "page.8": {
+      "sourceId": "pdf-p8-block-063",
+      "pdfPage": 8,
+      "imageSrc": "assets/figure-4.png"
+    },
+    "page.9": {
+      "sourceId": "pdf-p9-block-072",
+      "pdfPage": 9,
+      "textPrefix": "Algorithm 2: AdaMax, a variant of Adam based "
+    },
+    "page.10": {
+      "sourceId": "pdf-p10-block-085",
+      "pdfPage": 10,
+      "textPrefix": "large datasets and/or high-dimensional parame"
+    },
+    "page.11": {
+      "sourceId": "pdf-p11-block-103",
+      "pdfPage": 11,
+      "textPrefix": "Roux, Nicolas L and Fitzgibbon, Andrew W. A f"
+    },
+    "page.12": {
+      "sourceId": "pdf-p12-block-112",
+      "pdfPage": 12,
+      "textPrefix": "10 APPENDIX"
+    },
+    "page.13": {
+      "sourceId": "pdf-p13-block-129",
+      "pdfPage": 13,
+      "textPrefix": "Lemma 10.4. Let  ,  . For ,  that satisfy  an"
+    },
+    "page.14": {
+      "sourceId": "pdf-p14-block-142",
+      "pdfPage": 14,
+      "imageSrc": "assets/math-p14-0314.svg"
+    },
+    "page.15": {
+      "sourceId": "pdf-p15-block-155",
+      "pdfPage": 15,
+      "textPrefix": "From the assumption, , , we have:"
+    },
+    "Doc-Start": {
+      "sourceId": "pdf-p1-block-001",
+      "pdfPage": 1,
+      "textPrefix": "Diederik P. Kingma* Jimmy Lei Ba University o"
+    }
+  },
+  "mathMode": "original-pdf-vectors"
+}

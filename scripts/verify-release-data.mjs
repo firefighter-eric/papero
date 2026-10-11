@@ -5,6 +5,7 @@ import { load } from 'cheerio'
 import { inspectPublicData } from './prepare-data.mjs'
 import { assertCodexFallbackReceipt } from './apply-codex-translations.mjs'
 import { assertPdfProvenance } from './pdf-provenance.mjs'
+import { assertAuthorArticleProvenance } from './author-article-lib.mjs'
 import { publicationAuthors } from './publication-bibliography.mjs'
 import { sourceAssetMetadata } from './publication-assets.mjs'
 import { assertTranslationFidelity, catalogEntry, sanitizeHtml, sanitizeSvg, sha256, translationUnits, validArxivId, visibleProseText, scientificSignature } from './paper-lib.mjs'
@@ -12,7 +13,7 @@ import { assertTranslationFidelity, catalogEntry, sanitizeHtml, sanitizeSvg, sha
 const fingerprint = value => typeof value === 'string' && /^[a-f0-9]{64}$/.test(value)
 const nonempty = value => typeof value === 'string' && !!value.trim()
 const timestamp = value => nonempty(value) && Number.isFinite(Date.parse(value))
-const kinds = new Set(['heading', 'paragraph', 'figure', 'table', 'equation', 'reference', 'list', 'code'])
+const kinds = new Set(['heading', 'paragraph', 'figure', 'table', 'equation', 'reference', 'list', 'code', 'algorithm'])
 const record = value => !!value && typeof value === 'object' && !Array.isArray(value)
 const ordered = value => Array.isArray(value) ? value.map(ordered)
   : record(value) ? Object.fromEntries(Object.keys(value).sort().map(key => [key, ordered(value[key])])) : value
@@ -115,7 +116,8 @@ function assertSource(paper) {
       throw new Error(`Invalid pinned arXiv provenance: ${paper.id}.`)
     }
   } else if (kind === 'official-article') {
-    if (paper.arxivId !== null || source.url !== 'https://qwen.ai/blog?id=qwen3.5' || source.htmlUrl !== source.url
+    if (paper.id === 'muon-original-design') assertAuthorArticleProvenance(paper)
+    else if (paper.arxivId !== null || source.url !== 'https://qwen.ai/blog?id=qwen3.5' || source.htmlUrl !== source.url
       || source.payloadUrl !== 'https://qwen.ai/api/v2/article/?language=en-US&path=qwen3.5&type=qwen_ai'
       || !timestamp(source.publishedAt) || source.language !== 'en-US') throw new Error(`Invalid official article provenance: ${paper.id}.`)
   } else if (kind === 'official-paper') {

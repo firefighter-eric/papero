@@ -5,8 +5,9 @@ export const PAPER_FAMILIES = [
   'Qwen', 'DeepSeek', 'Kimi', 'MiniMax', 'Gemini', 'Gemma', 'Chinchilla', 'Transformer',
   'Llama', 'OLMo', 'GPT', 'BERT', 'T5', 'Falcon', 'CLIP',
   'FineWeb', 'DCLM', 'DoReMi', 'Scaling Laws', 'μP', 'Dolma', 'Switch Transformer',
+  'Adam', 'AdamW', 'Muon', 'Shampoo', 'SOAP', 'Adafactor', 'Lion', 'Dion',
 ] as const
-export const RESEARCH_TAGS = ['预训练', '后训练', '模型架构', '监督训练', '缩放定律', '预训练数据', '数据混合', '训练优化'] as const
+export const RESEARCH_TAGS = ['预训练', '后训练', '模型架构', '监督训练', '缩放定律', '预训练数据', '数据混合', '训练优化', '优化器', '矩阵优化', '显存优化', '分布式训练'] as const
 
 export function tagLabel(tag: string): string {
   return tag === 'Qwen' ? 'Qwen / 千问' : tag
@@ -36,6 +37,13 @@ const searchAliases: Record<string, string> = {
   'μP': 'muP mup muTransfer maximal update parametrization 最大更新参数化',
   Dolma: 'AI2 Allen Institute for AI 艾伦',
   'Switch Transformer': 'Switch Transformers 谷歌 Google',
+  AdamW: 'decoupled weight decay 解耦 权重衰减',
+  Muon: 'Moonlight Polar Express 正交化 牛顿舒尔茨 Newton-Schulz',
+  Shampoo: 'preconditioner 预条件',
+  SOAP: 'Shampoo Adam preconditioner 预条件',
+  Adafactor: 'factorization 分解 内存 显存',
+  Lion: 'symbolic discovery 符号发现 sign 符号更新',
+  Dion: 'distributed orthonormalized 分布式 正交化',
   预训练: 'pretraining pre-training',
   后训练: 'posttraining post-training',
   模型架构: 'architecture',
@@ -44,6 +52,10 @@ const searchAliases: Record<string, string> = {
   预训练数据: 'pretraining data pre-training data dataset corpus 数据集 语料',
   数据混合: 'data mixing data mixture domain reweighting',
   训练优化: 'training optimization hyperparameter transfer 超参数',
+  优化器: 'optimizer optimization 优化算法',
+  矩阵优化: 'matrix optimization orthogonalization 正交化',
+  显存优化: 'memory efficient sublinear memory 内存优化',
+  分布式训练: 'distributed training communication 通信',
 }
 
 export function matchesPaperFilters(paper: CatalogPaper, query: string, family: string, research: string): boolean {

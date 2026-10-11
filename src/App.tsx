@@ -16,6 +16,7 @@ import { useMediaQuery, usePreferences } from './hooks/usePreferences'
 import { useLibraryPanel } from './hooks/useLibraryPanel'
 import { SIDEBAR_WIDTH_DEFAULTS, SIDEBAR_WIDTH_LIMITS, useSidebarWidths } from './hooks/useSidebarWidths'
 import { getPaperDataBaseUrl } from './lib/paper-data'
+import { paperSourceLink } from './lib/paper-source'
 
 export default function App() {
   const library = usePaperLibrary()
@@ -29,6 +30,7 @@ export default function App() {
   const [position, setPosition] = useState<ReadingPosition>({ progress: 0, sectionId: null, headerCollapseProgress: 0 })
   const reader = useRef<PaperReaderHandle>(null)
   const paper = library.document.value?.id === library.selected?.id ? library.document.value : null
+  const sourceLink = library.selected ? paperSourceLink(library.selected, paper) : null
   const remoteData = /^https?:\/\//i.test(getPaperDataBaseUrl())
   const onPosition = useCallback((next: ReadingPosition) => setPosition(next), [])
 
@@ -90,8 +92,8 @@ export default function App() {
           <ReaderToolbar preferences={preferences} onChange={(patch) => setPreferences((current) => ({ ...current, ...patch }))} />}
         <div className="topbar-actions">
           <ThemeControl theme={preferences.theme} onChange={(theme) => setPreferences((current) => ({ ...current, theme }))} />
-          {library.selected && <a className="source-link" href={library.selected.sourceHtmlUrl} target="_blank" rel="noopener noreferrer"
-            title={library.selected.sourceKind === 'official-paper' ? '打开官方论文来源' : library.selected.arxivId === null ? '打开官方发布文章' : '在 arXiv 打开英文 HTML 原文'}>
+          {library.selected && sourceLink && <a className="source-link" href={sourceLink.url} target="_blank" rel="noopener noreferrer"
+            title={sourceLink.title}>
             {library.selected.arxivId === null ? '原文' : 'arXiv'} <ArrowUpRight size={16} aria-hidden="true" /></a>}
         </div>
       </div>
