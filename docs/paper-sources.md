@@ -106,7 +106,9 @@ MiniMax M3 的 [官方仓库](https://github.com/MiniMax-AI/MiniMax-M3)和[模�
 
 DeepSeek V4 的[官方模型卡](https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro)链接到上述固定报告。[arXiv 摘要页](https://arxiv.org/abs/2606.19348v1)的提交历史、`citation_date` 与 HTML 页头显示 2026-04-26，与编号 `2606` 的月份不一致；本地保存实际源 HTML，不从编号推断或改写具体发布日期。
 
-三份 Kimi HTML 明确标注 **CC BY-NC-ND 4.0**。该许可中的 ND 条款限制公开分发改编内容，见 [Creative Commons 许可原文](https://creativecommons.org/licenses/by-nc-nd/4.0/)。本地导入和公开发布分开处理；代码、权重许可不自动替代论文自身许可。在获得适用的译文公开授权前，译文保留在被 Git 忽略的本地工作目录。
+三份 Kimi HTML 明确标注 **CC BY-NC-ND 4.0**。该许可中的 ND 条款限制公开分发改编内容，见 [Creative Commons 许可原文](https://creativecommons.org/licenses/by-nc-nd/4.0/)。用户于 **2026-10-11** 在本次对话中确认已获得作者授权公开 Kimi K2 `2507.20534v2`、Kimi K2.5 `2602.02276v2`、Kimi K3 `2607.24653v2` 的中文全文。本次公开这三篇固定版本的依据为该用户确认，未独立核验书面授权文件；来源中的原始许可标注继续保留。
+
+公共库由首批七篇全文、此次三篇 Kimi 全文和四篇仅来源条目组成，共 14 个目录条目。DeepSeek V3／R1／V4 与 MiniMax Sparse Attention 继续保留为仅来源条目，本地导入和公开发布分开处理。上述授权确认不覆盖其他报告或版本；代码、权重许可不自动替代论文自身许可。Kimi 三篇共 1342 个对齐内容块，仍为机器译文，`humanReviewed: false`，自动校验与定向校正不代表全篇人工审校。
 
 可重复的固定版本导入：
 
