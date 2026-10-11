@@ -19,6 +19,7 @@
     "paper:benchmark": "node --env-file-if-exists=.env scripts/benchmark-lm-studio.mjs",
     "library:translate": "node --env-file-if-exists=.env scripts/translate-library.mjs",
     "paper:verify": "node --env-file-if-exists=.env scripts/verify-data.mjs",
+    "research:verify": "node scripts/verify-research-data.mjs --data-dir paper-data",
     "data:export": "node --env-file-if-exists=.env scripts/prepare-data.mjs --include --out-dir .cache/export"
   },
   "dependencies": {

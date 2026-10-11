@@ -43,6 +43,7 @@
     "dolma-pretraining-corpus": ["Dolma", "预训练", "预训练数据", "数据混合"],
     "switch-transformers": ["Switch Transformer", "模型架构", "预训练", "监督训练", "训练优化", "MoE"],
     "clip-pretraining": ["CLIP", "预训练", "多模态", "对比学习"],
+    "scaling-laws-native-multimodal-models": ["Scaling Laws", "预训练", "缩放定律", "多模态", "模型架构"],
     "adamw-decoupled-weight-decay": ["AdamW", "优化器", "训练优化"],
     "muon-scalable-llm-training": ["Muon", "优化器", "训练优化", "预训练", "矩阵优化", "分布式训练"],
     "muon-original-design": ["Muon", "优化器", "训练优化", "矩阵优化"],

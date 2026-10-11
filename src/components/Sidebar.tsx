@@ -1,6 +1,6 @@
 import { Database, PanelLeftClose, PanelLeftOpen, Search, X } from 'lucide-react'
 import { useLayoutEffect, useMemo, useRef, useState } from 'react'
-import type { CatalogPaper } from '../types'
+import type { CatalogPaper, ResearchEntry } from '../types'
 import { PaperTags } from './PaperTags'
 import { matchesPaperFilters, PAPER_FAMILIES, RESEARCH_TAGS, tagLabel } from '../lib/paper-tags'
 import { useNavigationDrawer } from '../hooks/useNavigationDrawer'
@@ -18,9 +18,16 @@ interface Props {
   onClose: () => void
   onSelect: (id: string) => void
   onToggle: () => void
+  reports?: ResearchEntry[]
+  view?: 'papers' | 'research'
+  selectedResearchId?: string
+  researchLoading?: boolean
+  onView?: (view: 'papers' | 'research') => void
+  onResearchSelect?: (id: string) => void
 }
 
-export function Sidebar({ papers, selectedId, mobile, open, collapsed, remoteData, loading, onClose, onSelect, onToggle }: Props) {
+export function Sidebar({ papers, selectedId, mobile, open, collapsed, remoteData, loading, onClose, onSelect, onToggle,
+  reports = [], view = 'papers', selectedResearchId, researchLoading = false, onView, onResearchSelect }: Props) {
   const [query, setQuery] = useState('')
   const [family, setFamily] = useState('')
   const [research, setResearch] = useState('')
@@ -41,6 +48,7 @@ export function Sidebar({ papers, selectedId, mobile, open, collapsed, remoteDat
   }, [papers, query, family, research, sort])
   const families = PAPER_FAMILIES.filter(tag => papers.some(paper => paper.tags.includes(tag)))
   const researchTypes = RESEARCH_TAGS.filter(tag => papers.some(paper => paper.tags.includes(tag)))
+  const reportMatches = reports.filter(r => `${r.title} ${r.summary} ${r.tags.join(' ')}`.toLowerCase().includes(query.trim().toLowerCase()))
 
   return <>
     {mobile && open && <button className="sidebar-backdrop" aria-label="关闭论文库" onClick={onClose} tabIndex={-1} />}
@@ -57,10 +65,14 @@ export function Sidebar({ papers, selectedId, mobile, open, collapsed, remoteDat
       </div>
       <div id="paper-library-content" className="library-content" hidden={!visible}>
         <p className="brand-caption">论文阅读，让理解更近一步</p>
-        <label className="library-search"><Search size={18} aria-hidden="true" /><span className="sr-only">搜索论文标题、作者或关键词</span>
-          <input type="search" placeholder="搜索论文…" value={query} onChange={(event) => setQuery(event.target.value)} />
+        {onView && <div className="library-tabs" role="group" aria-label="内容栏目">
+          <button aria-pressed={view === 'papers'} onClick={() => { setQuery(''); setFamily(''); setResearch(''); onView('papers') }}>论文库 <span>{papers.length}</span></button>
+          <button aria-pressed={view === 'research'} onClick={() => { setQuery(''); setFamily(''); setResearch(''); onView('research') }}>研究产出 <span>{reports.length}</span></button>
+        </div>}
+        <label className="library-search"><Search size={18} aria-hidden="true" /><span className="sr-only">{view === 'research' ? '搜索研究标题、摘要或关键词' : '搜索论文标题、作者或关键词'}</span>
+          <input type="search" placeholder={view === 'research' ? '搜索研究报告…' : '搜索论文…'} value={query} onChange={(event) => setQuery(event.target.value)} />
         </label>
-        <div className="library-filters" role="group" aria-label="论文标签筛选">
+        {view === 'papers' && <div className="library-filters" role="group" aria-label="论文标签筛选">
           <label><span>模型系列</span><select value={family} onChange={event => setFamily(event.target.value)}>
             <option value="">全部系列</option>
             {families.map(tag => <option key={tag} value={tag}>{tagLabel(tag)}</option>)}
@@ -69,18 +81,24 @@ export function Sidebar({ papers, selectedId, mobile, open, collapsed, remoteDat
             <option value="">全部类型</option>
             {researchTypes.map(tag => <option key={tag} value={tag}>{tag}</option>)}
           </select></label>
-        </div>
-        <div className="sidebar-section-title"><h2>论文库</h2><div className="library-results">
+        </div>}
+        <div className="sidebar-section-title"><h2>{view === 'research' ? '研究产出' : '论文库'}</h2><div className="library-results">
           {filtered && <button className="filter-reset" onClick={() => { setQuery(''); setFamily(''); setResearch('') }} aria-label="清除论文筛选">重置</button>}
-          <span aria-live="polite" aria-atomic="true">{filtered ? `${matches.length} / ${papers.length}` : papers.length}</span>
+          <span aria-live="polite" aria-atomic="true">{view === 'research' ? reportMatches.length : filtered ? `${matches.length} / ${papers.length}` : papers.length}</span>
         </div></div>
-        <label className="library-sort"><span>排序</span><select value={sort} onChange={event => setSort(event.target.value)}>
+        {view === 'papers' && <label className="library-sort"><span>排序</span><select value={sort} onChange={event => setSort(event.target.value)}>
           <option value="catalog">默认顺序</option><option value="year">年份从新到旧</option><option value="title">标题 A–Z</option>
-        </select></label>
-        <nav ref={list} className="paper-list" aria-label="论文列表" onScroll={event => {
+        </select></label>}
+        {view === 'research' && <p className="sidebar-hint research-column-note">根据论文与官方资料形成的中文调研、综述与结论。</p>}
+        <nav ref={list} className="paper-list" aria-label={view === 'research' ? '研究报告列表' : '论文列表'} onScroll={event => {
           if (visible) listPosition.current = event.currentTarget.scrollTop
         }}>
-          {loading ? <p className="sidebar-hint">正在读取论文库…</p> : matches.map((paper) => <button key={paper.id}
+          {view === 'research' ? researchLoading ? <p className="sidebar-hint">正在读取研究产出…</p> : reportMatches.map(report => <button key={report.id}
+            className={`paper-card ${report.id === selectedResearchId ? 'is-selected' : ''}`} aria-current={report.id === selectedResearchId ? 'page' : undefined}
+            onClick={() => { onResearchSelect?.(report.id); if (mobile) onClose() }}>
+            <span className="paper-card-title">{report.title}</span><span className="paper-card-meta">中文调研 · {report.date}</span>
+            <span className="research-card-summary">{report.summary}</span><PaperTags tags={report.tags} compact />
+          </button>) : loading ? <p className="sidebar-hint">正在读取论文库…</p> : matches.map((paper) => <button key={paper.id}
             className={`paper-card ${paper.id === selectedId ? 'is-selected' : ''}`} aria-current={paper.id === selectedId ? 'page' : undefined}
             onClick={() => { onSelect(paper.id); if (mobile) onClose() }}>
             <span className="paper-card-title">{paper.title}</span>
@@ -90,7 +108,8 @@ export function Sidebar({ papers, selectedId, mobile, open, collapsed, remoteDat
               {paper.access === 'source-only' && <><span aria-hidden="true"> · </span>来源条目</>}</span>
             <PaperTags tags={paper.tags} compact />
           </button>)}
-          {!loading && matches.length === 0 && <p className="sidebar-hint">{filtered ? '当前筛选下没有论文。' : '论文库暂无内容。'}</p>}
+          {view === 'research' ? !researchLoading && reportMatches.length === 0 && <p className="sidebar-hint">{query ? '没有匹配的研究报告。' : '暂无研究报告。'}</p>
+            : !loading && matches.length === 0 && <p className="sidebar-hint">{filtered ? '当前筛选下没有论文。' : '论文库暂无内容。'}</p>}
         </nav>
         <div className="data-status"><Database size={16} strokeWidth={1.4} aria-hidden="true" />
           <span>{remoteData ? '论文数据来自独立存储' : '论文数据来自本地'}</span>

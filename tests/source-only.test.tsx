@@ -97,7 +97,9 @@ afterEach(async () => {
 
 describe('source-only selection', () => {
   it('renders searchable source information and safe official links without body requests or reader controls', async () => {
-    const fetcher = vi.fn<typeof fetch>().mockResolvedValue(new Response(JSON.stringify({ schemaVersion: 1, papers: [source] })))
+    const fetcher = vi.fn<typeof fetch>(input => Promise.resolve(new Response(JSON.stringify(
+      String(input).endsWith('/research/catalog.json') ? { schemaVersion: 1, reports: [] } : { schemaVersion: 1, papers: [source] },
+    ))))
     vi.stubGlobal('fetch', fetcher)
     root = createRoot(host)
     await act(async () => { root!.render(<App />) })
@@ -111,8 +113,10 @@ describe('source-only selection', () => {
     expect(links.every(link => link.target === '_blank' && link.rel === 'noopener noreferrer')).toBe(true)
     expect(host.querySelector('.reader-toolbar, [role="progressbar"], [role="alert"], [id^="pane-"]')).toBeNull()
     expect(host.textContent).not.toMatch(/正在打开论文|中文翻译待生成|机器翻译/)
-    expect(fetcher).toHaveBeenCalledTimes(1)
-    expect(String(fetcher.mock.calls[0][0])).toMatch(/catalog\.json$/)
+    expect(fetcher).toHaveBeenCalledTimes(2)
+    expect(fetcher.mock.calls.map(call => String(call[0])).sort()).toEqual([
+      `${window.location.origin}/paper-data/catalog.json`, `${window.location.origin}/paper-data/research/catalog.json`,
+    ])
     expect(localStorage.getItem('papero:last-paper:v1')).toBe(source.id)
   })
 

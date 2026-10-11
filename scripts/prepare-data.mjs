@@ -6,6 +6,7 @@ import { pathToFileURL } from 'node:url'
 import { load } from 'cheerio'
 import { createPublication, parseReadingHtml } from './publication-html.mjs'
 import { mergePaperTags } from './paper-tags.mjs'
+import { inspectResearchData } from './research-data.mjs'
 
 const ASSET_EXTENSIONS = new Set(['.png', '.jpg', '.jpeg', '.gif', '.webp', '.avif', '.svg'])
 const digest = bytes => createHash('sha256').update(bytes).digest('hex')
@@ -140,7 +141,9 @@ export async function inspectPublicData({ dataDir = process.env.DATA_DIR || 'dat
     }
     papers.push({ entry, paper, metadata, dataPath })
   }
-  return { root, catalog, papers, files }
+  const research = await inspectResearchData(root)
+  for (const [relative, hash] of research.files) files.set(relative, hash)
+  return { root, catalog, papers, files, researchReports: research.reports }
 }
 
 /** Copy only public processed data. Raw sources and translation checkpoints stay private. */
