@@ -2,7 +2,7 @@
 
 Papero 是静态前端。浏览器读取目录 `catalog.json`，打开全文条目时才读取该篇的轻量 `paper.json` 元数据，以及独立的 `en.html`、`zh.html` 正文；仅来源条目提供固定版本的官方 HTML 与摘要页链接，不发送正文请求。LM Studio 只参与本机导入与翻译，线上读者无需连接本机模型。
 
-公共论文库有 14 个目录条目：10 篇完整机器译文，包括首批 7 篇与获授权公开的 Kimi K2／K2.5／K3。其中 Attention 的六处公式或引用相邻片段已定向校正。DeepSeek V3／R1／V4 和 MiniMax M3 关联架构论文 *MiniMax Sparse Attention* 为 4 篇仅来源条目。本地库已完成 14 篇机器译文，共 5209 个对齐内容块；扩充七篇共 2882 块，其中此次公开的 Kimi 三篇共 1342 块。本地完成状态与公开范围分别维护。固定版本与报告原题见 [论文来源记录](paper-sources.md)。
+公共论文库有 14 篇完整机器译文，包括首批 7 篇、Kimi K2／K2.5／K3、DeepSeek V3／R1／V4 和 MiniMax M3 关联架构论文 *MiniMax Sparse Attention*。其中 Attention 的六处公式或引用相邻片段已定向校正。公开库共 5209 个对齐内容块、191 个正文引用素材和 234 个发布文件；扩充七篇共 2882 块，本轮补齐的 DeepSeek 三篇与 MiniMax Sparse Attention 共 1540 块、68 个正文引用素材。本地完成状态与公开范围分别维护。固定版本与报告原题见 [论文来源记录](paper-sources.md)。
 
 ## 本地目录
 
@@ -18,19 +18,19 @@ data/                                # 整体被 Git 忽略
 
 `DATA_DIR` 可以覆盖本机数据位置；例如 `DATA_DIR=/Volumes/Papers/papero npm run dev`。开发服务器在 `/paper-data` 提供处理后的 JSON、固定文件名 `en.html`/`zh.html` 和图片，检查实际文件路径，不提供原始来源 HTML、检查点或任意目录文件。
 
-用户已明确允许初版使用 Git LFS。仓库中的 `paper-data/` 是经过验证后生成的公开发布快照，整体由 `.gitattributes` 的 LFS 规则管理；它与持续导入、翻译的本机 `data/` 分开。`data/`、原始来源与 `.cache/` 继续被 Git 忽略。全文公开前须完成翻译、来源验证和当前固定版本的译文公开许可核对；翻译检查点与中间版本留在本地。
+用户已明确允许初版使用 Git LFS。仓库中的 `paper-data/` 是经过验证后生成的公开发布快照，整体由 `.gitattributes` 的 LFS 规则管理；它与持续导入、翻译的本机 `data/` 分开。`data/`、原始来源与 `.cache/` 继续被 Git 忽略。全文公开前须完成翻译、来源验证和公开范围确认，保留当前固定版本的来源与许可记录；翻译检查点与中间版本留在本地。
 
 自定义数据目录优先放在代码仓库之外。如果使用仓库内的其他目录，应先将该目录加入 `.gitignore`；默认忽略规则覆盖 `data/` 与 `.cache/`。
 
 全文条目记录 `dataPath: "papers/attention-is-all-you-need/paper.json"`。发布正文与元数据位于同一目录；HTML 中 `assets/figure.png` 之类的相对路径也以此目录为基准。浏览器在显示前对两种语言都进行 DOMPurify 清理，保留表格、图片、MathML 公式，移除脚本、样式、表单及危险 URL。本机开发读取旧的检查点 JSON 时仍可直接阅读。
 
-## 授权范围与仅来源条目
+## 发布范围与仅来源条目
 
 Kimi K2 `2507.20534v2`、Kimi K2.5 `2602.02276v2`、Kimi K3 `2607.24653v2` 的来源明确标注 CC BY-NC-ND 4.0。用户于 2026-10-11 确认已获得作者授权公开这三篇固定版本的中文全文；发布依据是本次对话中的用户确认，未独立核验书面授权文件，原始许可标注继续保留。
 
-上述确认仅覆盖这三篇 Kimi 报告。DeepSeek V3／R1／V4 与 MiniMax Sparse Attention 继续只公开原题、作者、年份、检索标签与官方固定版本链接，不公开摘要、中文标题、正文或素材。本地全文与公共目录分别维护。
+上述作者授权确认仅覆盖这三篇 Kimi 报告。同日用户进一步明确指示将 DeepSeek V3／R1／V4 与 MiniMax Sparse Attention 全部上线，本轮据此扩展公开范围，加入其完整英文与中文 HTML、轻量元数据和正文引用素材。该发布指示不改写来源许可记录或原有 Kimi 授权确认的范围。本地全文与公共目录分别维护。
 
-目录中的仅来源条目使用以下固定值：
+读取端与导出器仍支持仅来源条目，供后续只公开书目和官方链接的条目使用；当前 14 篇快照中没有此类条目。仅来源条目使用以下固定值：
 
 ```json
 {
@@ -45,7 +45,7 @@ Kimi K2 `2507.20534v2`、Kimi K2.5 `2602.02276v2`、Kimi K3 `2607.24653v2` 的�
 }
 ```
 
-其余书目字段包含 `id`、`arxivId`、`sourceKind`、`title`、`authors`、`year`、`tags`、`sourceUrl` 和 `sourceHtmlUrl`。本批 `sourceKind` 为 `arxiv`，两条 URL 必须分别为相同固定 `arxivId` 的 `https://arxiv.org/abs/<id>` 与 `https://arxiv.org/html/<id>`。`pending` 只表示未公开译文，不用于报告本地进度。
+其余书目字段包含 `id`、`arxivId`、`sourceKind`、`title`、`authors`、`year`、`tags`、`sourceUrl` 和 `sourceHtmlUrl`。arXiv 仅来源条目的 `sourceKind` 为 `arxiv`，两条 URL 必须分别为相同固定 `arxivId` 的 `https://arxiv.org/abs/<id>` 与 `https://arxiv.org/html/<id>`。`pending` 只表示未公开译文，不用于报告本地进度。
 
 读取端在加载正文前拒绝 `source-only` 条目。导出器只复制其目录记录，不读取本地 `paper.json`、正文或图片；严格发布校验拒绝此类条目对应的任何 `papers/<id>/` 目录，包括空目录。
 
@@ -82,7 +82,7 @@ npm run paper:verify -- --strict-translation --require-data
 
 ## 通过 Git LFS 部署公共快照
 
-本轮公共快照保留首批 7 篇已公开全文，加入此次获授权的 Kimi 三篇固定版本全文，其他四篇新增报告继续只保留来源目录记录。组装公共目录时使用的元数据暂存目录是被 Git 忽略的临时材料，不是公开存储，也不是把 `data/` 全库自动发布的流程。核对公开范围后维护 `paper-data/`，再对该快照与构建产物执行严格校验。
+本轮公共快照保留已有十篇公开全文，加入 DeepSeek V3／R1／V4 与 MiniMax Sparse Attention 四篇固定版本全文，合计 14 篇。组装公共目录时使用的元数据暂存目录是被 Git 忽略的临时材料，不是公开存储，也不是把 `data/` 全库自动发布的流程。核对公开范围后维护 `paper-data/`，再对该快照与构建产物执行严格校验。
 
 公共快照只含 `catalog.json`、全文条目的轻量 `paper.json`、`en.html`、`zh.html` 和 `assets/` 图片。`source.html`、`source-assets/`、模型响应、检查点、锁和缓存不进入快照。`.gitattributes` 覆盖 `paper-data/**`；LFS 在 Git 历史中存储指针，在 LFS 服务中保存实际内容。
 
@@ -99,7 +99,7 @@ node scripts/verify-release-data.mjs --data-dir paper-data
 npm run build:library
 ```
 
-`build:library` 先检查快照，再执行 `DATA_DIR=paper-data PAPERO_INCLUDE_LOCAL_DATA=1 npm run build`。严格检查对全文条目要求独立 HTML 正文、全部段落已翻译、标题存在，核对 HTML 文件和段落指纹、容器身份与顺序、目录与文档身份及计数、机器翻译来源元数据、段落英文 SHA-256、公式/代码/引用与原文锚点不变，两种语言分别验证内部链接目标，并检查图片引用闭包和所有图片的 SHA-256/字节数。仅来源条目须满足「授权范围与仅来源条目」一节的书目约束且没有正文目录。机器翻译继续明确标记 `humanReviewed: false`，通过自动检查不能宣称人工审校完成。快照中出现正文 JSON、原始来源、调试材料、未知文件或符号链接时会被拒绝。
+`build:library` 先检查快照，再执行 `DATA_DIR=paper-data PAPERO_INCLUDE_LOCAL_DATA=1 npm run build`。严格检查对全文条目要求独立 HTML 正文、全部段落已翻译、标题存在，核对 HTML 文件和段落指纹、容器身份与顺序、目录与文档身份及计数、机器翻译来源元数据、段落英文 SHA-256、公式/代码/引用与原文锚点不变，两种语言分别验证内部链接目标，并检查图片引用闭包和所有图片的 SHA-256/字节数。仅来源条目须满足「发布范围与仅来源条目」一节的书目约束且没有正文目录。机器翻译继续明确标记 `humanReviewed: false`，通过自动检查不能宣称人工审校完成。快照中出现正文 JSON、原始来源、调试材料、未知文件或符号链接时会被拒绝。
 
 此检查验证的是**处理后的发布快照**，只保留原始 HTML 的来源哈希及抓取记录，不会重新验证被排除的原始 HTML。完整来源哈希验证仍由前面的 `paper:verify` 在本机 `data/` 上执行。
 
