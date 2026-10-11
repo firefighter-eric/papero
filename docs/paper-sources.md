@@ -92,7 +92,7 @@ npm run library:translate -- --concurrency 2
 
 核验日期：2026-10-11。这一批下载固定版本的 arXiv HTML，采用同样的来源、正文结构与资产指纹校验；保留原始标题，不以相近模型或后续版本替换用户指定的系列。
 
-本批七篇均有可用的官方英文 HTML，无需从 PDF 转换。[项目协作规则](../AGENTS.md)已记录后续只有 PDF 时必须执行 **PDF → 英文 HTML → 中文 HTML**，保留完整正文结构、公式、图表、引用、来源指纹与 PDF 页码对应，不能仅保留 PDF 链接。PDF 自动转换路径目前尚未实现。
+本批七篇均有可用的官方英文 HTML，无需从 PDF 转换。[项目协作规则](../AGENTS.md)已记录后续只有 PDF 时必须执行 **PDF → 英文 HTML → 中文 HTML**，保留完整正文结构、公式、图表、引用、来源指纹与 PDF 页码对应，不能仅保留 PDF 链接。当时尚未实现 PDF 转换；后续 GPT-2 的完整转换路径见文末“预训练论文扩充批次”。
 
 | 用户指定系列 | 报告原题 | 固定版本 | 本地论文 ID | 正文块 / 资产 |
 | --- | --- | --- | --- | --- |
@@ -184,3 +184,43 @@ Luna 子任务不提供 API token 用量，本批不填造假的零值或借用 
 244 个内容块已全部生成对齐的中文 HTML。正文和标题由实际 GPT-6 Luna 子任务生成，记录 `provider: Codex subagent`、`reasoning_effort: low`、实际完成时间和来源／译文指纹；原样保留的公式、作者和参考文献块不虚构翻译模型。没有可核验的 Luna API 用量，记录中不填造 token 数或费用。关键结果、公式变量及表格单元格经过有限语义抽查，24 个内容块保留定向修订的模型、时间和前一版译文指纹；额外检查所有片段中的 Chinchilla／Gopher／SentencePiece 专名是否保留。机器译文仍标记 `humanReviewed: false`，未作全文人工审校。
 
 原始工作库与最终中英 HTML 均通过严格数据校验，构建后库共 22 个全文条目、8053 块、320 素材和 387 文件。添加前 21 个条目的 369 个正文、元数据和素材文件逐文件哈希不变。实际阅读器已检查桌面／手机显示、公式单份渲染、目录跳转、中英双向同步滚动、交换／单栏和标签检索；页面无加载错误，手机页面宽度未超出视口。此完整快照纳入用户明确授权的本次发布，新增 20 篇预训练论文仍在本地工作目录中处理。
+
+## 预训练论文扩充批次
+
+来源核验日期：2026-10-11。本批增加二十篇完整论文，十九篇来自实际请求并验证版本水印的官方 arXiv HTML；GPT-2 使用 OpenAI 官方 PDF。年份采用首发年份；固定版本可能是后续修订，不能据版本修订日期改写论文首发年。
+
+| 论文原题 | 首发年份 | 固定英文来源 | 本地论文 ID |
+| --- | --- | --- | --- |
+| The Llama 3 Herd of Models | 2024 | [2407.21783v3](https://arxiv.org/html/2407.21783v3) | `llama-3-technical-report` |
+| 2 OLMo 2 Furious | 2024 | [2501.00656v3](https://arxiv.org/html/2501.00656v3) | `olmo-2-technical-report` |
+| The FineWeb Datasets: Decanting the Web for the Finest Text Data at Scale | 2024 | [2406.17557v2](https://arxiv.org/html/2406.17557v2) | `fineweb-datasets` |
+| DataComp-LM: In search of the next generation of training sets for language models | 2024 | [2406.11794v4](https://arxiv.org/html/2406.11794v4) | `datacomp-lm` |
+| DoReMi: Optimizing Data Mixtures Speeds Up Language Model Pretraining | 2023 | [2305.10429v4](https://arxiv.org/html/2305.10429v4) | `doremi-data-mixtures` |
+| Scaling Laws for Neural Language Models | 2020 | [2001.08361v1](https://arxiv.org/html/2001.08361v1) | `scaling-laws-neural-language-models` |
+| DeepSeekMoE: Towards Ultimate Expert Specialization in Mixture-of-Experts Language Models | 2024 | [2401.06066v1](https://arxiv.org/html/2401.06066v1) | `deepseek-moe` |
+| Tensor Programs V: Tuning Large Neural Networks via Zero-Shot Hyperparameter Transfer | 2022 | [2203.03466v2](https://arxiv.org/html/2203.03466v2) | `tensor-programs-v-mup` |
+| Olmo 3 | 2025 | [2512.13961v2](https://arxiv.org/html/2512.13961v2) | `olmo-3-technical-report` |
+| LLaMA: Open and Efficient Foundation Language Models | 2023 | [2302.13971v1](https://arxiv.org/html/2302.13971v1) | `llama-1-technical-report` |
+| Llama 2: Open Foundation and Fine-Tuned Chat Models | 2023 | [2307.09288v2](https://arxiv.org/html/2307.09288v2) | `llama-2-technical-report` |
+| DeepSeek LLM Scaling Open-Source Language Models with Longtermism | 2024 | [2401.02954v1](https://arxiv.org/html/2401.02954v1) | `deepseek-llm` |
+| Language Models are Unsupervised Multitask Learners | 2019 | [官方 PDF](https://cdn.openai.com/better-language-models/language-models.pdf) | `gpt-2-technical-report` |
+| Language Models are Few-Shot Learners | 2020 | [2005.14165v4](https://arxiv.org/html/2005.14165v4) | `gpt-3-technical-report` |
+| BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding | 2018 | [1810.04805v2](https://arxiv.org/html/1810.04805v2) | `bert-pretraining` |
+| Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer | 2019 | [1910.10683v4](https://arxiv.org/html/1910.10683v4) | `t5-text-to-text-transformer` |
+| The RefinedWeb Dataset for Falcon LLM: Outperforming Curated Corpora with Web Data, and Web Data Only | 2023 | [2306.01116v1](https://arxiv.org/html/2306.01116v1) | `refinedweb-dataset` |
+| Dolma: an Open Corpus of Three Trillion Tokens for Language Model Pretraining Research | 2024 | [2402.00159v2](https://arxiv.org/html/2402.00159v2) | `dolma-pretraining-corpus` |
+| Switch Transformers: Scaling to Trillion Parameter Models with Simple and Efficient Sparsity | 2021 | [2101.03961v3](https://arxiv.org/html/2101.03961v3) | `switch-transformers` |
+| Learning Transferable Visual Models From Natural Language Supervision | 2021 | [2103.00020v1](https://arxiv.org/html/2103.00020v1) | `clip-pretraining` |
+
+GPT-3 官方 HTML 中缺失的十二张 PNG，按相同固定版本原始 TeX 归档的准确成员路径恢复，记录归档 URL、SHA-256、成员名与原图指纹；不能以其他论文或近似图片替代。SVG 保留原始文件，并分别验证原图和净化后发布图的指纹。
+
+GPT-2 原始 PDF 为 24 页、582775 字节。转换器采用 pdfplumber 0.11.9 与 pypdf 6.10.0，生成 209 个语义块、17 个 HTML 表格、5 张局部图像和 27 个目录节，保留 156 个内部目标锚点以及 78 个参考文献。英文来源 HTML、原始 PDF、转换参数及页码/字符覆盖映射分别保留指纹。公式使用 MathML，英文与中文正文沿用相同块 ID；数据样例、公式和代码保留原文。PDF 字符覆盖验证和定向视觉核查不代表人工逐句审校。
+
+十九篇 arXiv 报告的官方引文作者名单另存于 `paper-metadata/bibliography.json`，包含准确固定版本、来源 URL 与核验时间。前端仅在论文 ID 和 arXiv 版本同时匹配时使用该名单显示及检索作者，避免 HTML 提取中出现 `arXiv`、邮箱或不完整姓氏。该独立阅读元数据不改写原始 HTML、来源指纹及冻结的翻译清单。
+
+GPT-2 的式 (1) 沿用原 PDF 的 `s_n` 项和乘积索引 `i`，包括原论文中记号不一致之处，未作为转换错误擅自改写。完整布局配方保存在 `paper-metadata/pdf-recipes/gpt-2-technical-report.json`。转换要求每个非页眉来源字符恰好覆盖一次；未覆盖、重复覆盖、缺页、错误素材指纹或失效内部引用都会阻止导入。
+
+
+本批二十篇现在已全部生成中文正文，共 8632 个对齐块。十九篇 arXiv 的固定版本、首发年份、本地来源 HTML 指纹和版本水印与官方预检一致；GPT-2 的 PDF、转换英文 HTML 与布局配方均有指纹。十八份真实 Luna 冻结任务清单对应 233 份分块草稿，逐份核对八键格式、精确 job ID、模型身份、低思考参数与完成时间；Luna 未提供的 API 用量继续保持未知。
+
+OLMo 2／3 的原 HTML 作者提取为空，冻结的原作者数组保持不变。发布元数据另外保存 `publicationBibliography`，逐字段对应已核验的固定版本官方引用记录；独立 HTML 头部显示这份完整署名。未知版本、错误来源、空或伪造名单仍会被发布校验拒绝。μP 和 Dolma 的未引用图像只保留原始素材元数据 `publicationSourceAssets` 以复现冻结的翻译来源，不发布这些未引用文件；发布素材仍由正文引用闭包决定。

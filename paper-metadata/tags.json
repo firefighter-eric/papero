@@ -22,6 +22,26 @@
     "gemma-2-technical-report": ["Gemma", "预训练", "后训练"],
     "gemma-3-technical-report": ["Gemma", "预训练", "后训练"],
     "gemma-4-technical-report": ["Gemma", "预训练", "后训练"],
-    "chinchilla-training-compute-optimal": ["Chinchilla", "预训练", "缩放定律"]
+    "chinchilla-training-compute-optimal": ["Chinchilla", "预训练", "缩放定律"],
+    "llama-3-technical-report": ["Llama", "预训练", "后训练", "缩放定律", "多模态"],
+    "olmo-2-technical-report": ["OLMo", "预训练", "后训练", "预训练数据", "数据混合", "训练优化"],
+    "fineweb-datasets": ["FineWeb", "预训练", "预训练数据"],
+    "datacomp-lm": ["DCLM", "预训练", "后训练", "预训练数据", "数据混合"],
+    "doremi-data-mixtures": ["DoReMi", "预训练", "数据混合", "训练优化"],
+    "scaling-laws-neural-language-models": ["Scaling Laws", "预训练", "缩放定律"],
+    "deepseek-moe": ["DeepSeek", "模型架构", "预训练", "后训练", "MoE"],
+    "tensor-programs-v-mup": ["μP", "预训练", "训练优化"],
+    "olmo-3-technical-report": ["OLMo", "预训练", "后训练", "预训练数据", "数据混合"],
+    "llama-1-technical-report": ["Llama", "预训练", "后训练"],
+    "llama-2-technical-report": ["Llama", "预训练", "后训练"],
+    "deepseek-llm": ["DeepSeek", "预训练", "后训练", "缩放定律"],
+    "gpt-2-technical-report": ["GPT", "预训练"],
+    "gpt-3-technical-report": ["GPT", "预训练"],
+    "bert-pretraining": ["BERT", "预训练", "监督训练"],
+    "t5-text-to-text-transformer": ["T5", "预训练", "监督训练", "预训练数据"],
+    "refinedweb-dataset": ["Falcon", "预训练", "预训练数据"],
+    "dolma-pretraining-corpus": ["Dolma", "预训练", "预训练数据", "数据混合"],
+    "switch-transformers": ["Switch Transformer", "模型架构", "预训练", "监督训练", "训练优化", "MoE"],
+    "clip-pretraining": ["CLIP", "预训练", "多模态", "对比学习"]
   }
 }

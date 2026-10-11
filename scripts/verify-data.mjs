@@ -3,6 +3,7 @@ import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { load } from 'cheerio'
 import { sanitizeHtml, sha256, safeId, catalogEntry, assertTranslationFidelity, visibleProseText, scientificSignature } from './paper-lib.mjs'
+import { verifyRawPdf } from './pdf-provenance.mjs'
 
 export async function verifyData({ dataDir = process.env.DATA_DIR || 'data', strictTranslation = false, requireData = false } = {}) {
   let catalog
@@ -28,7 +29,10 @@ export async function verifyData({ dataDir = process.env.DATA_DIR || 'data', str
       if (!/^https:\/\/arxiv\.org\/html\//.test(paper.source.htmlUrl) || !/^https:\/\/arxiv\.org\/abs\//.test(paper.source.url)) throw new Error('Source provenance is not arXiv')
     } else if (sourceKind === 'official-article') {
       if (paper.arxivId !== null || paper.source.url !== 'https://qwen.ai/blog?id=qwen3.5' || paper.source.htmlUrl !== paper.source.url) throw new Error('Official Qwen3.5 article provenance is invalid')
+    } else if (sourceKind === 'official-paper') {
+      if (paper.arxivId !== null || paper.source.format !== 'pdf') throw new Error('Official paper PDF provenance is invalid')
     } else throw new Error(`Unsupported source kind: ${sourceKind}`)
+    if (paper.source.format === 'pdf') await verifyRawPdf(paper, directory)
     const sectionIds = new Set(paper.sections.map(section => section.id))
     const blockIds = new Set()
     const sourceIds = new Set()

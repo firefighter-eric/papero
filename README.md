@@ -1,10 +1,10 @@
 # Papero
 
-一个静态前端论文阅读器：从 arXiv HTML 离线导入论文，通过本机 LM Studio 或实际 GPT-6 Luna 任务生成中文译文，在浏览器中逐段对照阅读。前端使用 React、TypeScript 和 Vite，可部署到 Vercel。
+一个静态前端论文阅读器：离线导入官方 HTML，或将官方 PDF 转成英文 HTML，通过本机 LM Studio 或实际 GPT-6 Luna 任务生成中文 HTML，在浏览器中逐段对照阅读。前端使用 React、TypeScript 和 Vite，可部署到 Vercel。
 
 [在线阅读器](https://papero-omega.vercel.app) · [GitHub 仓库](https://github.com/firefighter-eric/papero)
 
-支持多篇论文、标题与作者搜索、章节目录、中英双栏、交换左右、单语言阅读、双向段落同步滚动、字号调整和阅读位置保存。拖动任意一栏都能带动另一栏；也可关闭同步，分别阅读。提供白色、黑色和淡橙色三种主题，主题与阅读设置会保存在当前浏览器。公式、图表和参考文献随论文保留。移动端也可以切换阅读模式。
+支持多篇论文、标题与作者搜索、章节目录、中英双栏、交换左右、单语言阅读、双向段落同步滚动、字号调整和阅读位置保存。最左侧论文检索栏与本文目录栏可分别拖动调整宽度，支持键盘操作并保存设置；检索栏可折叠，目录子章节可展开。拖动任意正文栏都能带动另一栏；也可关闭同步，分别阅读。工具栏位于顶部，阅读向下滚动时标题区收起。提供白色、黑色和淡橙色三种主题，主题与阅读设置会保存在当前浏览器。公式、图表和参考文献随论文保留。移动端分别提供论文检索与目录抽屉。
 
 论文列表与标题区显示模型系列和研究标签，可组合筛选 Qwen／千问、DeepSeek、Kimi、MiniMax、Gemini、Gemma、Chinchilla，以及预训练、后训练、缩放定律等研究标签。搜索“千问”也能匹配 Qwen，“Google／谷歌”可检索 Gemini、Gemma 和 Chinchilla，各自保持独立系列；“Chillchila”作为 Chinchilla 的检索别名。报告覆盖多个阶段时保留多个标签。分类依据与维护方式见 [论文标签](docs/paper-tags.md)。
 
@@ -21,29 +21,13 @@ DATA_DIR=paper-data npm run dev
 
 阅读器通过 `/paper-data` 加载目录。全文条目的英文与中文正文分别保存为 `en.html` 和 `zh.html`，可以单独打开；公式使用原生 MathML，图表与正文放在一起。小型 `paper.json` 只保存标题、目录、段落定位和来源记录，不保存正文字符串。阅读器按相同段落标记对齐两份 HTML。仅来源条目提供官方原文与摘要页链接，不加载正文。
 
-首批七篇全文包括 **Attention Is All You Need**，arXiv `1706.03762v7`，以及 Qwen2、Qwen2.5、Qwen2.5-VL、Qwen3、Qwen3-VL 技术报告。Qwen3.5 收入官方发布文章，明确标注为官方文章。
+公开处理库 `paper-data/` 包含 **42 个中英全文条目**（41 篇论文及 Qwen3.5 官方文章），共 **16685 个对齐内容块、1032 个正文素材、1159 个处理后文件**。这次按用户明确要求，等新增二十篇完整翻译后一次发布；原有二十二个条目的 386 个正文、元数据和素材文件保持 SHA-256 一致。
 
-上次已发布的线上论文库包含 **14 篇中英全文**，共 5209 个对齐内容块、191 个正文引用素材和 234 个发布文件。全文包括首批 7 篇、Kimi K2／K2.5／K3、DeepSeek V3／R1／V4 与 MiniMax M3 关联架构论文；Attention 的六处公式或引用相邻译文片段已定向校正。该批次的公开范围如下：
+已有报告涵盖 Attention、Qwen、DeepSeek、Kimi、MiniMax、Gemini、Gemma 和 Chinchilla。新增二十篇包括 Llama 1／2／3、OLMo 2／3、FineWeb、DataComp-LM、DoReMi、Scaling Laws、DeepSeekMoE、DeepSeek LLM、μP、GPT-2／3、BERT、T5、RefinedWeb、Dolma、Switch Transformers 和 CLIP。固定版本、来源及各系列记录见 [论文来源](docs/paper-sources.md)。Qwen3.5 明确标注为官方文章；GPT-2 来自官方 PDF，转换为完整英文 HTML 后翻译，标注为官方论文。
 
-| 系列 | 报告原题 | 固定 arXiv 版本 | 公开范围 |
-| --- | --- | --- | --- |
-| DeepSeek V3 | DeepSeek-V3 Technical Report | [2412.19437v2](https://arxiv.org/abs/2412.19437v2) | 中英全文 |
-| DeepSeek R1 | DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning | [2501.12948v2](https://arxiv.org/abs/2501.12948v2) | 中英全文 |
-| DeepSeek V4 | DeepSeek-V4: Towards Highly Efficient Million-Token Context Intelligence | [2606.19348v1](https://arxiv.org/abs/2606.19348v1) | 中英全文 |
-| Kimi K2 | Kimi K2: Open Agentic Intelligence | [2507.20534v2](https://arxiv.org/abs/2507.20534v2) | 中英全文 |
-| Kimi K2.5 | Kimi K2.5: Visual Agentic Intelligence | [2602.02276v2](https://arxiv.org/abs/2602.02276v2) | 中英全文 |
-| Kimi K3 | Kimi K3: Open Frontier Intelligence | [2607.24653v2](https://arxiv.org/abs/2607.24653v2) | 中英全文 |
-| MiniMax M3 关联架构论文 | MiniMax Sparse Attention | [2606.13392v2](https://arxiv.org/abs/2606.13392v2) | 中英全文 |
+新增论文保留已验收的本机 Qwen3.6 35B A3B 译文，缺失部分由实际 GPT-6 Luna（低思考）任务补齐；每块记录实际贡献及来源指纹。Llama 3、OLMo 3、μP 和 GPT-2 使用 Luna；Llama 1 和 Scaling Laws 使用 Qwen 并保留定向辅助修正记录；其余新增论文逐块记录两个模型的贡献。全部译文标记为机器翻译、`humanReviewed: false`，未经全篇人工审校。有限抽查发现的限定词遗漏、数值和公式衔接问题已经定向修正。
 
-MiniMax M3 的官方技术报告链接指向 *MiniMax Sparse Attention*，目录保留报告原题并增加 M3 检索标签。扩充的七篇共 2882 个对齐内容块，其中 Kimi 三篇共 1342 块，此次补齐的 DeepSeek 三篇与 MiniMax Sparse Attention 共 1540 块、68 个正文引用素材。14 篇均为机器译文，`humanReviewed: false`，不代表完成全篇人工审校。
-
-三个 Kimi 固定版本明确使用 **CC BY-NC-ND 4.0**。用户于 **2026-10-11** 确认已获得作者授权公开这三篇固定版本的中文全文，发布依据为该用户确认，未独立核验书面授权文件；原始许可标注继续保留。同日用户进一步明确要求将剩余 DeepSeek V3／R1／V4 与 MiniMax Sparse Attention 全部上线，本轮按该指示补齐这四篇正文，不更改已有十篇全文或其模型记录。来源核验、固定版本与本地导入命令见 [论文来源记录](docs/paper-sources.md)。
-
-本地已加入 **Gemini 1.0、1.5、2.5** 和 **Gemma 1、2、3、4** 七篇核心技术报告，均提供完整中英 HTML，共 2600 个对齐内容块、115 个正文素材。Gemini 2.5 报告同时介绍 2.0；本批不收录 Gemini 3.x 模型卡。Gemma 2 原始 HTML 中两处错位表头已按固定版本 PDF 修复，原始文件保留。
-
-随后本地加入 **Chinchilla** 对应的 [Training Compute-Optimal Large Language Models](https://arxiv.org/abs/2203.15556v1)，提供完整中英 HTML，包含 244 个对齐内容块、14 个正文素材及附录 A–J；标签为 Chinchilla、预训练、缩放定律，中文由实际 GPT-6 Luna（低思考）生成。固定来源、许可与模型记录见 [Chinchilla 来源记录](docs/paper-sources.md#chinchilla)。
-
-本次公开的 `paper-data/` 包含 **22 个中英全文条目**（21 篇论文及 Qwen3.5 官方文章），共 8053 个对齐内容块、320 个正文素材、387 个处理后文件；添加 Chinchilla 前的 21 个条目的正文、元数据和图片共 369 个文件逐文件哈希不变。用户于 2026-10-11 明确要求先发布这些已完成条目及阅读器更新，再继续新增预训练论文；新增的 20 篇不在本次发布范围。Gemini 1.0／2.5 使用实际 GPT-6 Luna；Gemini 1.5 和四篇 Gemma 保留已验收的本地 Qwen3.6 译文，由 Luna 续译未完成部分，逐块记录实际贡献。均为机器译文，未经全篇人工审校。固定来源与修复记录见 [Gemini 与 Gemma 来源记录](docs/paper-sources.md#gemini-与-gemma-核心报告)。
+Kimi 三篇中文全文的公开依据是用户于 2026-10-11 确认已获得作者授权；原许可标注及具体记录保留在 [来源记录](docs/paper-sources.md)。
 
 需要导入或重新翻译论文时，使用下面的流程。开发服务器默认读取被 Git 忽略的原始工作目录 `data/`；运行 `npm run dev` 即可阅读该目录中的处理结果。本地处理时保留 JSON 检查点，便于中断后继续翻译；发布时导出 HTML 正文。原始下载的 HTML、检查点和模型权重不属于发布库。
 
@@ -51,7 +35,18 @@ MiniMax M3 的官方技术报告链接指向 *MiniMax Sparse Attention*，目录
 
 论文下载与翻译是本机执行的离线处理步骤，浏览器和 Vercel 都不会直接调用本机模型。使用已有的 LM Studio 模型，不下载或提交模型权重。
 
-[项目协作规则](AGENTS.md)要求优先使用官方英文 HTML；固定版本只有 PDF 时，继续执行 **PDF → 英文 HTML → 中文 HTML**，保留结构、公式、图表、引用、页码对应和来源指纹，不能仅放 PDF 链接代替正文。当前收录的报告都有官方 HTML；PDF 自动转换路径尚未实现。
+[项目协作规则](AGENTS.md)要求优先使用官方英文 HTML；固定版本只有 PDF 时，继续执行 **PDF → 英文 HTML → 中文 HTML**，保留结构、公式、图表、引用、页码对应和来源指纹，不能仅放 PDF 链接代替正文。GPT-2 已实现该路径：采用人工定位并经过程序覆盖验证的布局配方，转换 24 页官方 PDF，生成完整语义 HTML、17 个表格与 5 张局部图像。其他 PDF 需要自己的布局配方与核查，不能把 GPT-2 配方直接套用。
+
+`scripts/convert-pdf.py` 使用 pdfplumber 0.11.9 和 pypdf 6.10.0；经核查的 GPT-2 配方为 `paper-metadata/pdf-recipes/gpt-2-technical-report.json`。将官方 PDF 保存至被忽略的工作目录后转换：
+
+```sh
+python scripts/convert-pdf.py --pdf data/imports/gpt-2/source.pdf \
+  --recipe paper-metadata/pdf-recipes/gpt-2-technical-report.json \
+  --out-dir data/imports/gpt-2/converted
+npm run paper:import-pdf -- --help
+```
+
+PDF 导入器需要转换目录、原始 PDF、布局配方和来源身份元数据；核对 PDF／HTML／素材指纹、所有来源页和字符覆盖后才注册。随后使用相同翻译及 HTML 导出流程。原 PDF、模型响应和转换中间结果保留在本地工作目录。
 
 ```sh
 # 下载官方 arXiv HTML，提取可对齐的内容块与本地图像。
@@ -120,7 +115,7 @@ npm run paper:translate -- qwen3-5-official-article
 src/                 阅读器与数据访问层（代码）
 scripts/             离线导入、翻译、验证与构建脚本（代码）
 docs/                设计与数据部署说明（代码）
-paper-metadata/      经来源核验的分类标签（独立阅读元数据）
+paper-metadata/      经核验的分类、固定版本作者与 PDF 布局配方
 paper-data/          经验证的公开处理数据（整树 Git LFS 跟踪）
   catalog.json       全文与仅来源条目的发布目录
   papers/<id>/
@@ -155,7 +150,7 @@ DATA_DIR=.cache/local-library/paper-data npm run dev
 npm run paper:verify -- --strict-translation --require-data
 ```
 
-该命令生成 `.cache/local-library/paper-data/`，不会上传或更新公开库。公共库使用显式审查的目录，本次公开快照包含 22 个全文条目。添加论文、修改界面和构建本地库不等于发布授权；只有用户明确要求发布时才推送 GitHub 或部署 Vercel。用于组装的公共元数据暂存目录属于被忽略的临时材料，不是自动发布本地全文的通道。校验处理后快照再构建：
+该命令生成 `.cache/local-library/paper-data/`，不会上传或更新公开库。公共库使用显式审查的目录，本次公开快照包含 42 个全文条目。添加论文、修改界面和构建本地库不等于发布授权；只有用户明确要求发布时才推送 GitHub 或部署 Vercel。用于组装的公共元数据暂存目录属于被忽略的临时材料，不是自动发布本地全文的通道。校验处理后快照再构建：
 
 ```sh
 node scripts/verify-release-data.mjs --data-dir paper-data

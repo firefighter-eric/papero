@@ -86,6 +86,22 @@ describe('paper data validation', () => {
     expect(() => validatePaper(article, { ...articleEntry, sourceKind: 'arxiv' })).toThrow(/catalog entry/)
   })
 
+  it('requires original PDF provenance and complete page mappings for official papers', () => {
+    const reportEntry: CatalogPaper = { ...entry, id: 'official-paper', arxivId: null, sourceKind: 'official-paper',
+      sourceUrl: 'https://publisher.example/report', sourceHtmlUrl: 'https://publisher.example/report' }
+    const report: PaperDocument = { ...paper(), id: reportEntry.id, arxivId: null,
+      blocks: paper().blocks.map(block => ({ ...block, pdfPages: [1] })),
+      source: { ...paper().source, kind: 'official-paper', format: 'pdf', url: reportEntry.sourceUrl, htmlUrl: reportEntry.sourceHtmlUrl, publishedAt: '2019-02-14',
+        pdf: { url: 'https://publisher.example/report.pdf', sha256: 'b'.repeat(64), bytes: 100, pageCount: 1, version: '2019-02-14-publication' },
+        conversion: { method: 'pdf-layout-to-semantic-html', englishHtmlSha256: paper().source.sha256,
+          tools: [{ name: 'converter', version: '1', parameters: {} }], parameters: { ocr: false }, reviewedPdfPages: [1], notes: [] } } }
+    expect(validateCatalog({ schemaVersion: 1, papers: [reportEntry] }).papers[0].sourceKind).toBe('official-paper')
+    expect(validatePaper(report, reportEntry).source.pdf?.pageCount).toBe(1)
+    expect(() => validatePaper({ ...report, blocks: [{ ...report.blocks[0], pdfPages: [] }] })).toThrow(/source pages/)
+    expect(() => validatePaper({ ...report, source: { ...report.source, conversion: { ...report.source.conversion!, englishHtmlSha256: 'c'.repeat(64) } } })).toThrow(/fingerprint/)
+    expect(() => validateCatalog({ schemaVersion: 1, papers: [{ ...reportEntry, arxivId: entry.arxivId }] })).toThrow(/arxivId/)
+  })
+
   it.each([
     '../private.json',
     'papers/../../secret.json',

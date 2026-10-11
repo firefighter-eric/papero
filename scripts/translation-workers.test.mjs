@@ -4,11 +4,28 @@ import { mkdtemp, mkdir, writeFile, readFile, readdir, rm } from 'node:fs/promis
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { createServer } from 'node:http'
-import { createRequestGate, runBoundedTasks, createSerialWriter, extractCompletionText, translationRequestBudget, protectSourceDelimiters } from './translation-workers.mjs'
-import { parsePaper, sha256 } from './paper-lib.mjs'
+import { createRequestGate, runBoundedTasks, createSerialWriter, extractCompletionText, translationRequestBudget, protectSourceDelimiters, sourceNumericTokens } from './translation-workers.mjs'
+import { parsePaper, sha256, technicalIdentifiers, assertTranslationFidelity } from './paper-lib.mjs'
 import { translatePaper, assertCompletionResponse, translateWithSplitting, compactRequestContexts, parseUnitResponse } from './translate-paper.mjs'
 
 const pause = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds))
+
+test('numeric transport keeps scores and signs separate from immutable model versions', () => {
+  const source = 'Phi-3 and GPT-3 score -3.5% and +10% on 9 tasks, with 15.6T tokens.'
+  assert.deepEqual(technicalIdentifiers(source), ['Phi-3', 'GPT-3'])
+  assert.deepEqual(sourceNumericTokens(source, technicalIdentifiers(source)), ['-3.5%', '+10%', '9', '15.6'])
+  assert.deepEqual(sourceNumericTokens('Use 5-10 examples and 1e-3 steps.'), ['5', '10', '1e-3'])
+  assert.deepEqual(sourceNumericTokens('Phi-3 and Phi-3', technicalIdentifiers('Phi-3 and Phi-3')), [])
+  assertTranslationFidelity(' and Phi-3 ', '以及 Phi-3')
+  assert.throws(() => assertTranslationFidelity(' and Phi-3 ', '以及 Phi-3 -3'), /added/)
+  assert.throws(() => assertTranslationFidelity(' and Phi-3 ', '以及 Phi-2'), /identifier/)
+  const comparison = 'Mistral-7B-v0.3 (63%) or Llama 3 8B (66%)'
+  assert.deepEqual(technicalIdentifiers(comparison), ['Mistral-7B-v0.3', 'Llama 3'])
+  assert.deepEqual(sourceNumericTokens(comparison, technicalIdentifiers(comparison)), ['63%', '8', '66%'])
+  assertTranslationFidelity(comparison, 'Mistral-7B-v0.3（63%）或 Llama 3 8B（66%）')
+  assert.throws(() => assertTranslationFidelity(comparison, 'Mistral-7B-v0.2（63%）或 Llama 3 8B（66%）'), /identifier/)
+  assert.throws(() => assertTranslationFidelity(comparison, 'Mistral-7B-v0.3（63%）或 Llama 3 8B（66%），7B 参数'), /added/)
+})
 
 test('literal think delimiters use reversible per-unit transport and cannot cross units or lose multiplicity', () => {
   const records = [{ id: 'fragment:0', block: 'fragment', text: 'Finish with </think>. Preserve <think> and </think>.', mustPreserve: [] }, { id: 'fragment:1', block: 'fragment', text: 'Use <think> before the explanation.', mustPreserve: [] }]
@@ -192,14 +209,22 @@ test('checkpoint writer serializes snapshots even when batches finish out of ord
   const write = createSerialWriter()
   let active = 0, maximum = 0
   const order = []
-  await Promise.all([3, 1, 2].map(async value => {
-    await pause(value)
+  const release = new Map()
+  const enqueued = new Map()
+  const notifications = new Map()
+  const operations = [3, 1, 2].map(async value => {
+    const ready = new Promise(resolve => { enqueued.set(value, resolve) })
+    notifications.set(value, ready)
+    await new Promise(resolve => { release.set(value, resolve) })
+    enqueued.get(value)()
     return write(async () => {
       active++; maximum = Math.max(maximum, active)
       await pause(5)
       order.push(value); active--
     })
-  }))
+  })
+  for (const value of [1, 2, 3]) { release.get(value)(); await notifications.get(value) }
+  await Promise.all(operations)
   assert.equal(maximum, 1)
   assert.deepEqual(order, [1, 2, 3])
 })

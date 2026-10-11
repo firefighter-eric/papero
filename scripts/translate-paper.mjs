@@ -2,10 +2,10 @@ import { readFile, writeFile, rename } from 'node:fs/promises'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { load } from 'cheerio'
-import { translationUnits, normalizeHeadingNumber, assertTranslationFidelity, technicalIdentifiers, isTechnicalLabelOnly, safeId, sha256, translatedAbstractText } from './paper-lib.mjs'
+import { translationUnits, normalizeHeadingNumber, assertTranslationFidelity, assertBlockTranslationFidelity, technicalIdentifiers, isTechnicalLabelOnly, safeId, sha256, translatedAbstractText } from './paper-lib.mjs'
 import { updateCatalog } from './import-paper.mjs'
 import { withExclusivePaperLock } from './catalog-lock.mjs'
-import { createRequestGate, runBoundedTasks, createSerialWriter, validateConcurrency, extractCompletionText, translationRequestBudget, protectSourceDelimiters } from './translation-workers.mjs'
+import { createRequestGate, runBoundedTasks, createSerialWriter, validateConcurrency, extractCompletionText, translationRequestBudget, protectSourceDelimiters, sourceNumericTokens } from './translation-workers.mjs'
 import { assertModelContinuation, beginModelRun, recordModelUsage } from './translation-provenance.mjs'
 
 const BASE_SYSTEM_PROMPT = `你是严谨的人工智能论文译者。把提供的英文文本片段完整翻译为简体中文。相同 block 的片段来自同一段 HTML，按顺序连接；有些片段被公式、引文或链接分开。context 中 ⟦id⟧ 与 ⟦/id⟧ 标出了每个片段的精确边界，⟪FORMULA⟫ 是保留的原公式。根据 context 理解句意，但只翻译当前片段的 text，绝不能把相邻片段或公式内容补到当前译文。片段不是完整句子时，也只输出对应的句子片段。例如 text="Even with" 必须译为"即使"，不能补出"即使可分离卷积..."；text="where" 译为"其中"，不能补出后面的变量解释。text="and discuss its advantages over models such as" 必须译为"并讨论其相比以下模型的优势，例如"，不得将“优势/模型”后置到引用之后或省略。每个 id 必须对应一条译文，不能遗漏、合并或新增 id。严格保留 text 内每一个阿拉伯数字、正负号、小数、百分号、技术符号、姓名、模型型号、英文基准名称、缩写和链接；不得从 context 复制本片段没有的数字。参数数量的 million/billion/trillion 使用 M/B/T 原样单位，不换算成中文数位：0.5 billion parameters 译为 0.5B 参数，72 billion parameters 译为 72B 参数，范围 0.5 to 72 billion 译为 0.5B 到 72B，禁止译为 0.5亿或72亿。技术标识符 Qwen2.5-72B、GPT-4o、GSM8K 等逐字保留。完整翻译原片段每个概念：advantages 译为优势，models 译为模型，不得漏掉。译文不能加入解释、总结或审稿意见。Transformer 译为 Transformer，attention 译为注意力，self-attention 译为自注意力，multi-head attention 译为多头注意力，position-wise 译为逐位置，scaled dot-product attention 译为缩放点积注意力，sequence transduction 译为序列转换。输出只能是 JSON 对象，格式 {"translations":{"原id":"中文片段", "另一个id":"中文片段"}}。必须逐条输出所有 id，每个 id 只出现一次。不要输出 Markdown 围栏。/no_think`
@@ -22,6 +22,9 @@ function headingText(html) {
 }
 
 async function savePaper(filename, paper) {
+  // A failed resume still persists its observed request history and usage.
+  // Stamp that checkpoint even when it accepted no new text blocks.
+  paper.translation.updatedAt = new Date().toISOString()
   paper.translation.coverage = { complete: paper.blocks.filter(block => block.zh).length, total: paper.blocks.length }
   if (paper.translation.coverage.complete < paper.blocks.length) paper.translation.status = 'pending'
   const temporary = `${filename}.tmp`
@@ -125,7 +128,10 @@ async function translateUnlocked({ id, dataDir, endpoint = process.env.LM_STUDIO
     await runBoundedTasks(batches, async ({ batch, size }, batchIndex) => {
     const batchNumber = batchIndex + 1
     const acceptedCache = new Map()
-    const records = batch.flatMap(({ id: recordId, texts }) => texts.map((sourceText, unitIndex) => ({ id: `${recordId}:${unitIndex}`, text: sourceText, block: recordId, mustPreserve: technicalIdentifiers(sourceText), mustPreserveValues: sourceText.match(/[+-]?(?:\d+(?:[.,]\d+)*)(?:[eE][+-]?\d+)?%?/g) || [] })))
+    const records = batch.flatMap(({ id: recordId, texts }) => texts.map((sourceText, unitIndex) => {
+      const mustPreserve = technicalIdentifiers(sourceText)
+      return { id: `${recordId}:${unitIndex}`, text: sourceText, block: recordId, mustPreserve, mustPreserveValues: sourceNumericTokens(sourceText, mustPreserve) }
+    }))
     const contexts = batch.map(({ id: recordId, context }) => ({ block: recordId, context }))
     const correctedUnitIds = new Set()
     let results
@@ -192,16 +198,17 @@ async function translateUnlocked({ id, dataDir, endpoint = process.env.LM_STUDIO
       const texts = jobResults.map(result => result.text)
       resultIndex += job.texts.length
       if (job.id === '__title') { paper.titleZh = texts[0]; continue }
-      job.block.zh = translationUnits(job.block.en, job.block.kind).render(texts)
+      const rendered = translationUnits(job.block.en, job.block.kind).render(texts)
+      const candidate = job.block.kind === 'heading' ? normalizeHeadingNumber(job.block.en, rendered) : rendered
+      assertBlockTranslationFidelity(job.block.en, candidate)
+      job.block.zh = candidate
       job.block.translation = { status: 'machine', model, provider: 'LM Studio local API', parameters: structuredClone(parameters), modelIdentity: structuredClone(modelIdentity), requestBudget: structuredClone(requestBudget), sourceSha256: sha256(job.block.en), promptSha256: sha256(SYSTEM_PROMPT), translatedAt: new Date().toISOString(), responseChannels: [...new Set(jobResults.map(result => result.responseChannel))] }
       if (job.texts.some(text => /<\/?think>|<\|im_(?:start|end)\|>/.test(text))) job.block.translation.literalTransport = 'opaque-model-delimiters-v2'
       if (instructionsSha256 && selectedCorrectionBlocks.has(job.id)) job.block.translation.reviewCorrection = { method: 'scoped-review-instructions', instructionsSha256 }
       const corrections = [...correctedUnitIds].filter(unitId => unitId.startsWith(`${job.id}:`))
       if (corrections.length) job.block.translation.corrections = { method: 'isolated-fragment-retranslation', unitIds: corrections, promptSha256: sha256(ISOLATED_PROMPT) }
       if (job.block.kind === 'heading') {
-        const normalized = normalizeHeadingNumber(job.block.en, job.block.zh)
-        if (normalized !== job.block.zh) {
-          job.block.zh = normalized
+        if (candidate !== rendered) {
           job.block.translation.normalizations = ['preserve-original-section-number-v1']
         }
         const section = paper.sections.find(item => item.id === job.block.sectionId)

@@ -12,6 +12,7 @@
     "check": "tsc -b && vitest run && node --test scripts/*.test.mjs",
     "test": "vitest run",
     "paper:import": "node --env-file-if-exists=.env scripts/import-paper.mjs",
+    "paper:import-pdf": "node --env-file-if-exists=.env scripts/import-pdf.mjs",
     "article:import": "node --env-file-if-exists=.env scripts/import-qwen-blog.mjs",
     "paper:translate": "node --env-file-if-exists=.env scripts/translate-paper.mjs",
     "paper:benchmark": "node --env-file-if-exists=.env scripts/benchmark-lm-studio.mjs",

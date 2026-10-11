@@ -12,7 +12,7 @@ type Language = 'zh' | 'en'
 export interface ReadingPosition {
   progress: number
   sectionId: string | null
-  headerCollapsed: boolean
+  headerCollapseProgress: number
 }
 
 export interface PaperReaderHandle {
@@ -23,6 +23,8 @@ interface Props {
   paper: PaperDocument
   entry: FullTextCatalogPaper
   preferences: ReaderPreferences
+  /** Restore block anchors during a navigation-panel reflow, before resize scroll events. */
+  layoutKey?: string
   onPosition: (position: ReadingPosition) => void
 }
 
@@ -50,6 +52,7 @@ function namespaceSourceIds(html: string, prefix: string): string {
 }
 
 const TOP_OFFSET = 12
+const HEADER_COLLAPSE_DISTANCE = 160
 
 function blockElements(pane: HTMLElement) {
   return Array.from(pane.querySelectorAll<HTMLElement>('[data-block-id]'))
@@ -102,12 +105,12 @@ function getInitialAnchor(paper: PaperDocument): ReadingAnchor | null {
   return first ? { blockId: first.id, fraction: 0 } : null
 }
 
-export const PaperReader = forwardRef<PaperReaderHandle, Props>(function PaperReader({ paper, entry, preferences, onPosition }, ref) {
+export const PaperReader = forwardRef<PaperReaderHandle, Props>(function PaperReader({ paper, entry, preferences, layoutKey, onPosition }, ref) {
   const panes = useRef<Partial<Record<Language, HTMLDivElement>>>({})
   const anchor = useRef<ReadingAnchor | null>(getInitialAnchor(paper))
   const paneAnchors = useRef<Partial<Record<Language, ReadingAnchor | null>>>({ zh: anchor.current, en: anchor.current })
   const activeLanguage = useRef<Language>(preferences.mode === 'en' ? 'en' : 'zh')
-  const headerCollapsed = useRef(false)
+  const headerCollapseProgress = useRef(0)
   const frame = useRef<number | null>(null)
   const ignoreScroll = useRef(new Map<HTMLElement, number>())
   const paneRefs = useMemo(() => {
@@ -154,15 +157,15 @@ export const PaperReader = forwardRef<PaperReaderHandle, Props>(function PaperRe
       if (first && currentIndex >= 0) {
         const extent = blockExtent(elements, currentIndex, pane)
         const distance = extent.top + current.fraction * extent.height - relativeTop(first, pane)
-        if (distance >= 96) headerCollapsed.current = true
-        else if (distance <= 24) headerCollapsed.current = false
+        // Ignore subpixel rounding at the restored abstract anchor, while the first pixel still responds.
+        headerCollapseProgress.current = distance < 0.5 ? 0 : Math.min(1, distance / HEADER_COLLAPSE_DISTANCE)
       }
     }
     const atEnd = pane && pane.scrollHeight > pane.clientHeight && pane.scrollTop >= pane.scrollHeight - pane.clientHeight - 2
     onPositionRef.current({
       progress: atEnd ? 100 : Math.max(0, Math.min(100, (index + current.fraction) / Math.max(1, body.length) * 100)),
       sectionId: block.sectionId,
-      headerCollapsed: headerCollapsed.current,
+      headerCollapseProgress: headerCollapseProgress.current,
     })
     if (saveTimer.current) clearTimeout(saveTimer.current)
     saveTimer.current = setTimeout(() => saveAnchor(paper.id, current), 400)
@@ -204,7 +207,7 @@ export const PaperReader = forwardRef<PaperReaderHandle, Props>(function PaperRe
     if (preferences.mode !== 'bilingual') activeLanguage.current = preferences.mode
     if (anchor.current && (preferences.synced || modeChanged)) place(anchor.current)
     else preservePanePositions()
-  }, [preferences.mode, preferences.swapped, preferences.fontSize, preferences.synced, place, preservePanePositions])
+  }, [preferences.mode, preferences.swapped, preferences.fontSize, preferences.synced, layoutKey, place, preservePanePositions])
 
   // Images and viewport changes can alter block heights after the initial render.
   useEffect(() => {

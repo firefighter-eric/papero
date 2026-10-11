@@ -79,7 +79,7 @@ describe('paper tag filtering', () => {
     expect(matchesPaperFilters(unrelated, 'Chillchila', '', '')).toBe(false)
   })
 
-  it('intersects pretraining and scaling-law searches and registers only the new paper', () => {
+  it('intersects pretraining and scaling-law searches without inferring the Chinchilla family', () => {
     const report = paper(registry.papers['chinchilla-training-compute-optimal'], 'Training Compute-Optimal Large Language Models')
     expect(RESEARCH_TAGS).toContain('缩放定律')
     expect(matchesPaperFilters(report, 'SCALING LAWS', 'Chinchilla', '预训练')).toBe(true)
@@ -90,8 +90,52 @@ describe('paper tag filtering', () => {
     for (const [id, tags] of Object.entries(registry.papers)) {
       if (id !== 'chinchilla-training-compute-optimal') {
         expect(tags).not.toContain('Chinchilla')
-        expect(tags).not.toContain('缩放定律')
       }
     }
+  })
+
+  it('separates dataset and method families from models mentioned by their papers', () => {
+    const dataset = paper(registry.papers['datacomp-lm'], 'DataComp-LM compares Llama 3 and Gemma')
+    expect(matchesPaperFilters(dataset, 'DataComp for Language Models', 'DCLM', '预训练数据')).toBe(true)
+    expect(matchesPaperFilters(dataset, 'data mixing', 'DCLM', '预训练')).toBe(true)
+    expect(matchesPaperFilters(dataset, '', 'Llama', '预训练')).toBe(false)
+    expect(matchesPaperFilters(dataset, '', 'Gemma', '后训练')).toBe(false)
+
+    const method = paper(registry.papers['tensor-programs-v-mup'], 'Tensor Programs V')
+    for (const alias of ['muP', 'MUP', 'muTransfer', '最大更新参数化']) {
+      expect(matchesPaperFilters(method, alias, 'μP', '训练优化')).toBe(true)
+    }
+    expect(matchesPaperFilters(method, '', 'GPT', '训练优化')).toBe(false)
+    expect(PAPER_FAMILIES).toContain('DCLM')
+    expect(PAPER_FAMILIES).toContain('μP')
+  })
+
+  it('finds instruction-tuning stages that the added reports actually cover', () => {
+    for (const id of ['llama-1-technical-report', 'llama-2-technical-report', 'llama-3-technical-report',
+      'olmo-2-technical-report', 'olmo-3-technical-report', 'deepseek-llm', 'deepseek-moe', 'datacomp-lm']) {
+      const report = paper(registry.papers[id as keyof typeof registry.papers])
+      expect(matchesPaperFilters(report, '', '', '预训练')).toBe(true)
+      expect(matchesPaperFilters(report, '', '', '后训练')).toBe(true)
+    }
+    for (const id of ['gpt-2-technical-report', 'gpt-3-technical-report', 'clip-pretraining']) {
+      expect(matchesPaperFilters(paper(registry.papers[id as keyof typeof registry.papers]), '', '', '后训练')).toBe(false)
+    }
+    expect(registry.papers['bert-pretraining']).toContain('监督训练')
+    expect(registry.papers['t5-text-to-text-transformer']).toContain('监督训练')
+    expect(registry.papers['switch-transformers']).toContain('监督训练')
+  })
+
+  it('filters pretraining datasets and keeps topic tags independently searchable', () => {
+    const refined = paper(registry.papers['refinedweb-dataset'], 'The RefinedWeb Dataset')
+    expect(matchesPaperFilters(refined, 'RefinedWeb', 'Falcon', '预训练数据')).toBe(true)
+    expect(matchesPaperFilters(refined, 'corpus', 'Falcon', '预训练')).toBe(true)
+    expect(matchesPaperFilters(refined, '', 'FineWeb', '预训练数据')).toBe(false)
+    const moe = paper(registry.papers['deepseek-moe'])
+    expect(matchesPaperFilters(moe, 'MoE', 'DeepSeek', '模型架构')).toBe(true)
+    expect(classificationTags(moe.tags)).not.toContain('MoE')
+    const clip = paper(registry.papers['clip-pretraining'])
+    expect(matchesPaperFilters(clip, '多模态', 'CLIP', '预训练')).toBe(true)
+    expect(classificationTags(clip.tags)).not.toContain('多模态')
+    expect(matchesPaperFilters(paper(['预训练'], 'A paper citing FineWeb and muTransfer'), '', 'FineWeb', '')).toBe(false)
   })
 })

@@ -5,9 +5,69 @@ import { mkdtemp, mkdir, writeFile, readFile, rm } from 'node:fs/promises'
 import path from 'node:path'
 import { tmpdir } from 'node:os'
 import { parsePaper, sanitizeHtml, sanitizeSvg, translationUnits, normalizeHeadingNumber, assertTranslationFidelity, technicalIdentifiers, isTechnicalLabelOnly, sha256, safeId, validArxivId, visibleProseText, scientificSignature, isLiteralChatTemplateNode, isLiteralFencedCodeNode } from './paper-lib.mjs'
+
+test('explicit LaTeXML verbatim table samples preserve split JSON lines while surrounding descriptions translate', () => {
+  const html = '<table><tr><td>Data instance</td><td><span class="ltx_verbatim ltx_font_typewriter"><span>{</span></span><span class="ltx_verbatim ltx_font_typewriter"><span>"url": "http://example.com/24758",</span></span><span class="ltx_verbatim ltx_font_typewriter"><span>"text": "Original training sample."</span></span><span class="ltx_verbatim ltx_font_typewriter"><span>}</span></span><p>This sample comes from a web crawl.</p></td></tr></table>'
+  const prepared = translationUnits(html, 'table')
+  assert.deepEqual(prepared.units.map(unit => unit.text), ['Data instance', 'This sample comes from a web crawl.'])
+  const translated = prepared.render(['数据样例', '该样例来自网页抓取。'])
+  assert.deepEqual(scientificSignature(load(html, {}, false)), scientificSignature(load(translated, {}, false)))
+  assert.ok(translated.includes('Original training sample.'))
+  assert.ok(translated.includes('该样例来自网页抓取。'))
+})
+
+test('unambiguous US slash dates retain calendar identity without licensing changed dates or extra scores', () => {
+  assertTranslationFidelity('09/30/2024 dump', '2024年9月30日转储')
+  assert.throws(() => assertTranslationFidelity('09/30/2024 dump', '2024年9月29日转储'), /Calendar date/)
+  assert.throws(() => assertTranslationFidelity('09/30/2024 dump', '2024年9月30日转储，得分96'), /added/)
+  assert.throws(() => assertTranslationFidelity('09/31/2024 dump', '2024年9月30日转储'))
+})
 import { parseUnitResponse, translateWithSplitting, compactRequestContexts } from './translate-paper.mjs'
 import { importArxiv, updateCatalog } from './import-paper.mjs'
 import { translatedAbstractText } from './paper-lib.mjs'
+import { assertBlockTranslationFidelity } from './paper-lib.mjs'
+
+test('joined blocks reject a percentage copied across preserved math after fragments pass', () => {
+  const source = '<p>The model is 10<math><mo>×</mo></math> smaller.</p>'
+  assertTranslationFidelity(' smaller.', '%更小。')
+  assert.throws(() => assertBlockTranslationFidelity(source, '<p>模型规模缩小 10<math><mo>×</mo></math>%。</p>'), /Numeric value/)
+  assertBlockTranslationFidelity(source, '<p>模型规模缩小 10<math><mo>×</mo></math>。</p>')
+  assertBlockTranslationFidelity('<p>We improve 50<math><mo>%</mo></math>.</p>', '<p>我们提升 50<math><mo>%</mo></math>。</p>')
+  assert.throws(() => assertBlockTranslationFidelity(source, '<p>模型规模缩小 10<math><mo>%</mo></math>。</p>'), /Scientific markup/)
+})
+
+test('taking advantage of reward weaknesses is exploitation rather than a model advantage', () => {
+  assertTranslationFidelity('The model is taking advantage of weaknesses in our reward.', '模型利用了奖励中的弱点。')
+  assert.throws(() => assertTranslationFidelity('The model takes advantage of a weakness, but we discuss its advantages over other models.', '模型利用了一个弱点，我们讨论它与其他模型。'), /advantages/)
+})
+
+test('plain MBPP assertion spans preserve executable source and existing fragment boundaries', () => {
+  const code = 'assert heap_queue_largest([25, 35, 22, 85, 14, 65, 75, 22, 58], 5) == [85, 75, 65, 58, 35]'
+  const html = `<p>Run the test:</p><span class="ltx_text">${code}</span>`
+  assert.ok(isTechnicalLabelOnly(code))
+  assert.deepEqual(translationUnits(html, 'table').units.map(unit => unit.text), ['Run the test:', code])
+  assertTranslationFidelity(code, code)
+  assert.throws(() => assertTranslationFidelity(code, `断言：${code}`), /Literal Python assertion/)
+  assert.throws(() => assertTranslationFidelity(code, code.replace('==', '!=')), /Literal Python assertion/)
+  assertBlockTranslationFidelity(html, `<p>运行测试：</p><span class="ltx_text">${code}</span>`)
+  assert.throws(() => assertBlockTranslationFidelity(html, `<p>运行测试：</p><span class="ltx_text">断言：${code}</span>`), /Scientific markup/)
+})
+
+test('complete SacreBLEU configuration signatures are preserved without translating their fields', () => {
+  const signature = '[SacreBLEU signature: BLEU+case.mixed+numrefs.1+smooth.exp+tok.intl+version.1.2.20]'
+  assert.ok(isTechnicalLabelOnly(signature))
+  assertTranslationFidelity(signature, signature)
+  assert.throws(() => assertTranslationFidelity(signature, signature.replace('tok.intl', 'tok.zh')), /Literal SacreBLEU/)
+  assert.throws(() => assertTranslationFidelity(signature, `评分配置：${signature}`), /Literal SacreBLEU/)
+  assert.equal(isTechnicalLabelOnly(`We use ${signature} to evaluate our translations.`), false)
+})
+
+test('decimal dataset versions followed by modal may are not invented calendar dates', () => {
+  assertTranslationFidelity('OSCAR-22.01 may be distributed without deduplication.', 'OSCAR-22.01 可能未经去重就被分发。')
+  assert.throws(() => assertTranslationFidelity('OSCAR-22.01 may be distributed without deduplication.', 'OSCAR-22.02 可能未经去重就被分发。'), /Numeric value/)
+  assertTranslationFidelity('We released it on 1 May.', '我们在5月1日发布。')
+  assert.throws(() => assertTranslationFidelity('We released it on 1 May.', '我们在5月2日发布。'), /Calendar date/)
+})
 
 test('derived translated abstract excludes front matter and duplicate LaTeX annotations', () => {
   const blocks = [
@@ -457,6 +517,69 @@ test('quantity compounds do not relax identifier, sign, range or subtraction bou
   assert.doesNotThrow(() => assertTranslationFidelity('The Qwen3-1-million-token model.', 'Qwen3-1-million-token 模型。'))
   assert.throws(() => assertTranslationFidelity('The Qwen3-1-million-token model.', 'Qwen3-1000000-token 模型。'), /Technical identifier/)
   assert.throws(() => assertTranslationFidelity('The Prototype-1-million-token model.', 'Prototype-1000000-token 模型。'), /Numeric value/)
+})
+
+test('FineWeb spaced token compounds preserve their scale, snapshot count and occurrence counts', () => {
+  const source = 'FineWeb is a 15-trillion token dataset derived from 96 Common Crawl snapshots.'
+  for (const value of ['15T', '15 万亿', '15000000000000']) {
+    assert.doesNotThrow(() => assertTranslationFidelity(source, `FineWeb 包含 ${value} token，来自 96 个 Common Crawl 快照。`))
+  }
+  assert.doesNotThrow(() => assertTranslationFidelity('FineWeb-Edu is a 1.3-trillion token collection.', 'FineWeb-Edu 包含 1.3 万亿 token。'))
+  assert.doesNotThrow(() => assertTranslationFidelity('A 15-trillion-token dataset from 96 snapshots.', '包含15T token的数据集来自96个快照。'))
+  for (const value of ['14T', '15 亿', '15', '-15T']) {
+    assert.throws(() => assertTranslationFidelity(source, `FineWeb 包含 ${value} token，来自 96 个 Common Crawl 快照。`), /Numeric value/)
+  }
+  assert.throws(() => assertTranslationFidelity(source, 'FineWeb 包含15T token，来自Common Crawl快照。'), /Numeric value omitted or changed: 96/)
+  assert.throws(() => assertTranslationFidelity(source, 'FineWeb 包含15T token，来自95个Common Crawl快照。'), /Numeric value omitted or changed: 96/)
+  assert.throws(() => assertTranslationFidelity(source, 'FineWeb 包含15T token，来自96个Common Crawl快照，另有15T token。'), /Numeric values added/)
+  assert.doesNotThrow(() => assertTranslationFidelity('Two 15-trillion token datasets.', '两个15T token数据集。'))
+  assert.throws(() => assertTranslationFidelity('15-trillion token datasets and another 15-trillion token dataset.', '15T token数据集与另一个数据集。'), /Numeric value/)
+})
+
+test('shared-year month ranges preserve both ordered endpoints without licensing different dates or scores', () => {
+  const source = 'We add Wikipedia dumps from the June-August 2022 period, covering 20 languages.'
+  for (const interval of ['2022 年 6 月至 8 月', '2022年6月到8月', '2022年6月至2022年8月']) {
+    assert.doesNotThrow(() => assertTranslationFidelity(source, `我们添加${interval}期间的维基百科转储，涵盖20种语言。`))
+  }
+  for (const interval of ['June–August 2022', 'Jun.-Aug. 2022', 'June 2022 to August 2022', 'June through August 2022']) {
+    assert.doesNotThrow(() => assertTranslationFidelity(interval, '2022年6月至8月'))
+  }
+  for (const interval of ['2022年6月至9月', '2022年7月至8月', '2021年6月至8月', '2022年6月至2023年8月', '2022年8月', '2022年6月', '2022年8月至6月', '6月至8月', '2022年6月至8月19日']) {
+    assert.throws(() => assertTranslationFidelity(source, `我们添加${interval}期间的维基百科转储，涵盖20种语言。`), /Calendar date/)
+  }
+  assert.throws(() => assertTranslationFidelity(source, '我们添加2022年6月至8月期间的维基百科转储，涵盖19种语言。'), /Numeric value omitted or changed: 20/)
+  assert.throws(() => assertTranslationFidelity(source, '我们添加2022年6月至8月期间的维基百科转储，涵盖20种语言，得分99。'), /Numeric values added/)
+  assert.throws(() => assertTranslationFidelity(source, '我们添加2022年6月至8月、2022年6月至8月期间的维基百科转储，涵盖20种语言。'), /Calendar dates added/)
+  assert.throws(() => assertTranslationFidelity('June 2022 and August 2022.', '2022年6月至8月。'), /Calendar date/)
+})
+
+test('explicit between month intervals retain ordered endpoints across years', () => {
+  const source = 'Data collected between August 2024 and January 2025 includes 20 languages.'
+  assert.doesNotThrow(() => assertTranslationFidelity(source, '2024年8月至2025年1月收集的数据包含20种语言。'))
+  for (const interval of ['2024年7月至2025年1月', '2024年8月至2025年2月', '2025年1月至2024年8月', '2024年8月', '2025年1月']) {
+    assert.throws(() => assertTranslationFidelity(source, `${interval}收集的数据包含20种语言。`), /Calendar date/)
+  }
+  assert.throws(() => assertTranslationFidelity(source, '2024年8月至2025年1月收集的数据包含19种语言。'), /Numeric value/)
+  assert.throws(() => assertTranslationFidelity(source, '2024年8月至2025年1月收集的数据包含20种语言，得分99。'), /Numeric values added/)
+  assert.throws(() => assertTranslationFidelity('August 2024 and January 2025.', '2024年8月至2025年1月。'), /Calendar date/)
+})
+
+test('space-separated pretraining sizes may precede or follow the protected version without changing values', () => {
+  const source = 'Our 8B and 70B Llama 3 variants outperform others.'
+  assert.doesNotThrow(() => assertTranslationFidelity(source, '我们的 Llama 3 8B 和70B变体优于其他模型。'))
+  assert.doesNotThrow(() => assertTranslationFidelity('OLMo 2  7B improves by 10.6 points.', 'OLMo 2 7B 提升了10.6分。'))
+  assert.throws(() => assertTranslationFidelity(source, '我们的 Llama 3 8B 和72B变体优于其他模型。'), /Numeric value/)
+  assert.throws(() => assertTranslationFidelity(source, '我们的 Llama 4 8B 和70B变体优于其他模型。'), /identifier/)
+  assert.throws(() => assertTranslationFidelity('Llama-3-8B scores 66%.', 'Llama-3-70B 得分66%。'), /identifier/)
+})
+
+test('explicit Stage and Phase references retain quantities across translated tables and shared labels', () => {
+  const source = 'Stage 1 scores 5. Phase 3 scores 8. Cooldown (Phase 4 and 5).'
+  assert.doesNotThrow(() => assertTranslationFidelity(source, '阶段1得分5。阶段3得分8。冷却（Phase 4 和 Phase 5）。'))
+  assert.doesNotThrow(() => assertTranslationFidelity(source, '第一阶段得分5。第三阶段得分8。冷却（第四阶段和第五阶段）。'))
+  assert.throws(() => assertTranslationFidelity(source, '阶段5得分1。阶段3得分8。冷却（Phase 4 和 Phase 5）。'), /Stage reference/)
+  assert.throws(() => assertTranslationFidelity(source, '阶段1得分5。阶段3得分8。冷却（Phase 4 和 Phase 6）。'), /Stage reference/)
+  assert.throws(() => assertTranslationFidelity('Stage 2 has 5 layers.', '阶段5有2层。'), /Stage reference/)
 })
 
 test('source listings are preserved and marker context has exact node boundaries and formulas', () => {

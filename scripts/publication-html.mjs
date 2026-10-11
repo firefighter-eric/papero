@@ -1,5 +1,6 @@
 import { load } from 'cheerio'
 import { sanitizeHtml, sha256 } from './paper-lib.mjs'
+import { attachPublicationBibliography, publicationAuthors } from './publication-bibliography.mjs'
 
 const escape = value => String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;')
 const fingerprint = value => typeof value === 'string' && /^[a-f0-9]{64}$/.test(value)
@@ -10,9 +11,10 @@ export function renderReadingDocument(paper, language, blocks = paper.blocks) {
   try { source = new URL(paper.source.url) } catch { throw new Error(`Invalid publication source URL: ${paper.id}.`) }
   if (source.protocol !== 'https:' || source.username || source.password) throw new Error(`Invalid publication source URL: ${paper.id}.`)
   const title = language === 'zh' ? paper.titleZh || paper.title : paper.title
-  const sourceLabel = paper.source.kind === 'official-article' ? (language === 'zh' ? 'Qwen · 官方文章' : 'Qwen · Official article') : 'arXiv'
+  const sourceLabel = paper.source.kind === 'official-article' ? (language === 'zh' ? 'Qwen · 官方文章' : 'Qwen · Official article')
+    : paper.source.kind === 'official-paper' ? (language === 'zh' ? '官方论文' : 'Official paper') : 'arXiv'
   const translationNote = language === 'zh' ? '<p>机器翻译，未经人工审校。</p>' : ''
-  const prefix = `<!doctype html>\n<html lang="${language === 'zh' ? 'zh-CN' : 'en'}"><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' file:; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escape(title)}</title><style>${css}</style></head><body><header><h1>${escape(title)}</h1><p>${escape(paper.authors.join(', '))}</p><p><a href="${escape(paper.source.url)}">${escape(sourceLabel)}</a></p>${translationNote}</header><article data-paper-id="${escape(paper.id)}" data-language="${language}">\n`
+  const prefix = `<!doctype html>\n<html lang="${language === 'zh' ? 'zh-CN' : 'en'}"><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' file:; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escape(title)}</title><style>${css}</style></head><body><header><h1>${escape(title)}</h1><p>${escape(publicationAuthors(paper).join(', '))}</p><p><a href="${escape(paper.source.url)}">${escape(sourceLabel)}</a></p>${translationNote}</header><article data-paper-id="${escape(paper.id)}" data-language="${language}">\n`
   const parts = [prefix], offsets = []
   let byteOffset = Buffer.byteLength(prefix, 'utf8')
   for (const block of blocks) {
@@ -33,6 +35,7 @@ export const renderReadingHtml = (paper, language, blocks = paper.blocks) => ren
 
 /** Convert internal checkpoint data into metadata plus standalone reading documents. */
 export function createPublication(paper) {
+  paper = attachPublicationBibliography(paper)
   for (const block of paper.blocks) for (const language of ['en', 'zh']) {
     const html = block[language]
     if ((language === 'en' && (typeof html !== 'string' || !html))

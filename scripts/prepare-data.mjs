@@ -41,9 +41,9 @@ function assertSourceOnlyEntry(entry) {
       || entry.sourceUrl !== `https://arxiv.org/abs/${entry.arxivId}` || entry.sourceHtmlUrl !== `https://arxiv.org/html/${entry.arxivId}`) {
       throw new Error(`Invalid pinned source-only arXiv identity: ${entry.id}.`)
     }
-  } else if (entry.sourceKind === 'official-article') {
+  } else if (entry.sourceKind === 'official-article' || entry.sourceKind === 'official-paper') {
     if (entry.arxivId !== null || !safeHttpsUrl(entry.sourceUrl) || !safeHttpsUrl(entry.sourceHtmlUrl)) {
-      throw new Error(`Invalid source-only official article identity or HTTPS URL: ${entry.id}.`)
+      throw new Error(`Invalid source-only official source identity or HTTPS URL: ${entry.id}.`)
     }
   } else throw new Error(`Unsupported source-only source kind: ${entry.id}.`)
 }
@@ -191,7 +191,8 @@ export async function prepareData({
       excludedAssets.add(path.posix.join(path.posix.dirname(dataPath), 'assets', asset.filename))
       return false
     })
-    const publication = createPublication({ ...paper, tags, assets })
+    const publication = createPublication({ ...paper, tags, assets,
+      ...(assets.length < paper.assets.length ? { publicationSourceAssets: paper.assets } : {}) })
     generated.set(dataPath, Buffer.from(JSON.stringify(publication.metadata, null, 2) + '\n'))
     for (const language of ['en', 'zh']) generated.set(path.posix.join(path.posix.dirname(dataPath), `${language}.html`), Buffer.from(publication.html[language]))
   }

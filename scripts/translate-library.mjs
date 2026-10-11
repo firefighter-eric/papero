@@ -43,7 +43,7 @@ export function createRequestGate(limit) {
 
 export async function translateLibrary({ dataDir = process.env.DATA_DIR || 'data', ids = [], concurrency = 2,
   translate = translatePaper, report = value => console.log(JSON.stringify(value)),
-  handleSignals = false, signalEmitter = process, ...options } = {}) {
+  handleSignals = false, signalEmitter = process, continueOnPaperError = false, ...options } = {}) {
   concurrency = concurrencyLimit(concurrency)
   const catalog = JSON.parse(await readFile(path.join(dataDir, 'catalog.json'), 'utf8'))
   if (catalog.schemaVersion !== 1 || !Array.isArray(catalog.papers)) throw new Error('Invalid local paper catalog')
@@ -76,11 +76,14 @@ export async function translateLibrary({ dataDir = process.env.DATA_DIR || 'data
   let nextPaper = 0
   const processPaper = async id => {
     try {
-      const paper = await translate({ ...options, id, dataDir, concurrency, requestGate })
+      // A failed fragment still stops and drains its own paper's workers. In
+      // an explicitly resilient run, other documents can use the shared gate.
+      const paperGate = continueOnPaperError ? action => requestGate(action) : requestGate
+      const paper = await translate({ ...options, id, dataDir, concurrency, requestGate: paperGate })
       report({ type: 'paper-translation-complete', id, coverage: paper.translation.coverage, status: paper.translation.status })
       return { status: 'fulfilled', value: paper }
     } catch (error) {
-      if (!firstFailure) {
+      if (!firstFailure && !continueOnPaperError) {
         firstFailure = error
         requestGate.stop(error)
       }
@@ -101,6 +104,12 @@ export async function translateLibrary({ dataDir = process.env.DATA_DIR || 'data
   report({ type: 'library-translation-finished', completedPapers: results.filter(result => result?.status === 'fulfilled').length,
     totalPapers: selected.length, elapsedSeconds: Number(((Date.now() - started) / 1000).toFixed(3)), requests: requestGate.stats() })
   if (firstFailure) throw firstFailure
+  const failures = results.flatMap((result, index) => result?.status === 'rejected' ? [{ id: selected[index], error: result.reason }] : [])
+  if (failures.length) {
+    const error = new AggregateError(failures.map(failure => failure.error), `${failures.length} paper(s) incomplete: ${failures.map(failure => failure.id).join(', ')}`)
+    error.failedPaperIds = failures.map(failure => failure.id)
+    throw error
+  }
   return results.map(result => result.value)
 }
 
@@ -116,6 +125,7 @@ export function parseLibraryArguments(args) {
       options.batchCharacters = Number(value)
     }
     else if (argument === '--allow-model-change') options.allowModelChange = true
+    else if (argument === '--continue-on-paper-error') options.continueOnPaperError = true
     else if (argument === '--model') {
       const value = args[++index]
       if (!value || value.startsWith('--')) throw new Error('--model requires an exact local API model identifier')
@@ -130,7 +140,7 @@ export function parseLibraryArguments(args) {
 if (import.meta.url === pathToFileURL(process.argv[1] || '').href) {
   try {
     const options = parseLibraryArguments(process.argv.slice(2))
-    if (options.help) console.log('Usage: npm run library:translate -- [paper-id ...] [--concurrency 1..4] [--batch-characters 256..6000] [--model exact-api-id] [--allow-model-change]\nDefault: all locally registered papers, 2 concurrent local API requests, batches of 6000 source characters. Completed blocks are reused. An explicit model change preserves prior per-block provenance. One global request limit includes corrections and retries; each paper has one writer. SIGINT/SIGTERM drain accepted requests before exit. No downloads or uploads.')
+    if (options.help) console.log('Usage: npm run library:translate -- [paper-id ...] [--concurrency 1..4] [--batch-characters 256..6000] [--model exact-api-id] [--allow-model-change] [--continue-on-paper-error]\nDefault: all locally registered papers, 2 concurrent local API requests, batches of 6000 source characters. Completed blocks are reused. An explicit model change preserves prior per-block provenance. One global request limit includes corrections and retries; each paper has one writer. --continue-on-paper-error drains a failed paper and continues the others, then exits unsuccessfully with incomplete paper IDs. SIGINT/SIGTERM drain accepted requests before exit. No downloads or uploads.')
     else await translateLibrary({ ...options, handleSignals: true })
   } catch (error) {
     console.error(JSON.stringify({ type: 'library-translation-error', message: error.message }))
