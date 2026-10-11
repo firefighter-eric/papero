@@ -104,7 +104,7 @@ async function scroll(language: 'zh' | 'en', top: number) {
 
 describe('reading header folding', () => {
   it('keeps details accessible when expanded and preserves a manual expansion until the automatic state or paper changes', async () => {
-    await act(() => root.render(<PaperHeader entry={entry} paper={paper} collapsed />))
+    await act(() => root.render(<PaperHeader entry={entry} paper={paper} collapseProgress={1} />))
     const details = host.querySelector<HTMLDivElement>('.paper-heading-details')!
     const button = host.querySelector<HTMLButtonElement>('button')!
     expect(details.getAttribute('aria-hidden')).toBe('true')
@@ -117,33 +117,39 @@ describe('reading header folding', () => {
     expect(details.hasAttribute('inert')).toBe(false)
     expect(button.getAttribute('aria-label')).toBe('收起论文信息')
     expect(button.getAttribute('aria-expanded')).toBe('true')
-    await act(() => root.render(<PaperHeader entry={entry} paper={paper} collapsed />))
+    await act(() => root.render(<PaperHeader entry={entry} paper={paper} collapseProgress={0.75} />))
     expect(details.getAttribute('aria-hidden')).toBe('false')
-    await act(() => root.render(<PaperHeader entry={entry} paper={paper} collapsed={false} />))
+    await act(() => root.render(<PaperHeader entry={entry} paper={paper} collapseProgress={0} />))
     expect(details.getAttribute('aria-hidden')).toBe('false')
     expect(host.querySelector('button')).toBeNull()
-    await act(() => root.render(<PaperHeader entry={entry} paper={paper} collapsed />))
+    await act(() => root.render(<PaperHeader entry={entry} paper={paper} collapseProgress={1} />))
     expect(details.getAttribute('aria-hidden')).toBe('true')
     await act(() => host.querySelector<HTMLButtonElement>('button')!.click())
-    await act(() => root.render(<PaperHeader entry={{ ...entry, id: 'another-paper' }} paper={paper} collapsed />))
+    await act(() => root.render(<PaperHeader entry={{ ...entry, id: 'another-paper' }} paper={paper} collapseProgress={1} />))
     expect(details.getAttribute('aria-hidden')).toBe('true')
   })
 
-  it.each(['zh', 'en'] as const)('starts after front matter, then folds and unfolds from %s scrolling with a stable middle zone', async language => {
+  it.each(['zh', 'en'] as const)('starts folding with the first pixel of %s scrolling, follows distance linearly and retraces on return', async language => {
     const onPosition = vi.fn<(position: ReadingPosition) => void>()
     await act(() => root.render(<PaperReader paper={paper} entry={entry} preferences={preferences} onPosition={onPosition} />))
     expect(pane('zh').scrollTop).toBe(228)
     expect(pane('en').scrollTop).toBe(308)
-    expect(onPosition.mock.lastCall?.[0]).toMatchObject({ sectionId: 'abstract', progress: 0, headerCollapsed: false })
+    expect(onPosition.mock.lastCall?.[0]).toMatchObject({ sectionId: 'abstract', progress: 0, headerCollapseProgress: 0 })
     const abstractTop = paneMetrics(pane(language)).tops[1]
-    await scroll(language, abstractTop + 100)
-    expect(onPosition.mock.lastCall?.[0].headerCollapsed).toBe(true)
-    await scroll(language, abstractTop + 40)
-    expect(onPosition.mock.lastCall?.[0].headerCollapsed).toBe(true)
+    await scroll(language, abstractTop - 11)
+    expect(onPosition.mock.lastCall?.[0].headerCollapseProgress).toBeCloseTo(1 / 160)
+    await scroll(language, abstractTop + 28)
+    expect(onPosition.mock.lastCall?.[0].headerCollapseProgress).toBeCloseTo(0.25)
+    await scroll(language, abstractTop + 68)
+    expect(onPosition.mock.lastCall?.[0].headerCollapseProgress).toBeCloseTo(0.5)
+    await scroll(language, abstractTop + 188)
+    expect(onPosition.mock.lastCall?.[0].headerCollapseProgress).toBe(1)
+    await scroll(language, abstractTop + 28)
+    expect(onPosition.mock.lastCall?.[0].headerCollapseProgress).toBeCloseTo(0.25)
     await scroll(language, abstractTop - 12)
-    expect(onPosition.mock.lastCall?.[0]).toMatchObject({ sectionId: 'abstract', headerCollapsed: false })
-    await scroll(language, abstractTop + 40)
-    expect(onPosition.mock.lastCall?.[0].headerCollapsed).toBe(false)
+    expect(onPosition.mock.lastCall?.[0]).toMatchObject({ sectionId: 'abstract', headerCollapseProgress: 0 })
+    await scroll(language, abstractTop - 40)
+    expect(onPosition.mock.lastCall?.[0].headerCollapseProgress).toBe(0)
   })
 
   it('restores a saved deep reading position with the heading already folded', async () => {
@@ -152,7 +158,7 @@ describe('reading header folding', () => {
     await act(() => root.render(<PaperReader paper={paper} entry={entry} preferences={preferences} onPosition={onPosition} />))
     expect(pane('zh').scrollTop).toBe(1478)
     expect(pane('en').scrollTop).toBe(2008)
-    expect(onPosition.mock.lastCall?.[0]).toMatchObject({ sectionId: 'results', headerCollapsed: true })
+    expect(onPosition.mock.lastCall?.[0]).toMatchObject({ sectionId: 'results', headerCollapseProgress: 1 })
   })
 
   it('keeps independent language anchors through the layout resize caused by folding when synchronization is off', async () => {
@@ -167,6 +173,43 @@ describe('reading header folding', () => {
     await flushFrames()
     expect(pane('zh').scrollTop).toBeCloseTo(1212)
     expect(pane('en').scrollTop).toBeCloseTo(3612)
-    expect(onPosition.mock.lastCall?.[0]).toMatchObject({ sectionId: 'results', headerCollapsed: true })
+    expect(onPosition.mock.lastCall?.[0]).toMatchObject({ sectionId: 'results', headerCollapseProgress: 1 })
+  })
+
+  it.each([true, false])('restores reading anchors synchronously when the library changes width (synced=%s)', async synced => {
+    const onPosition = vi.fn<(position: ReadingPosition) => void>()
+    const renderReader = (layoutKey: string) => <PaperReader paper={paper} entry={entry}
+      preferences={{ ...preferences, synced }} layoutKey={layoutKey} onPosition={onPosition} />
+    await act(() => root.render(renderReader('expanded')))
+    await scroll('zh', 600)
+    if (!synced) await scroll('en', 1800)
+    const previous = { zh: pane('zh').scrollTop, en: pane('en').scrollTop }
+    layoutScale = 2
+    await act(() => root.render(renderReader('collapsed')))
+    // No ResizeObserver callbacks are required for this user-triggered layout change.
+    expect(pane('zh').scrollTop).toBeCloseTo((previous.zh + 12) * 2 - 12)
+    expect(pane('en').scrollTop).toBeCloseTo((previous.en + 12) * 2 - 12)
+    layoutScale = 1
+    await act(() => root.render(renderReader('expanded')))
+    expect(pane('zh').scrollTop).toBeCloseTo(previous.zh)
+    expect(pane('en').scrollTop).toBeCloseTo(previous.en)
+  })
+
+  it.each([true, false])('keeps both pane anchors and mounted content through successive sidebar boundary adjustments (synced=%s)', async synced => {
+    const renderReader = (library: number, toc: number) => <PaperReader paper={paper} entry={entry}
+      preferences={{ ...preferences, synced }} layoutKey={`desktop:${library}:${toc}`} onPosition={() => {}} />
+    await act(() => root.render(renderReader(300, 220)))
+    await scroll('zh', 600)
+    if (!synced) await scroll('en', 1800)
+    const originalPanes = { zh: pane('zh'), en: pane('en') }
+    const originalPositions = { zh: pane('zh').scrollTop, en: pane('en').scrollTop }
+    for (const [library, toc, scale] of [[360, 220, 1.5], [360, 270, 2], [280, 270, 0.75], [300, 220, 1]]) {
+      layoutScale = scale
+      await act(() => root.render(renderReader(library, toc)))
+      for (const language of ['zh', 'en'] as const) {
+        expect(pane(language)).toBe(originalPanes[language])
+        expect(pane(language).scrollTop).toBeCloseTo((originalPositions[language] + 12) * scale - 12)
+      }
+    }
   })
 })

@@ -309,7 +309,12 @@ function qwenCheckpoint(paper) {
 
 test('explicit fallback freezes real Qwen contributions and resumes Luna without inventing Luna API usage', async () => {
   await fixture(async ({ directory, dataDir, paper, save, draft }) => {
-    const local = qwenCheckpoint(paper); await save(local)
+    const local = qwenCheckpoint(paper)
+    const unused = Buffer.from('unused synthetic image source')
+    await mkdir(path.join(dataDir, 'papers', paper.id, 'assets'))
+    await writeFile(path.join(dataDir, 'papers', paper.id, 'assets', 'unused.png'), unused)
+    local.assets = [{ filename: 'unused.png', sourceUrl: 'https://arxiv.org/html/2401.00001v1/unused.png', sha256: sha256(unused), bytes: unused.length }]
+    await save(local)
     const manifest = createCodexTranslationManifest(local, { prompt, createdAt: fallbackAt, allowModelChange: true })
     const fallbackDraft = ids => ({ ...draft(ids), promptSha256: manifest.promptSha256, translatedAt: fallbackTranslatedAt })
     const first = await applyCodexTranslations({ dataDir, id: paper.id, manifest, drafts: [fallbackDraft(['block-002:0', 'block-002:1'])], allowModelChange: true })
@@ -344,6 +349,10 @@ test('explicit fallback freezes real Qwen contributions and resumes Luna without
     assert.equal(JSON.stringify(second.blocks[0]), JSON.stringify(local.blocks[0]))
     const exported = await prepareData({ dataDir, outDir: path.join(directory, 'mixed'), include: true })
     assert.equal((await verifyReleaseData({ dataDir: exported.output, report: () => {} })).completePapers, 1)
+    const published = JSON.parse(await readFile(path.join(exported.output, 'papers', paper.id, 'paper.json')))
+    assert.deepEqual(published.assets, [])
+    assert.deepEqual(published.publicationSourceAssets, local.assets)
+    assert.deepEqual(published.translation.codexFallback, receipt)
   })
 })
 
@@ -374,6 +383,58 @@ test('fallback remains opt-in and refuses unknown or inconsistent existing Qwen 
       assert.throws(() => createCodexTranslationManifest(changed, options), /Qwen fallback provenance/)
       await assert.rejects(applyCodexTranslations({ dataDir, id: paper.id, manifest, drafts, allowModelChange: true }), /Qwen fallback provenance/)
       assert.equal(await readFile(filename, 'utf8'), before)
+    }
+  })
+})
+
+test('assisted correction preserves frozen Qwen history and exports only the corrected HTML', async () => {
+  await fixture(async ({ directory, dataDir, paper, save, draft }) => {
+    const local = qwenCheckpoint(paper); await save(local)
+    const manifest = createCodexTranslationManifest(local, { prompt, createdAt: fallbackAt, allowModelChange: true })
+    const completed = await applyCodexTranslations({ dataDir, id: paper.id, manifest,
+      drafts: [{ ...draft(['block-002:0', 'block-002:1', 'block-003:0']), translatedAt: fallbackTranslatedAt }], allowModelChange: true })
+    const baseline = structuredClone(completed.translation.codexFallback)
+    const block = completed.blocks[0], original = structuredClone(block.translation), previous = block.zh
+    block.zh = block.zh.replace('引言', '引言部分')
+    completed.sections[0].titleZh = '1. 引言部分'
+    const receipt = { id: 'synthetic-observed-assistance', blockId: block.id, sourceId: block.sourceId,
+      method: 'codex-subagent-fragment-correction', assistingModel: 'gpt-6-luna', assistingProvider: 'Codex subagent',
+      primaryModel: original.model, sourceSha256: completed.source.sha256, sourceBlockSha256: sha256(block.en),
+      draftSha256: sha256('synthetic test correction draft'), previousChineseSha256: sha256(previous),
+      correctedChineseSha256: sha256(block.zh), unitIds: [0], appliedAt: '2026-01-01T00:06:00.000Z' }
+    block.translation = { ...original, originalTranslationMetadata: original, translatedSha256: sha256(block.zh), assistedCorrection: receipt }
+    completed.translation.assistedCorrections = [structuredClone(receipt)]
+    completed.translation.updatedAt = receipt.appliedAt
+    assert.deepEqual(assertCodexFallbackReceipt(completed), baseline)
+    assert.deepEqual(createCodexTranslationManifest(completed, { prompt, createdAt: fallbackAt }), manifest)
+    assert.deepEqual(completed.translation.usage, local.translation.usage)
+    assert.deepEqual(completed.translation.modelHistory.slice(0, -1), local.translation.modelHistory)
+    await save(completed)
+    const exported = await prepareData({ dataDir, outDir: path.join(directory, 'corrected'), include: true })
+    assert.equal((await verifyReleaseData({ dataDir: exported.output, report: () => {} })).completePapers, 1)
+    const html = await readFile(path.join(exported.output, 'papers', paper.id, 'zh.html'), 'utf8')
+    assert.match(html, /引言部分/)
+    for (const mutate of [
+      value => { value.blocks[0].translation.originalTranslationMetadata.parameters.seed++ },
+      value => { value.blocks[0].translation.parameters.seed++ },
+      value => { value.blocks[0].translation.assistedCorrection.previousChineseSha256 = 'f'.repeat(64) },
+      value => { value.blocks[0].translation.assistedCorrection.correctedChineseSha256 = 'f'.repeat(64) },
+      value => { value.blocks[0].translation.assistedCorrection.sourceBlockSha256 = 'f'.repeat(64) },
+      value => { value.blocks[0].translation.assistedCorrection.unitIds = [100] },
+      value => { value.blocks[0].translation.assistedCorrection.unitIds = [0, 0] },
+      value => { value.blocks[0].translation.assistedCorrection.appliedAt = date },
+      value => { value.translation.assistedCorrections = [] },
+      value => { value.translation.assistedCorrections.push(structuredClone(receipt)) },
+      value => { value.blocks[0].translation.extra = 'invented' },
+      value => { value.translation.codexFallback.baseline.acceptedBlocks[0].translatedSha256 = sha256(value.blocks[0].zh) },
+    ]) {
+      const changed = structuredClone(completed); mutate(changed)
+      // Keep the counterpart consistent so malformed fields exercise their
+      // own validation, rather than failing only the ledger equality check.
+      if (changed.translation.assistedCorrections.length === 1) {
+        changed.translation.assistedCorrections[0] = structuredClone(changed.blocks[0].translation.assistedCorrection)
+      }
+      assert.throws(() => assertCodexFallbackReceipt(changed), /fallback receipt|Qwen fallback provenance/)
     }
   })
 })

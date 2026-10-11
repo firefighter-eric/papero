@@ -4,6 +4,7 @@ import { pathToFileURL } from 'node:url'
 import { load } from 'cheerio'
 import { catalogEntry, parsePaper, safeId, validArxivId, sha256, sanitizeSvg } from './paper-lib.mjs'
 import { withCatalogLock, withExclusivePaperLock } from './catalog-lock.mjs'
+import { readArxivSourceAssetRecovery, recoverArxivSourceAsset } from './arxiv-source-assets.mjs'
 
 export async function updateCatalog(dataDir, paper, lockOptions = {}) {
   return withCatalogLock(dataDir, async () => {
@@ -74,14 +75,25 @@ async function importUnlocked({ arxivId, id, dataDir, force = false }) {
     const filename = path.basename(url.pathname)
     const target = path.join(directory, 'assets', filename)
     let bytes
+    let recovery = null
     try {
       if (force) { const refresh = new Error('refresh'); refresh.code = 'ENOENT'; throw refresh }
       bytes = await readFile(target)
+      if (filename.endsWith('.svg')) {
+        const original = await readFile(path.join(directory, 'source-assets', filename))
+        if (!bytes.equals(Buffer.from(sanitizeSvg(original.toString('utf8'))))) throw new Error(`Cached sanitized SVG fingerprint mismatch: ${filename}`)
+        bytes = original
+      }
+      recovery = await readArxivSourceAssetRecovery({ directory, arxivId, url, bytes })
     } catch (error) {
       if (error.code !== 'ENOENT') throw error
       const response = await fetch(url, { signal: AbortSignal.timeout(60000) })
-      if (!response.ok) throw new Error(`Asset request failed (${response.status}): ${url}`)
-      bytes = Buffer.from(await response.arrayBuffer())
+      if (response.status === 404 || response.status === 410) {
+        ;({ bytes, recovery } = await recoverArxivSourceAsset({ directory, arxivId, url, status: response.status }))
+      } else {
+        if (!response.ok) throw new Error(`Asset request failed (${response.status}): ${url}`)
+        bytes = Buffer.from(await response.arrayBuffer())
+      }
       await writeFile(target, bytes)
     }
     let sourceSha256 = sha256(bytes)
@@ -100,7 +112,7 @@ async function importUnlocked({ arxivId, id, dataDir, force = false }) {
     }
     const duplicate = assets.find(asset => asset.filename === filename)
     if (duplicate && duplicate.sourceUrl !== url.href) throw new Error(`Conflicting asset filenames: ${filename}`)
-    if (!duplicate) assets.push({ filename, sourceUrl: url.href, sha256: sha256(bytes), sourceSha256, bytes: bytes.length, ...(filename.endsWith('.svg') ? { sanitized: true } : {}) })
+    if (!duplicate) assets.push({ filename, sourceUrl: url.href, sha256: sha256(bytes), sourceSha256, bytes: bytes.length, ...(filename.endsWith('.svg') ? { sanitized: true } : {}), ...(recovery ? { recovery } : {}) })
     $(image).attr('src', `assets/${filename}`)
   }
   const paper = parsePaper($.html(), { id, arxivId, htmlUrl })

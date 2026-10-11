@@ -1,5 +1,5 @@
 export type TranslationStatus = 'machine' | 'pending'
-export type SourceKind = 'arxiv' | 'official-article'
+export type SourceKind = 'arxiv' | 'official-article' | 'official-paper'
 
 export type PaperBlockKind =
   | 'heading'
@@ -71,6 +71,8 @@ export interface PaperBlock {
   zh: string | null
   sourceId?: string
   wordCount?: number
+  /** Original PDF page numbers retained through bilingual HTML export. */
+  pdfPages?: number[]
   /** Public HTML publications bind each reconstructed block to its source bytes. */
   contentSha256?: { en: string; zh: string | null }
   /** Inclusive start/exclusive end byte offsets into the complete UTF-8 HTML. */
@@ -108,6 +110,16 @@ export interface PaperSource {
   publishedAt?: string
   language?: string
   media?: { kind: 'video'; url: string; sourceId: string }[]
+  format?: 'pdf'
+  pdf?: { url: string; sha256: string; bytes: number; pageCount: number; version: string }
+  conversion?: {
+    method: 'pdf-layout-to-semantic-html'
+    englishHtmlSha256: string
+    tools: { name: string; version: string; parameters: Record<string, unknown> }[]
+    parameters: Record<string, unknown>
+    reviewedPdfPages: number[]
+    notes: string[]
+  }
 }
 
 export interface PaperTranslation {

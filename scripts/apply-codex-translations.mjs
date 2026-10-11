@@ -2,9 +2,10 @@ import { readFile, writeFile, rename, unlink } from 'node:fs/promises'
 import { randomUUID } from 'node:crypto'
 import path from 'node:path'
 import { load } from 'cheerio'
-import { assertTranslationFidelity, isTechnicalLabelOnly, normalizeHeadingNumber, safeId, sanitizeHtml, sha256, translationUnits, translatedAbstractText } from './paper-lib.mjs'
+import { assertTranslationFidelity, assertBlockTranslationFidelity, isTechnicalLabelOnly, normalizeHeadingNumber, safeId, sanitizeHtml, sha256, translationUnits, translatedAbstractText } from './paper-lib.mjs'
 import { withExclusivePaperLock } from './catalog-lock.mjs'
 import { updateCatalog } from './import-paper.mjs'
+import { sourceAssetMetadata } from './publication-assets.mjs'
 
 const MODEL = 'gpt-6-luna', PROVIDER = 'Codex subagent'
 const LOCAL_MODEL = 'qwen3.6-35b-a3b', LOCAL_PROVIDER = 'LM Studio local API'
@@ -35,12 +36,12 @@ const validLocalUsage = usage => record(usage) && Number.isSafeInteger(usage.pro
   && Object.entries(usage).every(([key, value]) => ['promptTokens', 'completionTokens', 'observedReasoningTokens', 'reasoningUsageResponses'].includes(key) && Number.isSafeInteger(value) && value >= 0)
 const localOnlyFields = ['requestBudget', 'literalTransport', 'correctionPromptSha256', 'concurrency', 'retryPolicy']
 
-function acceptedBlocks(paper) {
+function acceptedBlocks(paper, originalHashes = new Map()) {
   return paper.blocks.filter(block => block.zh).map(block => ({ id: block.id, sourceSha256: sha256(block.en),
-    translatedSha256: sha256(block.zh), translationSha256: manifestHash(block.translation) }))
+    translatedSha256: originalHashes.get(block.id) || sha256(block.zh), translationSha256: manifestHash(block.translation) }))
 }
 
-function assertQwenCheckpoint(paper, previous, cutoff) {
+function assertQwenCheckpoint(paper, previous, cutoff, originalHashes = new Map()) {
   const fail = () => { throw new Error('Invalid existing Qwen fallback provenance or declared API history') }
   const complete = paper.blocks.filter(block => block.zh).length
   if (previous.model !== LOCAL_MODEL || previous.provider !== LOCAL_PROVIDER || previous.status !== 'pending' || previous.humanReviewed !== false
@@ -84,7 +85,7 @@ function assertQwenCheckpoint(paper, previous, cutoff) {
     if (metadata?.status !== 'machine' || metadata.model !== LOCAL_MODEL || metadata.provider !== LOCAL_PROVIDER
       || !validLocalIdentity(metadata.modelIdentity) || metadata.sourceSha256 !== sha256(block.en)
       || !fingerprint(metadata.promptSha256) || !timestamp(metadata.translatedAt)
-      || (metadata.translatedSha256 !== undefined && metadata.translatedSha256 !== sha256(block.zh))
+      || (metadata.translatedSha256 !== undefined && metadata.translatedSha256 !== (originalHashes.get(block.id) || sha256(block.zh)))
       || (metadata.sourcePaperSha256 !== undefined && metadata.sourcePaperSha256 !== paper.source.sha256)
       || Date.parse(metadata.translatedAt) < Date.parse(previous.createdAt) || Date.parse(metadata.translatedAt) > Date.parse(previous.updatedAt)) fail()
     const at = Date.parse(metadata.translatedAt)
@@ -95,6 +96,30 @@ function assertQwenCheckpoint(paper, previous, cutoff) {
       && metadata.promptSha256 === run.promptSha256)) fail()
   }
   if (!machine) fail()
+}
+
+function frozenCorrectionMetadata(paper, block, frozen) {
+  const metadata = block.translation, original = metadata?.originalTranslationMetadata, correction = metadata?.assistedCorrection
+  const keys = 'id blockId sourceId method assistingModel assistingProvider primaryModel sourceSha256 sourceBlockSha256 draftSha256 previousChineseSha256 correctedChineseSha256 unitIds appliedAt'.split(' ')
+  if (!record(original) || manifestHash(original) !== frozen.translationSha256 || original.status !== 'machine'
+    || !exactKeys(correction, keys) || !nonempty(correction.id) || correction.blockId !== block.id || correction.sourceId !== block.sourceId
+    || correction.method !== 'codex-subagent-fragment-correction' || correction.assistingModel !== MODEL || correction.assistingProvider !== PROVIDER
+    || correction.primaryModel !== LOCAL_MODEL || original.model !== LOCAL_MODEL
+    || correction.sourceSha256 !== paper.source.sha256 || correction.sourceBlockSha256 !== frozen.sourceSha256
+    || !fingerprint(correction.draftSha256) || correction.previousChineseSha256 !== frozen.translatedSha256
+    || correction.correctedChineseSha256 !== sha256(block.zh) || !timestamp(correction.appliedAt)
+    || Date.parse(correction.appliedAt) < Date.parse(original.translatedAt) || Date.parse(correction.appliedAt) > Date.parse(paper.translation.updatedAt)
+    || !Array.isArray(paper.translation.assistedCorrections)
+    || paper.translation.assistedCorrections.filter(item => same(item, correction)).length !== 1
+    || !same(metadata, { ...original, originalTranslationMetadata: original, translatedSha256: sha256(block.zh), assistedCorrection: correction })) {
+    throw new Error('Invalid Qwen fallback provenance: frozen assisted-correction chain')
+  }
+  const units = translationUnits(block.en, block.kind).units
+  if (!Array.isArray(correction.unitIds) || !correction.unitIds.length || correction.unitIds.some((index, position) =>
+    !Number.isSafeInteger(index) || index < 0 || index >= units.length || position > 0 && index <= correction.unitIds[position - 1])) {
+    throw new Error('Invalid Qwen fallback provenance: frozen assisted-correction units')
+  }
+  return original
 }
 
 function fallbackHistory(baseline, promptSha256, startedAt) {
@@ -114,21 +139,25 @@ export function assertCodexFallbackReceipt(paper) {
     || !nonempty(receipt.prompt) || receipt.promptSha256 !== sha256(receipt.prompt) || !timestamp(receipt.startedAt)
     || !exactKeys(receipt.baseline, ['translation', 'acceptedBlocks', 'title']) || receipt.baselineSha256 !== manifestHash(receipt.baseline)
     || !Array.isArray(receipt.baseline.acceptedBlocks)) fail()
-  const baseline = receipt.baseline, ids = new Set()
+  const baseline = receipt.baseline, ids = new Set(), originalMetadata = new Map(), originalHashes = new Map()
   for (const frozen of baseline.acceptedBlocks) {
     const block = paper.blocks.find(candidate => candidate.id === frozen?.id)
     if (!exactKeys(frozen, ['id', 'sourceSha256', 'translatedSha256', 'translationSha256']) || ids.has(frozen.id) || !block?.zh
-      || frozen.sourceSha256 !== sha256(block.en) || frozen.translatedSha256 !== sha256(block.zh)
-      || frozen.translationSha256 !== manifestHash(block.translation)) fail()
+      || frozen.sourceSha256 !== sha256(block.en)) fail()
+    if (frozen.translatedSha256 !== sha256(block.zh) || frozen.translationSha256 !== manifestHash(block.translation)) {
+      originalMetadata.set(block.id, frozenCorrectionMetadata(paper, block, frozen))
+      originalHashes.set(block.id, frozen.translatedSha256)
+    }
     ids.add(frozen.id)
   }
   if (baseline.title !== null && (!exactKeys(baseline.title, ['model', 'provider', 'sourceSha256', 'translatedSha256'])
     || baseline.title.model !== LOCAL_MODEL || baseline.title.provider !== LOCAL_PROVIDER || baseline.title.sourceSha256 !== sha256(paper.title)
     || baseline.title.translatedSha256 !== sha256(paper.titleZh) || !same(current.titleTranslation, baseline.title))) fail()
   const before = { ...paper, titleZh: baseline.title ? paper.titleZh : null,
-    blocks: paper.blocks.map(block => ids.has(block.id) ? block : { ...block, zh: null, translation: undefined }) }
-  assertQwenCheckpoint(before, baseline.translation, receipt.startedAt)
-  if (!same(acceptedBlocks(before), baseline.acceptedBlocks)) fail()
+    blocks: paper.blocks.map(block => ids.has(block.id) ? { ...block, translation: originalMetadata.get(block.id) || block.translation }
+      : { ...block, zh: null, translation: undefined }) }
+  assertQwenCheckpoint(before, baseline.translation, receipt.startedAt, originalHashes)
+  if (!same(acceptedBlocks(before, originalHashes), baseline.acceptedBlocks)) fail()
   assertRun(current, receipt.promptSha256)
   if (!same(current.modelHistory, fallbackHistory(baseline, receipt.promptSha256, receipt.startedAt))
     || !same(current.modelsUsed, [LOCAL_MODEL, MODEL]) || !same(current.modelIdentities, { ...baseline.translation.modelIdentities, [MODEL]: IDENTITY })
@@ -168,7 +197,7 @@ function sourceDocument(paper) {
     authors: paper.authors, year: paper.year, tags: paper.tags, abstract: paper.abstract, source: paper.source,
     sections: paper.sections.map(({ id, title, level }) => ({ id, title, level })),
     blocks: paper.blocks.map(({ id, sourceId, sectionId, kind, en }) => ({ id, sourceId, sectionId, kind, en })),
-    statistics: paper.statistics, assets: paper.assets }
+    statistics: paper.statistics, assets: sourceAssetMetadata(paper) }
 }
 
 /** Freeze the exact original DOM text fragments before dispatching real Codex translation work. */
@@ -302,6 +331,7 @@ export async function applyCodexTranslations({ dataDir = process.env.DATA_DIR ||
         const section = paper.sections.find(section => section.id === block.sectionId)
         if (section) section.titleZh = headingText(block.zh)
       }
+      assertBlockTranslationFidelity(block.en, block.zh)
       block.translation.translatedSha256 = sha256(block.zh)
     }
     const complete = paper.blocks.filter(block => block.zh).length

@@ -113,14 +113,14 @@ export function validateDataPath(value: unknown): asserts value is string {
 
 function sourceKind(value: unknown, label: string): SourceKind {
   if (value === undefined || value === 'arxiv') return 'arxiv'
-  if (value === 'official-article') return value
+  if (value === 'official-article' || value === 'official-paper') return value
   return invalid(`${label} is unsupported.`)
 }
 
 function validatePaperIdentity(value: Record<string, unknown>, label: string, kind: SourceKind): void {
   identifier(value.id, `${label}.id`)
-  if (kind === 'official-article') {
-    if (value.arxivId !== null) invalid(`${label}.arxivId must be null for an official article.`)
+  if (kind === 'official-article' || kind === 'official-paper') {
+    if (value.arxivId !== null) invalid(`${label}.arxivId must be null for an official source.`)
   } else nonempty(value.arxivId, `${label}.arxivId`, 160)
   nonempty(value.title, `${label}.title`)
   translatedString(value.titleZh, `${label}.titleZh`)
@@ -226,6 +226,39 @@ export function validatePaper(value: unknown, expected?: CatalogPaper): PaperDoc
   if (!Number.isFinite(Date.parse(source.fetchedAt))) invalid('paper.source.fetchedAt must be a date.')
   string(source.sha256, 'paper.source.sha256', 64)
   if (!/^[a-f0-9]{64}$/i.test(source.sha256)) invalid('paper.source.sha256 must be a SHA-256 hash.')
+  if (kind === 'official-paper' && source.format !== 'pdf') invalid('Official papers must declare their PDF conversion source.')
+  if (source.format !== undefined) {
+    if (source.format !== 'pdf') invalid('paper.source.format is unsupported.')
+    const pdf = record(source.pdf, 'paper.source.pdf')
+    httpsUrl(pdf.url, 'paper.source.pdf.url')
+    nonempty(pdf.version, 'paper.source.pdf.version')
+    string(pdf.sha256, 'paper.source.pdf.sha256', 64)
+    if (!/^[a-f0-9]{64}$/.test(pdf.sha256 as string)) invalid('paper.source.pdf.sha256 must be a SHA-256 hash.')
+    integer(pdf.bytes, 'paper.source.pdf.bytes', 1, Number.MAX_SAFE_INTEGER)
+    integer(pdf.pageCount, 'paper.source.pdf.pageCount', 1, 10_000)
+    const conversion = record(source.conversion, 'paper.source.conversion')
+    if (conversion.method !== 'pdf-layout-to-semantic-html' || conversion.englishHtmlSha256 !== source.sha256) invalid('PDF conversion must bind the source English HTML fingerprint.')
+    record(conversion.parameters, 'paper.source.conversion.parameters')
+    strings(conversion.notes, 'paper.source.conversion.notes')
+    if (!Array.isArray(conversion.tools) || !conversion.tools.length) invalid('PDF conversion must identify its tools.')
+    conversion.tools.forEach(item => {
+      const tool = record(item, 'paper.source.conversion.tools[]')
+      nonempty(tool.name, 'conversion tool name')
+      nonempty(tool.version, 'conversion tool version')
+      record(tool.parameters, 'conversion tool parameters')
+    })
+    if (!Array.isArray(conversion.reviewedPdfPages) || !conversion.reviewedPdfPages.length) invalid('PDF conversion must identify visually checked pages.')
+    conversion.reviewedPdfPages.forEach(page => integer(page, 'conversion reviewed PDF page', 1, pdf.pageCount as number))
+    const mappedPages = new Set<number>()
+    paper.blocks.forEach(item => {
+      const block = record(item, 'PDF block')
+      if (!Array.isArray(block.pdfPages) || !block.pdfPages.length) invalid('PDF block must identify source pages.')
+      block.pdfPages.forEach(page => { integer(page, 'block PDF page', 1, pdf.pageCount as number); mappedPages.add(page) })
+      if (new Set(block.pdfPages).size !== block.pdfPages.length) invalid('PDF block page mappings must be unique.')
+    })
+    if (mappedPages.size !== pdf.pageCount) invalid('PDF conversion omits a source page.')
+    if (kind === 'official-paper' && (source.htmlUrl !== source.url || !Number.isFinite(Date.parse(source.publishedAt as string)))) invalid('Official paper must identify its publisher source and publication date.')
+  }
   const translation = record(paper.translation, 'paper.translation')
   status(translation.status, 'paper.translation.status')
   if (translation.model !== undefined && translation.model !== null) nonempty(translation.model, 'translation.model')

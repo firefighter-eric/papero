@@ -1,0 +1,4487 @@
+{
+  "title": "Language Models are Unsupervised Multitask Learners",
+  "pages": [
+    {
+      "page": 1,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            80,
+            600,
+            112
+          ],
+          "reason": "Title preserved in document h1"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            0,
+            130,
+            600,
+            164
+          ],
+          "headings": false
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            0,
+            175,
+            298,
+            510
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            0,
+            530,
+            298,
+            660
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            298,
+            174,
+            600,
+            740
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            0,
+            661,
+            298,
+            721
+          ],
+          "headings": false
+        }
+      ]
+    },
+    {
+      "page": 2,
+      "items": [
+        {
+          "kind": "figure",
+          "number": 1,
+          "bounds": [
+            54,
+            65,
+            545,
+            226
+          ],
+          "caption": [
+            54,
+            230,
+            545,
+            265
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            0,
+            280,
+            298,
+            721
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            298,
+            280,
+            600,
+            319
+          ]
+        },
+        {
+          "kind": "equation",
+          "bounds": [
+            298,
+            322,
+            600,
+            368
+          ],
+          "html": "<math display=\"block\"><mrow><mi>p</mi><mo>(</mo><mi>x</mi><mo>)</mo><mo>=</mo><munderover><mo>\u220f</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mi>p</mi><mo>(</mo><msub><mi>s</mi><mi>n</mi></msub><mo>|</mo><msub><mi>s</mi><mn>1</mn></msub><mo>,</mo><mo>\u2026</mo><mo>,</mo><msub><mi>s</mi><mrow><mi>n</mi><mo>\u2212</mo><mn>1</mn></mrow></msub><mo>)</mo></mrow></math><span class=\"ltx_tag\">(1)</span>"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            298,
+            370,
+            600,
+            721
+          ]
+        }
+      ]
+    },
+    {
+      "page": 3,
+      "items": [
+        {
+          "kind": "text",
+          "bounds": [
+            0,
+            65,
+            298,
+            721
+          ]
+        },
+        {
+          "kind": "table",
+          "number": 1,
+          "rows": [
+            [
+              {
+                "bounds": [
+                  306,
+                  65,
+                  544,
+                  288
+                ]
+              }
+            ]
+          ],
+          "caption": [
+            306,
+            300,
+            544,
+            337
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            298,
+            356,
+            600,
+            702
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            298,
+            702,
+            600,
+            721
+          ],
+          "headings": false
+        }
+      ]
+    },
+    {
+      "page": 4,
+      "items": [
+        {
+          "kind": "text",
+          "bounds": [
+            0,
+            65,
+            298,
+            721
+          ]
+        },
+        {
+          "kind": "table",
+          "number": 2,
+          "rows": [
+            [
+              {
+                "bounds": [
+                  358,
+                  79,
+                  411,
+                  93
+                ],
+                "header": true
+              },
+              {
+                "bounds": [
+                  411,
+                  79,
+                  447,
+                  93
+                ],
+                "header": true
+              },
+              {
+                "bounds": [
+                  447,
+                  79,
+                  486,
+                  93
+                ],
+                "header": true
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  358,
+                  93,
+                  411,
+                  106
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  411,
+                  93,
+                  447,
+                  106
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  447,
+                  93,
+                  486,
+                  106
+                ],
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  358,
+                  106,
+                  411,
+                  116
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  411,
+                  106,
+                  447,
+                  116
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  447,
+                  106,
+                  486,
+                  116
+                ],
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  358,
+                  116,
+                  411,
+                  126
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  411,
+                  116,
+                  447,
+                  126
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  447,
+                  116,
+                  486,
+                  126
+                ],
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  358,
+                  126,
+                  411,
+                  138
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  411,
+                  126,
+                  447,
+                  138
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  447,
+                  126,
+                  486,
+                  138
+                ],
+                "header": false
+              }
+            ]
+          ],
+          "caption": [
+            306,
+            144,
+            544,
+            161
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            298,
+            179,
+            600,
+            721
+          ]
+        }
+      ]
+    },
+    {
+      "page": 5,
+      "items": [
+        {
+          "kind": "table",
+          "number": 3,
+          "rows": [
+            [
+              {
+                "bounds": [
+                  55,
+                  69,
+                  98,
+                  93
+                ],
+                "header": true
+              },
+              {
+                "bounds": [
+                  98,
+                  69,
+                  151,
+                  93
+                ],
+                "header": true
+              },
+              {
+                "bounds": [
+                  151,
+                  69,
+                  207,
+                  93
+                ],
+                "header": true
+              },
+              {
+                "bounds": [
+                  207,
+                  69,
+                  252,
+                  93
+                ],
+                "header": true
+              },
+              {
+                "bounds": [
+                  252,
+                  69,
+                  295,
+                  93
+                ],
+                "header": true
+              },
+              {
+                "bounds": [
+                  295,
+                  69,
+                  344,
+                  93
+                ],
+                "header": true
+              },
+              {
+                "bounds": [
+                  344,
+                  69,
+                  377,
+                  93
+                ],
+                "header": true
+              },
+              {
+                "bounds": [
+                  377,
+                  69,
+                  415,
+                  93
+                ],
+                "header": true
+              },
+              {
+                "bounds": [
+                  415,
+                  69,
+                  446,
+                  93
+                ],
+                "header": true
+              },
+              {
+                "bounds": [
+                  446,
+                  69,
+                  503,
+                  93
+                ],
+                "header": true
+              },
+              {
+                "bounds": [
+                  503,
+                  69,
+                  542,
+                  93
+                ],
+                "header": true
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  55,
+                  93,
+                  98,
+                  107
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  98,
+                  93,
+                  151,
+                  107
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  151,
+                  93,
+                  207,
+                  107
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  207,
+                  93,
+                  252,
+                  107
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  252,
+                  93,
+                  295,
+                  107
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  295,
+                  93,
+                  344,
+                  107
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  344,
+                  93,
+                  377,
+                  107
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  377,
+                  93,
+                  415,
+                  107
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  415,
+                  93,
+                  446,
+                  107
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  446,
+                  93,
+                  503,
+                  107
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  503,
+                  93,
+                  542,
+                  107
+                ],
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  55,
+                  107,
+                  98,
+                  118
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  98,
+                  107,
+                  151,
+                  118
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  151,
+                  107,
+                  207,
+                  118
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  207,
+                  107,
+                  252,
+                  118
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  252,
+                  107,
+                  295,
+                  118
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  295,
+                  107,
+                  344,
+                  118
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  344,
+                  107,
+                  377,
+                  118
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  377,
+                  107,
+                  415,
+                  118
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  415,
+                  107,
+                  446,
+                  118
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  446,
+                  107,
+                  503,
+                  118
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  503,
+                  107,
+                  542,
+                  118
+                ],
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  55,
+                  118,
+                  98,
+                  128
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  98,
+                  118,
+                  151,
+                  128
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  151,
+                  118,
+                  207,
+                  128
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  207,
+                  118,
+                  252,
+                  128
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  252,
+                  118,
+                  295,
+                  128
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  295,
+                  118,
+                  344,
+                  128
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  344,
+                  118,
+                  377,
+                  128
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  377,
+                  118,
+                  415,
+                  128
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  415,
+                  118,
+                  446,
+                  128
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  446,
+                  118,
+                  503,
+                  128
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  503,
+                  118,
+                  542,
+                  128
+                ],
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  55,
+                  128,
+                  98,
+                  138
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  98,
+                  128,
+                  151,
+                  138
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  151,
+                  128,
+                  207,
+                  138
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  207,
+                  128,
+                  252,
+                  138
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  252,
+                  128,
+                  295,
+                  138
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  295,
+                  128,
+                  344,
+                  138
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  344,
+                  128,
+                  377,
+                  138
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  377,
+                  128,
+                  415,
+                  138
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  415,
+                  128,
+                  446,
+                  138
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  446,
+                  128,
+                  503,
+                  138
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  503,
+                  128,
+                  542,
+                  138
+                ],
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  55,
+                  138,
+                  98,
+                  154
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  98,
+                  138,
+                  151,
+                  154
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  151,
+                  138,
+                  207,
+                  154
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  207,
+                  138,
+                  252,
+                  154
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  252,
+                  138,
+                  295,
+                  154
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  295,
+                  138,
+                  344,
+                  154
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  344,
+                  138,
+                  377,
+                  154
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  377,
+                  138,
+                  415,
+                  154
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  415,
+                  138,
+                  446,
+                  154
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  446,
+                  138,
+                  503,
+                  154
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  503,
+                  138,
+                  542,
+                  154
+                ],
+                "header": false
+              }
+            ]
+          ],
+          "caption": [
+            54,
+            164,
+            544,
+            203
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            0,
+            220,
+            298,
+            526
+          ]
+        },
+        {
+          "kind": "figure",
+          "number": 2,
+          "bounds": [
+            54,
+            530,
+            293,
+            658
+          ],
+          "caption": [
+            54,
+            664,
+            295,
+            703
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            298,
+            220,
+            600,
+            721
+          ]
+        }
+      ]
+    },
+    {
+      "page": 6,
+      "items": [
+        {
+          "kind": "text",
+          "bounds": [
+            0,
+            65,
+            298,
+            122
+          ]
+        },
+        {
+          "kind": "figure",
+          "number": 3,
+          "bounds": [
+            54,
+            124,
+            293,
+            300
+          ],
+          "caption": [
+            54,
+            305,
+            295,
+            336
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            0,
+            353,
+            298,
+            721
+          ]
+        },
+        {
+          "kind": "table",
+          "number": 4,
+          "rows": [
+            [
+              {
+                "bounds": [
+                  317,
+                  80,
+                  388,
+                  94
+                ],
+                "header": true
+              },
+              {
+                "bounds": [
+                  388,
+                  80,
+                  426,
+                  94
+                ],
+                "header": true
+              },
+              {
+                "bounds": [
+                  426,
+                  80,
+                  457,
+                  94
+                ],
+                "header": true
+              },
+              {
+                "bounds": [
+                  457,
+                  80,
+                  486,
+                  94
+                ],
+                "header": true
+              },
+              {
+                "bounds": [
+                  486,
+                  80,
+                  528,
+                  94
+                ],
+                "header": true
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  317,
+                  94,
+                  388,
+                  104
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  388,
+                  94,
+                  426,
+                  104
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  426,
+                  94,
+                  457,
+                  104
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  457,
+                  94,
+                  486,
+                  104
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  486,
+                  94,
+                  528,
+                  104
+                ],
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  317,
+                  104,
+                  388,
+                  114
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  388,
+                  104,
+                  426,
+                  114
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  426,
+                  104,
+                  457,
+                  114
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  457,
+                  104,
+                  486,
+                  114
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  486,
+                  104,
+                  528,
+                  114
+                ],
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  317,
+                  114,
+                  388,
+                  124
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  388,
+                  114,
+                  426,
+                  124
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  426,
+                  114,
+                  457,
+                  124
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  457,
+                  114,
+                  486,
+                  124
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  486,
+                  114,
+                  528,
+                  124
+                ],
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  317,
+                  124,
+                  388,
+                  134
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  388,
+                  124,
+                  426,
+                  134
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  426,
+                  124,
+                  457,
+                  134
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  457,
+                  124,
+                  486,
+                  134
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  486,
+                  124,
+                  528,
+                  134
+                ],
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  317,
+                  134,
+                  388,
+                  144
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  388,
+                  134,
+                  426,
+                  144
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  426,
+                  134,
+                  457,
+                  144
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  457,
+                  134,
+                  486,
+                  144
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  486,
+                  134,
+                  528,
+                  144
+                ],
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  317,
+                  144,
+                  388,
+                  159
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  388,
+                  144,
+                  426,
+                  159
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  426,
+                  144,
+                  457,
+                  159
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  457,
+                  144,
+                  486,
+                  159
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  486,
+                  144,
+                  528,
+                  159
+                ],
+                "header": false
+              }
+            ]
+          ],
+          "caption": [
+            306,
+            164,
+            544,
+            199
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            298,
+            220,
+            600,
+            721
+          ]
+        }
+      ]
+    },
+    {
+      "page": 7,
+      "items": [
+        {
+          "kind": "table",
+          "number": 5,
+          "rows": [
+            [
+              {
+                "bounds": [
+                  102,
+                  80,
+                  334,
+                  92
+                ],
+                "header": true
+              },
+              {
+                "bounds": [
+                  334,
+                  80,
+                  416,
+                  92
+                ],
+                "header": true
+              },
+              {
+                "bounds": [
+                  416,
+                  80,
+                  447,
+                  92
+                ],
+                "header": true
+              },
+              {
+                "bounds": [
+                  447,
+                  80,
+                  491,
+                  92
+                ],
+                "header": true
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  102,
+                  92,
+                  334,
+                  100.102
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  334,
+                  92,
+                  416,
+                  100.102
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  416,
+                  92,
+                  447,
+                  100.102
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  447,
+                  92,
+                  491,
+                  100.102
+                ],
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  102,
+                  100.102,
+                  334,
+                  108.20400000000001
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  334,
+                  100.102,
+                  416,
+                  108.20400000000001
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  416,
+                  100.102,
+                  447,
+                  108.20400000000001
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  447,
+                  100.102,
+                  491,
+                  108.20400000000001
+                ],
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  102,
+                  108.20400000000001,
+                  334,
+                  116.306
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  334,
+                  108.20400000000001,
+                  416,
+                  116.306
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  416,
+                  108.20400000000001,
+                  447,
+                  116.306
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  447,
+                  108.20400000000001,
+                  491,
+                  116.306
+                ],
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  102,
+                  116.306,
+                  334,
+                  124.408
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  334,
+                  116.306,
+                  416,
+                  124.408
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  416,
+                  116.306,
+                  447,
+                  124.408
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  447,
+                  116.306,
+                  491,
+                  124.408
+                ],
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  102,
+                  124.408,
+                  334,
+                  132.51
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  334,
+                  124.408,
+                  416,
+                  132.51
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  416,
+                  124.408,
+                  447,
+                  132.51
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  447,
+                  124.408,
+                  491,
+                  132.51
+                ],
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  102,
+                  132.51,
+                  334,
+                  140.612
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  334,
+                  132.51,
+                  416,
+                  140.612
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  416,
+                  132.51,
+                  447,
+                  140.612
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  447,
+                  132.51,
+                  491,
+                  140.612
+                ],
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  102,
+                  140.612,
+                  334,
+                  148.714
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  334,
+                  140.612,
+                  416,
+                  148.714
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  416,
+                  140.612,
+                  447,
+                  148.714
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  447,
+                  140.612,
+                  491,
+                  148.714
+                ],
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  102,
+                  148.714,
+                  334,
+                  156.816
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  334,
+                  148.714,
+                  416,
+                  156.816
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  416,
+                  148.714,
+                  447,
+                  156.816
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  447,
+                  148.714,
+                  491,
+                  156.816
+                ],
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  102,
+                  156.816,
+                  334,
+                  164.918
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  334,
+                  156.816,
+                  416,
+                  164.918
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  416,
+                  156.816,
+                  447,
+                  164.918
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  447,
+                  156.816,
+                  491,
+                  164.918
+                ],
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  102,
+                  164.918,
+                  334,
+                  173.02
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  334,
+                  164.918,
+                  416,
+                  173.02
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  416,
+                  164.918,
+                  447,
+                  173.02
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  447,
+                  164.918,
+                  491,
+                  173.02
+                ],
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  102,
+                  173.02,
+                  334,
+                  181.122
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  334,
+                  173.02,
+                  416,
+                  181.122
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  416,
+                  173.02,
+                  447,
+                  181.122
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  447,
+                  173.02,
+                  491,
+                  181.122
+                ],
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  102,
+                  181.122,
+                  334,
+                  189.224
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  334,
+                  181.122,
+                  416,
+                  189.224
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  416,
+                  181.122,
+                  447,
+                  189.224
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  447,
+                  181.122,
+                  491,
+                  189.224
+                ],
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  102,
+                  189.224,
+                  334,
+                  197.32600000000002
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  334,
+                  189.224,
+                  416,
+                  197.32600000000002
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  416,
+                  189.224,
+                  447,
+                  197.32600000000002
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  447,
+                  189.224,
+                  491,
+                  197.32600000000002
+                ],
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  102,
+                  197.32600000000002,
+                  334,
+                  205.428
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  334,
+                  197.32600000000002,
+                  416,
+                  205.428
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  416,
+                  197.32600000000002,
+                  447,
+                  205.428
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  447,
+                  197.32600000000002,
+                  491,
+                  205.428
+                ],
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  102,
+                  205.428,
+                  334,
+                  213.53
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  334,
+                  205.428,
+                  416,
+                  213.53
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  416,
+                  205.428,
+                  447,
+                  213.53
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  447,
+                  205.428,
+                  491,
+                  213.53
+                ],
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  102,
+                  213.53,
+                  334,
+                  221.632
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  334,
+                  213.53,
+                  416,
+                  221.632
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  416,
+                  213.53,
+                  447,
+                  221.632
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  447,
+                  213.53,
+                  491,
+                  221.632
+                ],
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  102,
+                  221.632,
+                  334,
+                  229.734
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  334,
+                  221.632,
+                  416,
+                  229.734
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  416,
+                  221.632,
+                  447,
+                  229.734
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  447,
+                  221.632,
+                  491,
+                  229.734
+                ],
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  102,
+                  229.734,
+                  334,
+                  237.836
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  334,
+                  229.734,
+                  416,
+                  237.836
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  416,
+                  229.734,
+                  447,
+                  237.836
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  447,
+                  229.734,
+                  491,
+                  237.836
+                ],
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  102,
+                  237.836,
+                  334,
+                  245.93800000000002
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  334,
+                  237.836,
+                  416,
+                  245.93800000000002
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  416,
+                  237.836,
+                  447,
+                  245.93800000000002
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  447,
+                  237.836,
+                  491,
+                  245.93800000000002
+                ],
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  102,
+                  245.93800000000002,
+                  334,
+                  254.04000000000002
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  334,
+                  245.93800000000002,
+                  416,
+                  254.04000000000002
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  416,
+                  245.93800000000002,
+                  447,
+                  254.04000000000002
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  447,
+                  245.93800000000002,
+                  491,
+                  254.04000000000002
+                ],
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  102,
+                  254.04000000000002,
+                  334,
+                  262.142
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  334,
+                  254.04000000000002,
+                  416,
+                  262.142
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  416,
+                  254.04000000000002,
+                  447,
+                  262.142
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  447,
+                  254.04000000000002,
+                  491,
+                  262.142
+                ],
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  102,
+                  262.142,
+                  334,
+                  270.244
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  334,
+                  262.142,
+                  416,
+                  270.244
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  416,
+                  262.142,
+                  447,
+                  270.244
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  447,
+                  262.142,
+                  491,
+                  270.244
+                ],
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  102,
+                  270.244,
+                  334,
+                  278.346
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  334,
+                  270.244,
+                  416,
+                  278.346
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  416,
+                  270.244,
+                  447,
+                  278.346
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  447,
+                  270.244,
+                  491,
+                  278.346
+                ],
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  102,
+                  278.346,
+                  334,
+                  286.448
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  334,
+                  278.346,
+                  416,
+                  286.448
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  416,
+                  278.346,
+                  447,
+                  286.448
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  447,
+                  278.346,
+                  491,
+                  286.448
+                ],
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  102,
+                  286.448,
+                  334,
+                  294.55
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  334,
+                  286.448,
+                  416,
+                  294.55
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  416,
+                  286.448,
+                  447,
+                  294.55
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  447,
+                  286.448,
+                  491,
+                  294.55
+                ],
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  102,
+                  294.55,
+                  334,
+                  302.65200000000004
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  334,
+                  294.55,
+                  416,
+                  302.65200000000004
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  416,
+                  294.55,
+                  447,
+                  302.65200000000004
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  447,
+                  294.55,
+                  491,
+                  302.65200000000004
+                ],
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  102,
+                  302.65200000000004,
+                  334,
+                  310.754
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  334,
+                  302.65200000000004,
+                  416,
+                  310.754
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  416,
+                  302.65200000000004,
+                  447,
+                  310.754
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  447,
+                  302.65200000000004,
+                  491,
+                  310.754
+                ],
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  102,
+                  310.754,
+                  334,
+                  318.856
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  334,
+                  310.754,
+                  416,
+                  318.856
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  416,
+                  310.754,
+                  447,
+                  318.856
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  447,
+                  310.754,
+                  491,
+                  318.856
+                ],
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  102,
+                  318.856,
+                  334,
+                  326.95799999999997
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  334,
+                  318.856,
+                  416,
+                  326.95799999999997
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  416,
+                  318.856,
+                  447,
+                  326.95799999999997
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  447,
+                  318.856,
+                  491,
+                  326.95799999999997
+                ],
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  102,
+                  326.95799999999997,
+                  334,
+                  335.06
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  334,
+                  326.95799999999997,
+                  416,
+                  335.06
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  416,
+                  326.95799999999997,
+                  447,
+                  335.06
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  447,
+                  326.95799999999997,
+                  491,
+                  335.06
+                ],
+                "header": false
+              }
+            ]
+          ],
+          "caption": [
+            54,
+            342,
+            545,
+            370
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            0,
+            384,
+            298,
+            693
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            298,
+            384,
+            600,
+            651
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            0,
+            693,
+            298,
+            722
+          ],
+          "headings": false
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            298,
+            651,
+            600,
+            718
+          ],
+          "headings": false
+        }
+      ]
+    },
+    {
+      "page": 8,
+      "items": [
+        {
+          "kind": "table",
+          "number": 6,
+          "rows": [
+            [
+              {
+                "bounds": [
+                  132,
+                  79,
+                  200,
+                  94
+                ],
+                "header": true
+              },
+              {
+                "bounds": [
+                  200,
+                  79,
+                  236,
+                  94
+                ],
+                "header": true
+              },
+              {
+                "bounds": [
+                  236,
+                  79,
+                  281,
+                  94
+                ],
+                "header": true
+              },
+              {
+                "bounds": [
+                  281,
+                  79,
+                  318,
+                  94
+                ],
+                "header": true
+              },
+              {
+                "bounds": [
+                  318,
+                  79,
+                  353,
+                  94
+                ],
+                "header": true
+              },
+              {
+                "bounds": [
+                  353,
+                  79,
+                  418,
+                  94
+                ],
+                "header": true
+              },
+              {
+                "bounds": [
+                  418,
+                  79,
+                  461,
+                  94
+                ],
+                "header": true
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  132,
+                  94,
+                  200,
+                  109
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  200,
+                  94,
+                  236,
+                  109
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  236,
+                  94,
+                  281,
+                  109
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  281,
+                  94,
+                  318,
+                  109
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  318,
+                  94,
+                  353,
+                  109
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  353,
+                  94,
+                  418,
+                  109
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  418,
+                  94,
+                  461,
+                  109
+                ],
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  132,
+                  109,
+                  200,
+                  124
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  200,
+                  109,
+                  236,
+                  124
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  236,
+                  109,
+                  281,
+                  124
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  281,
+                  109,
+                  318,
+                  124
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  318,
+                  109,
+                  353,
+                  124
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  353,
+                  109,
+                  418,
+                  124
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  418,
+                  109,
+                  461,
+                  124
+                ],
+                "header": false
+              }
+            ]
+          ],
+          "caption": [
+            170,
+            130,
+            425,
+            147
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            0,
+            157,
+            298,
+            674
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            298,
+            157,
+            600,
+            721
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            0,
+            674,
+            298,
+            719
+          ],
+          "headings": false
+        }
+      ]
+    },
+    {
+      "page": 9,
+      "items": [
+        {
+          "kind": "figure",
+          "number": 4,
+          "bounds": [
+            54,
+            65,
+            293,
+            281
+          ],
+          "caption": [
+            54,
+            290,
+            295,
+            318
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            0,
+            350,
+            298,
+            721
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            298,
+            65,
+            600,
+            721
+          ]
+        }
+      ]
+    },
+    {
+      "page": 10,
+      "items": [
+        {
+          "kind": "text",
+          "bounds": [
+            0,
+            65,
+            298,
+            432
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            0,
+            433,
+            298,
+            693
+          ],
+          "references": true
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            298,
+            65,
+            600,
+            721
+          ],
+          "references": true
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            0,
+            693,
+            298,
+            722
+          ],
+          "headings": false
+        }
+      ]
+    },
+    {
+      "page": 11,
+      "items": [
+        {
+          "kind": "text",
+          "bounds": [
+            0,
+            65,
+            298,
+            721
+          ],
+          "references": true
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            298,
+            65,
+            600,
+            721
+          ],
+          "references": true
+        }
+      ]
+    },
+    {
+      "page": 12,
+      "items": [
+        {
+          "kind": "text",
+          "bounds": [
+            0,
+            65,
+            298,
+            722
+          ],
+          "references": true
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            298,
+            65,
+            600,
+            722
+          ],
+          "references": true
+        }
+      ]
+    },
+    {
+      "page": 13,
+      "items": [
+        {
+          "kind": "text",
+          "bounds": [
+            0,
+            65,
+            298,
+            348
+          ]
+        },
+        {
+          "kind": "figure",
+          "number": 5,
+          "bounds": [
+            54,
+            386,
+            293,
+            607
+          ],
+          "caption": [
+            54,
+            621,
+            295,
+            699
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            298,
+            65,
+            600,
+            189
+          ]
+        }
+      ]
+    },
+    {
+      "page": 14,
+      "items": [
+        {
+          "kind": "table",
+          "number": 7,
+          "rows": [
+            [
+              {
+                "bounds": [
+                  57,
+                  110,
+                  538,
+                  278.44
+                ],
+                "colspan": 2
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  57,
+                  278.44,
+                  297.19,
+                  626
+                ]
+              },
+              {
+                "bounds": [
+                  297.19,
+                  278.44,
+                  538,
+                  626
+                ]
+              }
+            ]
+          ],
+          "caption": [
+            54,
+            632,
+            545,
+            770
+          ]
+        }
+      ]
+    },
+    {
+      "page": 15,
+      "items": [
+        {
+          "kind": "table",
+          "number": 8,
+          "rows": [
+            [
+              {
+                "bounds": [
+                  57,
+                  140,
+                  538,
+                  236.6
+                ],
+                "colspan": 2
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  57,
+                  236.6,
+                  297.19,
+                  596
+                ]
+              },
+              {
+                "bounds": [
+                  297.19,
+                  236.6,
+                  538,
+                  596
+                ]
+              }
+            ]
+          ],
+          "caption": [
+            54,
+            602,
+            545,
+            770
+          ]
+        }
+      ]
+    },
+    {
+      "page": 16,
+      "items": [
+        {
+          "kind": "table",
+          "number": 9,
+          "rows": [
+            [
+              {
+                "bounds": [
+                  57,
+                  80,
+                  538,
+                  260.51
+                ],
+                "colspan": 2
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  57,
+                  260.51,
+                  297.19,
+                  656
+                ]
+              },
+              {
+                "bounds": [
+                  297.19,
+                  260.51,
+                  538,
+                  656
+                ]
+              }
+            ]
+          ],
+          "caption": [
+            54,
+            662,
+            545,
+            770
+          ]
+        }
+      ]
+    },
+    {
+      "page": 17,
+      "items": [
+        {
+          "kind": "table",
+          "number": 10,
+          "rows": [
+            [
+              {
+                "bounds": [
+                  57,
+                  110,
+                  538,
+                  302.35
+                ],
+                "colspan": 2
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  57,
+                  302.35,
+                  297.19,
+                  626
+                ]
+              },
+              {
+                "bounds": [
+                  297.19,
+                  302.35,
+                  538,
+                  626
+                ]
+              }
+            ]
+          ],
+          "caption": [
+            54,
+            632,
+            545,
+            770
+          ]
+        }
+      ]
+    },
+    {
+      "page": 18,
+      "items": [
+        {
+          "kind": "table",
+          "number": 11,
+          "rows": [
+            [
+              {
+                "bounds": [
+                  57,
+                  67,
+                  538,
+                  318.72
+                ],
+                "colspan": 2
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  57,
+                  318.72,
+                  297.19,
+                  726
+                ]
+              },
+              {
+                "bounds": [
+                  297.19,
+                  318.72,
+                  538,
+                  726
+                ]
+              }
+            ]
+          ],
+          "caption": [
+            54,
+            732,
+            545,
+            770
+          ]
+        }
+      ]
+    },
+    {
+      "page": 19,
+      "items": [
+        {
+          "kind": "table",
+          "number": 12,
+          "rows": [
+            [
+              {
+                "bounds": [
+                  63,
+                  67,
+                  531,
+                  175.25
+                ],
+                "colspan": 3
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  63,
+                  175.25,
+                  218.33,
+                  438.67
+                ]
+              },
+              {
+                "bounds": [
+                  218.33,
+                  175.25,
+                  372.42,
+                  438.67
+                ]
+              },
+              {
+                "bounds": [
+                  372.42,
+                  175.25,
+                  531,
+                  438.67
+                ]
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  63,
+                  438.67,
+                  218.33,
+                  703
+                ]
+              },
+              {
+                "bounds": [
+                  218.33,
+                  438.67,
+                  372.42,
+                  703
+                ]
+              },
+              {
+                "bounds": [
+                  372.42,
+                  438.67,
+                  531,
+                  703
+                ]
+              }
+            ]
+          ],
+          "caption": [
+            54,
+            707,
+            544,
+            744
+          ]
+        }
+      ]
+    },
+    {
+      "page": 20,
+      "items": [
+        {
+          "kind": "table",
+          "number": 13,
+          "rows": [
+            [
+              {
+                "bounds": [
+                  91,
+                  145,
+                  503,
+                  193.9
+                ]
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  91,
+                  193.9,
+                  503,
+                  613
+                ]
+              }
+            ]
+          ],
+          "caption": [
+            54,
+            618,
+            544,
+            639
+          ]
+        }
+      ]
+    },
+    {
+      "page": 21,
+      "items": [
+        {
+          "kind": "table",
+          "number": 14,
+          "rows": [
+            [
+              {
+                "bounds": [
+                  57,
+                  67,
+                  538,
+                  199.16
+                ],
+                "colspan": 2
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  57,
+                  199.16,
+                  297.19,
+                  319.12
+                ]
+              },
+              {
+                "bounds": [
+                  297.19,
+                  199.16,
+                  538,
+                  319.12
+                ]
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  57,
+                  319.12,
+                  538,
+                  462.98
+                ],
+                "colspan": 2
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  57,
+                  462.98,
+                  297.19,
+                  547.06
+                ]
+              },
+              {
+                "bounds": [
+                  297.19,
+                  462.98,
+                  538,
+                  547.06
+                ]
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  57,
+                  547.06,
+                  538,
+                  655.06
+                ],
+                "colspan": 2
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  57,
+                  655.06,
+                  297.19,
+                  716
+                ]
+              },
+              {
+                "bounds": [
+                  297.19,
+                  655.06,
+                  538,
+                  716
+                ]
+              }
+            ]
+          ],
+          "caption": [
+            80,
+            722,
+            522,
+            740
+          ]
+        }
+      ]
+    },
+    {
+      "page": 22,
+      "items": [
+        {
+          "kind": "table",
+          "number": 15,
+          "rows": [
+            [
+              {
+                "bounds": [
+                  57,
+                  88,
+                  297.19,
+                  172.64
+                ]
+              },
+              {
+                "bounds": [
+                  297.19,
+                  88,
+                  538,
+                  172.64
+                ]
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  57,
+                  172.64,
+                  297.19,
+                  256.72
+                ]
+              },
+              {
+                "bounds": [
+                  297.19,
+                  172.64,
+                  538,
+                  256.72
+                ]
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  57,
+                  259.11,
+                  297.19,
+                  343.2
+                ]
+              },
+              {
+                "bounds": [
+                  297.19,
+                  259.11,
+                  538,
+                  343.2
+                ]
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  57,
+                  343.2,
+                  297.19,
+                  415.33
+                ]
+              },
+              {
+                "bounds": [
+                  297.19,
+                  343.2,
+                  538,
+                  415.33
+                ]
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  57,
+                  417.72,
+                  297.19,
+                  537.67
+                ]
+              },
+              {
+                "bounds": [
+                  297.19,
+                  417.72,
+                  538,
+                  537.67
+                ]
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  57,
+                  537.67,
+                  297.19,
+                  670
+                ]
+              },
+              {
+                "bounds": [
+                  297.19,
+                  537.67,
+                  538,
+                  670
+                ]
+              }
+            ]
+          ],
+          "caption": [
+            143,
+            676,
+            455,
+            695
+          ]
+        }
+      ]
+    },
+    {
+      "page": 23,
+      "items": [
+        {
+          "kind": "table",
+          "number": 16,
+          "rows": [
+            [
+              {
+                "bounds": [
+                  63,
+                  104,
+                  531,
+                  655
+                ]
+              }
+            ]
+          ],
+          "caption": [
+            224,
+            660,
+            370,
+            678
+          ]
+        }
+      ]
+    },
+    {
+      "page": 24,
+      "items": [
+        {
+          "kind": "table",
+          "number": 17,
+          "rows": [
+            [
+              {
+                "bounds": [
+                  63,
+                  200,
+                  531,
+                  559
+                ]
+              }
+            ]
+          ],
+          "caption": [
+            224,
+            564,
+            370,
+            583
+          ]
+        }
+      ]
+    }
+  ],
+  "mathOverrides": [
+    {
+      "page": 4,
+      "bounds": [
+        398,
+        259,
+        429,
+        280
+      ],
+      "baseline": 278.57,
+      "html": "<math><mfrac><mn>1</mn><msqrt><mi>N</mi></msqrt></mfrac></math>"
+    },
+    {
+      "page": 8,
+      "bounds": [
+        106,
+        363,
+        119,
+        381
+      ],
+      "baseline": 377.34,
+      "html": "<math><mfrac><mn>1</mn><msup><mn>10</mn><mn>8</mn></msup></mfrac></math>"
+    }
+  ],
+  "anchorTargets": {
+    "Doc-Start": {
+      "sourceId": "pdf-p1-block-001",
+      "pdfPage": 1,
+      "textPrefix": "Alec Radford * 1 Jeffrey Wu * 1 Rewon Child 1 David Luan 1 Dario Amode"
+    },
+    "Hfootnote.1": {
+      "sourceId": "pdf-p3-block-032",
+      "pdfPage": 3,
+      "textPrefix": "1 https://github.com/codelucas/newspaper"
+    },
+    "Hfootnote.2": {
+      "sourceId": "pdf-p7-block-072",
+      "pdfPage": 7,
+      "textPrefix": "2 https://github.com/CLD2Owners/cld2"
+    },
+    "Hfootnote.3": {
+      "sourceId": "pdf-p7-block-073",
+      "pdfPage": 7,
+      "textPrefix": "3 Alec, who previously thought of himself as good at random trivia, an"
+    },
+    "Hfootnote.4": {
+      "sourceId": "pdf-p8-block-090",
+      "pdfPage": 8,
+      "textPrefix": "4 A significant portion of additional overlap is due to editors reusin"
+    },
+    "Hfootnote.5": {
+      "sourceId": "pdf-p10-block-132",
+      "pdfPage": 10,
+      "textPrefix": "5 Preliminary code for downloading and using the small model is availa"
+    },
+    "cite.al2018character": {
+      "sourceId": "pdf-p10-block-109",
+      "pdfPage": 10,
+      "textPrefix": "Al-Rfou, R., Choe, D., Constant, N., Guo, M., and Jones, L. Character-"
+    },
+    "cite.alberti2019bert": {
+      "sourceId": "pdf-p10-block-110",
+      "pdfPage": 10,
+      "textPrefix": "Alberti, C., Lee, K., and Collins, M. A bert baseline for the natural "
+    },
+    "cite.alcorn2018strike": {
+      "sourceId": "pdf-p10-block-111",
+      "pdfPage": 10,
+      "textPrefix": "Alcorn, M. A., Li, Q., Gong, Z., Wang, C., Mai, L., Ku, W.-S., and Ngu"
+    },
+    "cite.amodei2016deep": {
+      "sourceId": "pdf-p10-block-112",
+      "pdfPage": 10,
+      "textPrefix": "Amodei, D., Ananthanarayanan, S., Anubhai, R., Bai, J., Battenberg, E."
+    },
+    "cite.artetxe2017unsupervised": {
+      "sourceId": "pdf-p10-block-113",
+      "pdfPage": 10,
+      "textPrefix": "Artetxe, M., Labaka, G., Agirre, E., and Cho, K. Unsupervised neural m"
+    },
+    "cite.artetxe2019effective": {
+      "sourceId": "pdf-p10-block-114",
+      "pdfPage": 10,
+      "textPrefix": "Artetxe, M., Labaka, G., and Agirre, E. An effective approach to unsup"
+    },
+    "cite.ba2016layer": {
+      "sourceId": "pdf-p10-block-115",
+      "pdfPage": 10,
+      "textPrefix": "Ba, J. L., Kiros, J. R., and Hinton, G. E. Layer normalization. arXiv "
+    },
+    "cite.bajgar2016embracing": {
+      "sourceId": "pdf-p10-block-116",
+      "pdfPage": 10,
+      "textPrefix": "Bajgar, O., Kadlec, R., and Kleindienst, J. Embracing data abundance: "
+    },
+    "cite.barz2019purging": {
+      "sourceId": "pdf-p10-block-117",
+      "pdfPage": 10,
+      "textPrefix": "Barz, B. and Denzler, J. Do we train on test data? purging cifar of ne"
+    },
+    "cite.bengio2003neural": {
+      "sourceId": "pdf-p10-block-118",
+      "pdfPage": 10,
+      "textPrefix": "Bengio, Y., Ducharme, R., Vincent, P., and Jauvin, C. A neural probabi"
+    },
+    "cite.bowman2018looking": {
+      "sourceId": "pdf-p10-block-119",
+      "pdfPage": 10,
+      "textPrefix": "Bowman, S. R., Pavlick, E., Grave, E., Van Durme, B., Wang, A., Hula, "
+    },
+    "cite.caruana1997multitask": {
+      "sourceId": "pdf-p10-block-120",
+      "pdfPage": 10,
+      "textPrefix": "Caruana, R. Multitask learning. Machine learning, 28(1):41\u201375, 1997."
+    },
+    "cite.chelba2013one": {
+      "sourceId": "pdf-p10-block-121",
+      "pdfPage": 10,
+      "textPrefix": "Chelba, C., Mikolov, T., Schuster, M., Ge, Q., Brants, T., Koehn, P., "
+    },
+    "cite.collobert2011natural": {
+      "sourceId": "pdf-p10-block-122",
+      "pdfPage": 10,
+      "textPrefix": "Collobert, R., Weston, J., Bottou, L., Karlen, M., Kavukcuoglu, K., an"
+    },
+    "cite.conneau2017supervised": {
+      "sourceId": "pdf-p10-block-123",
+      "pdfPage": 10,
+      "textPrefix": "Conneau, A., Kiela, D., Schwenk, H., Barrault, L., and Bordes, A. Supe"
+    },
+    "cite.conneau2017word": {
+      "sourceId": "pdf-p10-block-124",
+      "pdfPage": 10,
+      "textPrefix": "Conneau, A., Lample, G., Ranzato, M., Denoyer, L., and J\u00e9gou, H. Word "
+    },
+    "cite.dai2015semi": {
+      "sourceId": "pdf-p10-block-125",
+      "pdfPage": 10,
+      "textPrefix": "Dai, A. M. and Le, Q. V. Semi-supervised sequence learning. In Advance"
+    },
+    "cite.dai2019transformer": {
+      "sourceId": "pdf-p10-block-126",
+      "pdfPage": 10,
+      "textPrefix": "Dai, Z., Yang, Z., Yang, Y., Cohen, W. W., Carbonell, J., Le, Q. V., a"
+    },
+    "cite.davies2018iweb": {
+      "sourceId": "pdf-p10-block-127",
+      "pdfPage": 10,
+      "textPrefix": "Davies, M. The 14 billion word iweb corpus. https://corpus.byu.edu/iWe"
+    },
+    "cite.dehghani2018universal": {
+      "sourceId": "pdf-p10-block-128",
+      "pdfPage": 10,
+      "textPrefix": "Dehghani, M., Gouws, S., Vinyals, O., Uszkoreit, J., and Kaiser, \u0141. Un"
+    },
+    "cite.devlin2018bert": {
+      "sourceId": "pdf-p10-block-129",
+      "pdfPage": 10,
+      "textPrefix": "Devlin, J., Chang, M.-W., Lee, K., and Toutanova, K. Bert: Pre-trainin"
+    },
+    "cite.dinan2018wizard": {
+      "sourceId": "pdf-p10-block-130",
+      "pdfPage": 10,
+      "textPrefix": "Dinan, E., Roller, S., Shuster, K., Fan, A., Auli, M., and Weston, J. "
+    },
+    "cite.fan2018hierarchical": {
+      "sourceId": "pdf-p10-block-131",
+      "pdfPage": 10,
+      "textPrefix": "Fan, A., Lewis, M., and Dauphin, Y. Hierarchical neural story generati"
+    },
+    "cite.finn2017model": {
+      "sourceId": "pdf-p11-block-133",
+      "pdfPage": 11,
+      "textPrefix": "Finn, C., Abbeel, P., and Levine, S. Model-agnostic metalearning for f"
+    },
+    "cite.gehrmann2018bottom": {
+      "sourceId": "pdf-p11-block-134",
+      "pdfPage": 11,
+      "textPrefix": "Gehrmann, S., Deng, Y., and Rush, A. M. Bottom-up abstractive summariz"
+    },
+    "cite.gillick2015multilingual": {
+      "sourceId": "pdf-p11-block-135",
+      "pdfPage": 11,
+      "textPrefix": "Gillick, D., Brunk, C., Vinyals, O., and Subramanya, A. Multilingual l"
+    },
+    "cite.gong2018frage": {
+      "sourceId": "pdf-p11-block-136",
+      "pdfPage": 11,
+      "textPrefix": "Gong, C., He, D., Tan, X., Qin, T., Wang, L., and Liu, T.-Y. Frage: fr"
+    },
+    "cite.grave2016improving": {
+      "sourceId": "pdf-p11-block-137",
+      "pdfPage": 11,
+      "textPrefix": "Grave, E., Joulin, A., and Usunier, N. Improving neural language model"
+    },
+    "cite.he2016identity": {
+      "sourceId": "pdf-p11-block-138",
+      "pdfPage": 11,
+      "textPrefix": "He, K., Zhang, X., Ren, S., and Sun, J. Identity mappings in deep resi"
+    },
+    "cite.hestness2017deep": {
+      "sourceId": "pdf-p11-block-139",
+      "pdfPage": 11,
+      "textPrefix": "Hestness, J., Narang, S., Ardalani, N., Diamos, G., Jun, H., Kianineja"
+    },
+    "cite.hill2015goldilocks": {
+      "sourceId": "pdf-p11-block-140",
+      "pdfPage": 11,
+      "textPrefix": "Hill, F., Bordes, A., Chopra, S., and Weston, J. The goldilocks princi"
+    },
+    "cite.hill2016learning": {
+      "sourceId": "pdf-p11-block-141",
+      "pdfPage": 11,
+      "textPrefix": "Hill, F., Cho, K., and Korhonen, A. Learning distributed repre-sentati"
+    },
+    "cite.hoang2018entity": {
+      "sourceId": "pdf-p11-block-142",
+      "pdfPage": 11,
+      "textPrefix": "Hoang, L., Wiseman, S., and Rush, A. M. Entity tracking improves cloze"
+    },
+    "cite.howard2018universal": {
+      "sourceId": "pdf-p11-block-143",
+      "pdfPage": 11,
+      "textPrefix": "Howard, J. and Ruder, S. Universal language model fine-tuning for text"
+    },
+    "cite.jelinek1980interpolated": {
+      "sourceId": "pdf-p11-block-144",
+      "pdfPage": 11,
+      "textPrefix": "Jelinek, F. and Mercer, R. L. Interpolated estimation of markov source"
+    },
+    "cite.jia2017adversarial": {
+      "sourceId": "pdf-p11-block-145",
+      "pdfPage": 11,
+      "textPrefix": "Jia, R. and Liang, P. Adversarial examples for evaluating reading comp"
+    },
+    "cite.jozefowicz2016exploring": {
+      "sourceId": "pdf-p11-block-146",
+      "pdfPage": 11,
+      "textPrefix": "Jozefowicz, R., Vinyals, O., Schuster, M., Shazeer, N., and Wu, Y. Exp"
+    },
+    "cite.kaiser2017one": {
+      "sourceId": "pdf-p11-block-147",
+      "pdfPage": 11,
+      "textPrefix": "Kaiser, L., Gomez, A. N., Shazeer, N., Vaswani, A., Parmar, N., Jones,"
+    },
+    "cite.karpathy2015visualizing": {
+      "sourceId": "pdf-p11-block-148",
+      "pdfPage": 11,
+      "textPrefix": "Karpathy, A., Johnson, J., and Fei-Fei, L. Visualizing and understandi"
+    },
+    "cite.kirkpatrick2017overcoming": {
+      "sourceId": "pdf-p11-block-149",
+      "pdfPage": 11,
+      "textPrefix": "Kirkpatrick, J., Pascanu, R., Rabinowitz, N., Veness, J., Desjardins, "
+    },
+    "cite.kiros2015skip": {
+      "sourceId": "pdf-p11-block-150",
+      "pdfPage": 11,
+      "textPrefix": "Kiros, R., Zhu, Y., Salakhutdinov, R. R., Zemel, R., Urtasun, R., Torr"
+    },
+    "cite.krizhevsky2012imagenet": {
+      "sourceId": "pdf-p11-block-151",
+      "pdfPage": 11,
+      "textPrefix": "Krizhevsky, A., Sutskever, I., and Hinton, G. E. Imagenet classificati"
+    },
+    "cite.kwiatkowski2019natural": {
+      "sourceId": "pdf-p11-block-152",
+      "pdfPage": 11,
+      "textPrefix": "Kwiatkowski, T., Palomaki, J., Rhinehart, O., Collins, M., Parikh, A.,"
+    },
+    "cite.lake2017building": {
+      "sourceId": "pdf-p11-block-153",
+      "pdfPage": 11,
+      "textPrefix": "Lake, B. M., Ullman, T. D., Tenenbaum, J. B., and Gershman, S. J. Buil"
+    },
+    "cite.lample2017unsupervised": {
+      "sourceId": "pdf-p11-block-154",
+      "pdfPage": 11,
+      "textPrefix": "Lample, G., Conneau, A., Denoyer, L., and Ranzato, M. Unsupervised mac"
+    },
+    "cite.levesque2012winograd": {
+      "sourceId": "pdf-p11-block-155",
+      "pdfPage": 11,
+      "textPrefix": "Levesque, H., Davis, E., and Morgenstern, L. The winograd schema chall"
+    },
+    "cite.levy2014neural": {
+      "sourceId": "pdf-p11-block-156",
+      "pdfPage": 11,
+      "textPrefix": "Levy, O. and Goldberg, Y. Neural word embedding as implicit matrix fac"
+    },
+    "cite.liu2018generating": {
+      "sourceId": "pdf-p11-block-157",
+      "pdfPage": 11,
+      "textPrefix": "Liu, P. J., Saleh, M., Pot, E., Goodrich, B., Sepassi, R., Kaiser, L.,"
+    },
+    "cite.mccann2017learned": {
+      "sourceId": "pdf-p11-block-158",
+      "pdfPage": 11,
+      "textPrefix": "McCann, B., Bradbury, J., Xiong, C., and Socher, R. Learned in transla"
+    },
+    "cite.mccann2018natural": {
+      "sourceId": "pdf-p11-block-159",
+      "pdfPage": 11,
+      "textPrefix": "McCann, B., Keskar, N. S., Xiong, C., and Socher, R. The natural langu"
+    },
+    "cite.merity2016pointer": {
+      "sourceId": "pdf-p11-block-160",
+      "pdfPage": 11,
+      "textPrefix": "Merity, S., Xiong, C., Bradbury, J., and Socher, R. Pointer sentinel m"
+    },
+    "cite.mikolov2013distributed": {
+      "sourceId": "pdf-p11-block-161",
+      "pdfPage": 11,
+      "textPrefix": "Mikolov, T., Sutskever, I., Chen, K., Corrado, G. S., and Dean, J. Dis"
+    },
+    "cite.nallapati2016abstractive": {
+      "sourceId": "pdf-p11-block-162",
+      "pdfPage": 11,
+      "textPrefix": "Nallapati, R., Zhou, B., Gulcehre, C., Xiang, B., et al. Abstractive t"
+    },
+    "cite.paperno2016lambada": {
+      "sourceId": "pdf-p11-block-163",
+      "pdfPage": 11,
+      "textPrefix": "Paperno, D., Kruszewski, G., Lazaridou, A., Pham, Q. N., Bernardi, R.,"
+    },
+    "cite.pennington2014glove": {
+      "sourceId": "pdf-p11-block-164",
+      "pdfPage": 11,
+      "textPrefix": "Pennington, J., Socher, R., and Manning, C. Glove: Global vectors for "
+    },
+    "cite.peters2013content": {
+      "sourceId": "pdf-p12-block-165",
+      "pdfPage": 12,
+      "textPrefix": "Peters, M. E. and Lecocq, D. Content extraction using diverse feature "
+    },
+    "cite.peters2018deep": {
+      "sourceId": "pdf-p12-block-166",
+      "pdfPage": 12,
+      "textPrefix": "Peters, M. E., Neumann, M., Iyyer, M., Gardner, M., Clark, C., Lee, K."
+    },
+    "cite.radford2017learning": {
+      "sourceId": "pdf-p12-block-167",
+      "pdfPage": 12,
+      "textPrefix": "Radford, A., Jozefowicz, R., and Sutskever, I. Learning to generate re"
+    },
+    "cite.radford2018improving": {
+      "sourceId": "pdf-p12-block-168",
+      "pdfPage": 12,
+      "textPrefix": "Radford, A., Narasimhan, K., Salimans, T., and Sutskever, I. Improving"
+    },
+    "cite.ramachandran2016unsupervised": {
+      "sourceId": "pdf-p12-block-169",
+      "pdfPage": 12,
+      "textPrefix": "Ramachandran, P., Liu, P. J., and Le, Q. V. Unsupervised pre-training "
+    },
+    "cite.recht2018cifar": {
+      "sourceId": "pdf-p12-block-170",
+      "pdfPage": 12,
+      "textPrefix": "Recht, B., Roelofs, R., Schmidt, L., and Shankar, V. Do cifar-10 class"
+    },
+    "cite.reddy2018coqa": {
+      "sourceId": "pdf-p12-block-171",
+      "pdfPage": 12,
+      "textPrefix": "Reddy, S., Chen, D., and Manning, C. D. Coqa: A conversational questio"
+    },
+    "cite.schwartz2017story": {
+      "sourceId": "pdf-p12-block-172",
+      "pdfPage": 12,
+      "textPrefix": "Schwartz, R., Sap, M., Konstas, I., Zilles, L., Choi, Y., and Smith, N"
+    },
+    "cite.see2017get": {
+      "sourceId": "pdf-p12-block-173",
+      "pdfPage": 12,
+      "textPrefix": "See, A., Liu, P. J., and Manning, C. D. Get to the point: Summarizatio"
+    },
+    "cite.sennrich2015neural": {
+      "sourceId": "pdf-p12-block-174",
+      "pdfPage": 12,
+      "textPrefix": "Sennrich, R., Haddow, B., and Birch, A. Neural machine translation of "
+    },
+    "cite.subramanian2018learning": {
+      "sourceId": "pdf-p12-block-175",
+      "pdfPage": 12,
+      "textPrefix": "Subramanian, S., Trischler, A., Bengio, Y., and Pal, C. J. Learning ge"
+    },
+    "cite.sutskever2014sequence": {
+      "sourceId": "pdf-p12-block-176",
+      "pdfPage": 12,
+      "textPrefix": "Sutskever, I., Vinyals, O., and Le, Q. V. Sequence to sequence learnin"
+    },
+    "cite.sutskever2015towards": {
+      "sourceId": "pdf-p12-block-177",
+      "pdfPage": 12,
+      "textPrefix": "Sutskever, I., Jozefowicz, R., Gregor, K., Rezende, D., Lillicrap, T.,"
+    },
+    "cite.trichelair2018evaluation": {
+      "sourceId": "pdf-p12-block-178",
+      "pdfPage": 12,
+      "textPrefix": "Trichelair, P., Emami, A., Cheung, J. C. K., Trischler, A., Suleman, K"
+    },
+    "cite.trinh2018simple": {
+      "sourceId": "pdf-p12-block-179",
+      "pdfPage": 12,
+      "textPrefix": "Trinh, T. H. and Le, Q. V. A simple method for commonsense reasoning. "
+    },
+    "cite.vaswani2017attention": {
+      "sourceId": "pdf-p12-block-180",
+      "pdfPage": 12,
+      "textPrefix": "Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez,"
+    },
+    "cite.vinyals2015neural": {
+      "sourceId": "pdf-p12-block-181",
+      "pdfPage": 12,
+      "textPrefix": "Vinyals, O. and Le, Q. A neural conversational model. arXiv preprint a"
+    },
+    "cite.vinyals2015pointer": {
+      "sourceId": "pdf-p12-block-182",
+      "pdfPage": 12,
+      "textPrefix": "Vinyals, O., Fortunato, M., and Jaitly, N. Pointer networks. In Advanc"
+    },
+    "cite.wang2018glue": {
+      "sourceId": "pdf-p12-block-183",
+      "pdfPage": 12,
+      "textPrefix": "Wang, A., Singh, A., Michael, J., Hill, F., Levy, O., and Bowman, S. R"
+    },
+    "cite.weston2016dialog": {
+      "sourceId": "pdf-p12-block-184",
+      "pdfPage": 12,
+      "textPrefix": "Weston, J. E. Dialog-based language learning. In Advances in Neural In"
+    },
+    "cite.wieting2019no": {
+      "sourceId": "pdf-p12-block-185",
+      "pdfPage": 12,
+      "textPrefix": "Wieting, J. and Kiela, D. No training required: Exploring random encod"
+    },
+    "cite.wolf2019transfertransfo": {
+      "sourceId": "pdf-p12-block-186",
+      "pdfPage": 12,
+      "textPrefix": "Wolf, T., Sanh, V., Chaumond, J., and Delangue, C. Transfertransfo: A "
+    },
+    "cite.yogatama2019learning": {
+      "sourceId": "pdf-p12-block-187",
+      "pdfPage": 12,
+      "textPrefix": "Yogatama, D., d\u2019Autume, C. d. M., Connor, J., Kocisky, T., Chrzanowski"
+    },
+    "equation.2.1": {
+      "sourceId": "pdf-p2-block-019",
+      "pdfPage": 2,
+      "textPrefix": "p(x)=\u220fi=1np(sn|s1,\u2026,sn\u22121)(1)"
+    },
+    "figure.1": {
+      "sourceId": "pdf-p2-block-012",
+      "pdfPage": 2,
+      "textPrefix": "Figure 1. Zero-shot task performance of WebText LMs as a function of m"
+    },
+    "figure.2": {
+      "sourceId": "pdf-p5-block-050",
+      "pdfPage": 5,
+      "textPrefix": "Figure 2. Performance on the Children\u2019s Book Test as a function of mod"
+    },
+    "figure.3": {
+      "sourceId": "pdf-p6-block-056",
+      "pdfPage": 6,
+      "textPrefix": "Figure 3. Performance on the Winograd Schema Challenge as a function o"
+    },
+    "figure.4": {
+      "sourceId": "pdf-p9-block-091",
+      "pdfPage": 9,
+      "textPrefix": "Figure 4. The performance of LMs trained on WebText as a function of m"
+    },
+    "figure.5": {
+      "sourceId": "pdf-p13-block-194",
+      "pdfPage": 13,
+      "textPrefix": "Figure 5. CDF of percentage 8-gram overlap with WebText train-ing set,"
+    },
+    "page.1": {
+      "sourceId": "pdf-p1-block-001",
+      "pdfPage": 1,
+      "textPrefix": "Alec Radford * 1 Jeffrey Wu * 1 Rewon Child 1 David Luan 1 Dario Amode"
+    },
+    "page.10": {
+      "sourceId": "pdf-p10-block-103",
+      "pdfPage": 10,
+      "textPrefix": "training data and capacity of GPT-2 is sufficient to overcome the inef"
+    },
+    "page.11": {
+      "sourceId": "pdf-p11-block-133",
+      "pdfPage": 11,
+      "textPrefix": "Finn, C., Abbeel, P., and Levine, S. Model-agnostic metalearning for f"
+    },
+    "page.12": {
+      "sourceId": "pdf-p12-block-165",
+      "pdfPage": 12,
+      "textPrefix": "Peters, M. E. and Lecocq, D. Content extraction using diverse feature "
+    },
+    "page.13": {
+      "sourceId": "pdf-p13-block-188",
+      "pdfPage": 13,
+      "textPrefix": "8. Appendix A: Samples"
+    },
+    "page.14": {
+      "sourceId": "pdf-p14-block-199",
+      "pdfPage": 14,
+      "textPrefix": "Context (WebText test) Outfit 1: TypicalThis pairing was the first out"
+    },
+    "page.15": {
+      "sourceId": "pdf-p15-block-200",
+      "pdfPage": 15,
+      "textPrefix": "Context (WebText test) Some of the most glorious historical attraction"
+    },
+    "page.16": {
+      "sourceId": "pdf-p16-block-201",
+      "pdfPage": 16,
+      "textPrefix": "Context (WebText test) PinkyThe pink ghost\u2019s AI is designed to \u201dfeel\u201d "
+    },
+    "page.17": {
+      "sourceId": "pdf-p17-block-202",
+      "pdfPage": 17,
+      "textPrefix": "Context (WebText test) Corporal Michael P. Goeldin was an unskilled la"
+    },
+    "page.18": {
+      "sourceId": "pdf-p18-block-203",
+      "pdfPage": 18,
+      "textPrefix": "Context (WebText test) Xmonad, Xresources, and FontsXresources can be "
+    },
+    "page.19": {
+      "sourceId": "pdf-p19-block-204",
+      "pdfPage": 19,
+      "textPrefix": "Context (WebText test) Aaron loves mint chocolate cake, but he require"
+    },
+    "page.2": {
+      "sourceId": "pdf-p2-block-012",
+      "pdfPage": 2,
+      "textPrefix": "Figure 1. Zero-shot task performance of WebText LMs as a function of m"
+    },
+    "page.20": {
+      "sourceId": "pdf-p20-block-205",
+      "pdfPage": 20,
+      "textPrefix": "Context (human-written): In a shocking finding, scientist discovered a"
+    },
+    "page.21": {
+      "sourceId": "pdf-p21-block-206",
+      "pdfPage": 21,
+      "textPrefix": "Article: Prehistoric man sketched an incredible array of prehistoric b"
+    },
+    "page.22": {
+      "sourceId": "pdf-p22-block-207",
+      "pdfPage": 22,
+      "textPrefix": "English referenceThis re-release, titled The Next Day Extra, was prese"
+    },
+    "page.23": {
+      "sourceId": "pdf-p23-block-208",
+      "pdfPage": 23,
+      "textPrefix": "Context (passage and previous question/answer pairs)The 2008 Summer Ol"
+    },
+    "page.24": {
+      "sourceId": "pdf-p24-block-209",
+      "pdfPage": 24,
+      "textPrefix": "Context (passage and previous question/answer pairs)Tom goes everywher"
+    },
+    "page.3": {
+      "sourceId": "pdf-p3-block-022",
+      "pdfPage": 3,
+      "textPrefix": "to infer and perform many different tasks on examples with this type o"
+    },
+    "page.4": {
+      "sourceId": "pdf-p4-block-033",
+      "pdfPage": 4,
+      "textPrefix": "lapping training data with test evaluation tasks."
+    },
+    "page.5": {
+      "sourceId": "pdf-p5-block-046",
+      "pdfPage": 5,
+      "textPrefix": "LAMBADA (PPL)LAMBADA (ACC)CBT-CN (ACC)CBT-NE (ACC)WikiText2 (PPL)PTB ("
+    },
+    "page.6": {
+      "sourceId": "pdf-p6-block-054",
+      "pdfPage": 6,
+      "textPrefix": "since 19% of answers are not in context. We use a version of the datas"
+    },
+    "page.7": {
+      "sourceId": "pdf-p7-block-067",
+      "pdfPage": 7,
+      "textPrefix": "QuestionGenerated AnswerCorrectProbabilityWho wrote the book the origi"
+    },
+    "page.8": {
+      "sourceId": "pdf-p8-block-074",
+      "pdfPage": 8,
+      "textPrefix": "PTBWikiText-2enwik8text8Wikitext-1031BWDataset train2.67%0.66%7.50%2.3"
+    },
+    "page.9": {
+      "sourceId": "pdf-p9-block-091",
+      "pdfPage": 9,
+      "textPrefix": "Figure 4. The performance of LMs trained on WebText as a function of m"
+    },
+    "section*.1": {
+      "sourceId": "pdf-p10-block-106",
+      "pdfPage": 10,
+      "textPrefix": "Acknowledgements"
+    },
+    "section*.2": {
+      "sourceId": "pdf-p10-block-108",
+      "pdfPage": 10,
+      "textPrefix": "References"
+    },
+    "section.1": {
+      "sourceId": "pdf-p1-block-004",
+      "pdfPage": 1,
+      "textPrefix": "1. Introduction"
+    },
+    "section.2": {
+      "sourceId": "pdf-p2-block-016",
+      "pdfPage": 2,
+      "textPrefix": "2. Approach"
+    },
+    "section.3": {
+      "sourceId": "pdf-p4-block-042",
+      "pdfPage": 4,
+      "textPrefix": "3. Experiments"
+    },
+    "section.4": {
+      "sourceId": "pdf-p8-block-075",
+      "pdfPage": 8,
+      "textPrefix": "4. Generalization vs Memorization"
+    },
+    "section.5": {
+      "sourceId": "pdf-p8-block-088",
+      "pdfPage": 8,
+      "textPrefix": "5. Related Work"
+    },
+    "section.6": {
+      "sourceId": "pdf-p9-block-098",
+      "pdfPage": 9,
+      "textPrefix": "6. Discussion"
+    },
+    "section.7": {
+      "sourceId": "pdf-p10-block-104",
+      "pdfPage": 10,
+      "textPrefix": "7. Conclusion"
+    },
+    "section.8": {
+      "sourceId": "pdf-p13-block-188",
+      "pdfPage": 13,
+      "textPrefix": "8. Appendix A: Samples"
+    },
+    "subsection.2.1": {
+      "sourceId": "pdf-p3-block-025",
+      "pdfPage": 3,
+      "textPrefix": "2.1. Training Dataset"
+    },
+    "subsection.2.2": {
+      "sourceId": "pdf-p4-block-034",
+      "pdfPage": 4,
+      "textPrefix": "2.2. Input Representation"
+    },
+    "subsection.2.3": {
+      "sourceId": "pdf-p4-block-038",
+      "pdfPage": 4,
+      "textPrefix": "2.3. Model"
+    },
+    "subsection.3.1": {
+      "sourceId": "pdf-p4-block-044",
+      "pdfPage": 4,
+      "textPrefix": "3.1. Language Modeling"
+    },
+    "subsection.3.2": {
+      "sourceId": "pdf-p5-block-049",
+      "pdfPage": 5,
+      "textPrefix": "3.2. Children\u2019s Book Test"
+    },
+    "subsection.3.3": {
+      "sourceId": "pdf-p5-block-052",
+      "pdfPage": 5,
+      "textPrefix": "3.3. LAMBADA"
+    },
+    "subsection.3.4": {
+      "sourceId": "pdf-p6-block-055",
+      "pdfPage": 6,
+      "textPrefix": "3.4. Winograd Schema Challenge"
+    },
+    "subsection.3.5": {
+      "sourceId": "pdf-p6-block-058",
+      "pdfPage": 6,
+      "textPrefix": "3.5. Reading Comprehension"
+    },
+    "subsection.3.6": {
+      "sourceId": "pdf-p6-block-063",
+      "pdfPage": 6,
+      "textPrefix": "3.6. Summarization"
+    },
+    "subsection.3.7": {
+      "sourceId": "pdf-p6-block-065",
+      "pdfPage": 6,
+      "textPrefix": "3.7. Translation"
+    },
+    "subsection.3.8": {
+      "sourceId": "pdf-p7-block-069",
+      "pdfPage": 7,
+      "textPrefix": "3.8. Question Answering"
+    },
+    "subsection.8.1": {
+      "sourceId": "pdf-p13-block-189",
+      "pdfPage": 13,
+      "textPrefix": "8.1. Model capacity"
+    },
+    "subsection.8.2": {
+      "sourceId": "pdf-p13-block-191",
+      "pdfPage": 13,
+      "textPrefix": "8.2. Text Memorization"
+    },
+    "subsection.8.3": {
+      "sourceId": "pdf-p13-block-195",
+      "pdfPage": 13,
+      "textPrefix": "8.3. Diversity"
+    },
+    "subsection.8.4": {
+      "sourceId": "pdf-p13-block-197",
+      "pdfPage": 13,
+      "textPrefix": "8.4. Robustness"
+    },
+    "table.1": {
+      "sourceId": "pdf-p3-block-028",
+      "pdfPage": 3,
+      "textPrefix": "\u201dI\u2019m not the cleverest man in the world, but like they say in French: "
+    },
+    "table.10": {
+      "sourceId": "pdf-p17-block-202",
+      "pdfPage": 17,
+      "textPrefix": "Context (WebText test) Corporal Michael P. Goeldin was an unskilled la"
+    },
+    "table.11": {
+      "sourceId": "pdf-p18-block-203",
+      "pdfPage": 18,
+      "textPrefix": "Context (WebText test) Xmonad, Xresources, and FontsXresources can be "
+    },
+    "table.12": {
+      "sourceId": "pdf-p19-block-204",
+      "pdfPage": 19,
+      "textPrefix": "Context (WebText test) Aaron loves mint chocolate cake, but he require"
+    },
+    "table.13": {
+      "sourceId": "pdf-p20-block-205",
+      "pdfPage": 20,
+      "textPrefix": "Context (human-written): In a shocking finding, scientist discovered a"
+    },
+    "table.14": {
+      "sourceId": "pdf-p21-block-206",
+      "pdfPage": 21,
+      "textPrefix": "Article: Prehistoric man sketched an incredible array of prehistoric b"
+    },
+    "table.15": {
+      "sourceId": "pdf-p22-block-207",
+      "pdfPage": 22,
+      "textPrefix": "English referenceThis re-release, titled The Next Day Extra, was prese"
+    },
+    "table.16": {
+      "sourceId": "pdf-p23-block-208",
+      "pdfPage": 23,
+      "textPrefix": "Context (passage and previous question/answer pairs)The 2008 Summer Ol"
+    },
+    "table.17": {
+      "sourceId": "pdf-p24-block-209",
+      "pdfPage": 24,
+      "textPrefix": "Context (passage and previous question/answer pairs)Tom goes everywher"
+    },
+    "table.2": {
+      "sourceId": "pdf-p4-block-040",
+      "pdfPage": 4,
+      "textPrefix": "ParametersLayersdmodel117M12768345M241024762M3612801542M481600Table 2."
+    },
+    "table.3": {
+      "sourceId": "pdf-p5-block-046",
+      "pdfPage": 5,
+      "textPrefix": "LAMBADA (PPL)LAMBADA (ACC)CBT-CN (ACC)CBT-NE (ACC)WikiText2 (PPL)PTB ("
+    },
+    "table.4": {
+      "sourceId": "pdf-p6-block-061",
+      "pdfPage": 6,
+      "textPrefix": "R-1R-2R-LR-AVGBottom-Up Sum41.2218.6838.3432.75Lede-340.3817.6636.6231"
+    },
+    "table.5": {
+      "sourceId": "pdf-p7-block-067",
+      "pdfPage": 7,
+      "textPrefix": "QuestionGenerated AnswerCorrectProbabilityWho wrote the book the origi"
+    },
+    "table.6": {
+      "sourceId": "pdf-p8-block-074",
+      "pdfPage": 8,
+      "textPrefix": "PTBWikiText-2enwik8text8Wikitext-1031BWDataset train2.67%0.66%7.50%2.3"
+    },
+    "table.7": {
+      "sourceId": "pdf-p14-block-199",
+      "pdfPage": 14,
+      "textPrefix": "Context (WebText test) Outfit 1: TypicalThis pairing was the first out"
+    },
+    "table.8": {
+      "sourceId": "pdf-p15-block-200",
+      "pdfPage": 15,
+      "textPrefix": "Context (WebText test) Some of the most glorious historical attraction"
+    },
+    "table.9": {
+      "sourceId": "pdf-p16-block-201",
+      "pdfPage": 16,
+      "textPrefix": "Context (WebText test) PinkyThe pink ghost\u2019s AI is designed to \u201dfeel\u201d "
+    }
+  }
+}

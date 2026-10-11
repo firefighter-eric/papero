@@ -4,6 +4,9 @@ import { pathToFileURL } from 'node:url'
 import { load } from 'cheerio'
 import { inspectPublicData } from './prepare-data.mjs'
 import { assertCodexFallbackReceipt } from './apply-codex-translations.mjs'
+import { assertPdfProvenance } from './pdf-provenance.mjs'
+import { publicationAuthors } from './publication-bibliography.mjs'
+import { sourceAssetMetadata } from './publication-assets.mjs'
 import { assertTranslationFidelity, catalogEntry, sanitizeHtml, sanitizeSvg, sha256, translationUnits, validArxivId, visibleProseText, scientificSignature } from './paper-lib.mjs'
 
 const fingerprint = value => typeof value === 'string' && /^[a-f0-9]{64}$/.test(value)
@@ -115,8 +118,10 @@ function assertSource(paper) {
     if (paper.arxivId !== null || source.url !== 'https://qwen.ai/blog?id=qwen3.5' || source.htmlUrl !== source.url
       || source.payloadUrl !== 'https://qwen.ai/api/v2/article/?language=en-US&path=qwen3.5&type=qwen_ai'
       || !timestamp(source.publishedAt) || source.language !== 'en-US') throw new Error(`Invalid official article provenance: ${paper.id}.`)
-
+  } else if (kind === 'official-paper') {
+    if (paper.arxivId !== null || source.format !== 'pdf') throw new Error(`Invalid official paper provenance: ${paper.id}.`)
   } else throw new Error(`Unsupported release source kind: ${kind}.`)
+  if (source.format === 'pdf') assertPdfProvenance(paper)
 }
 
 function assertTranslationMetadata(paper) {
@@ -209,10 +214,11 @@ export async function verifyReleaseData({ dataDir = 'paper-data', report = value
   let blocks = 0, assets = 0
   for (const { entry, paper, metadata: publicMetadata, dataPath } of completePapers) {
     if (publicMetadata.content?.format !== 'html') throw new Error(`Public release requires standalone en.html/zh.html with body-free metadata: ${paper.id}.`)
-    if (!nonempty(paper.title) || !Array.isArray(paper.authors) || !paper.authors.length || !paper.authors.every(nonempty)
+    if (!nonempty(paper.title) || !Array.isArray(paper.authors) || !paper.authors.every(nonempty) || !publicationAuthors(paper)?.length
       || !Number.isInteger(paper.year) || paper.year < 1900 || paper.year > 2100 || !Array.isArray(paper.tags) || !paper.tags.every(nonempty)
       || !paper.blocks.length || !Array.isArray(paper.sections) || !paper.sections.length) throw new Error(`Invalid document metadata: ${paper.id}.`)
     assertSource(paper)
+    sourceAssetMetadata(paper)
     const modelHistory = assertTranslationMetadata(paper)
     const sectionIds = new Set()
     for (const section of paper.sections) {
