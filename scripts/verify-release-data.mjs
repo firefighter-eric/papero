@@ -6,6 +6,7 @@ import { inspectPublicData } from './prepare-data.mjs'
 import { assertCodexFallbackReceipt } from './apply-codex-translations.mjs'
 import { assertPdfProvenance } from './pdf-provenance.mjs'
 import { assertAuthorArticleProvenance } from './author-article-lib.mjs'
+import { assertChineseHeadingCompleteness } from './heading-provenance.mjs'
 import { publicationAuthors } from './publication-bibliography.mjs'
 import { sourceAssetMetadata } from './publication-assets.mjs'
 import { assertTranslationFidelity, catalogEntry, sanitizeHtml, sanitizeSvg, sha256, translationUnits, validArxivId, visibleProseText, scientificSignature } from './paper-lib.mjs'
@@ -260,6 +261,7 @@ export async function verifyReleaseData({ dataDir = 'paper-data', report = value
       || !Number.isInteger(paper.year) || paper.year < 1900 || paper.year > 2100 || !Array.isArray(paper.tags) || !paper.tags.every(nonempty)
       || !paper.blocks.length || !Array.isArray(paper.sections) || !paper.sections.length) throw new Error(`Invalid document metadata: ${paper.id}.`)
     assertSource(paper)
+    assertChineseHeadingCompleteness(paper)
     sourceAssetMetadata(paper)
     const modelHistory = assertTranslationMetadata(paper)
     const sectionIds = new Set()
