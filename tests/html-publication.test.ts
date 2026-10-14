@@ -69,6 +69,26 @@ beforeAll(() => vi.stubGlobal('crypto', webcrypto))
 afterAll(() => vi.unstubAllGlobals())
 
 describe('separate HTML paper publication', () => {
+  it('accepts a known section anchor before the hashed body without weakening wrapper boundaries', async () => {
+    const sample = publication(), anchor = '<span id="intro"></span>'
+    for (const language of ['en', 'zh'] as const) {
+      const insertAt = sample.metadata.blocks[0].contentOffsets[language].start
+      const before = Buffer.from(sample.documents[language])
+      sample.documents[language] = Buffer.concat([before.subarray(0, insertAt), Buffer.from(anchor), before.subarray(insertAt)]).toString()
+      for (const block of sample.metadata.blocks) {
+        block.contentOffsets[language].start += bytes(anchor)
+        block.contentOffsets[language].end += bytes(anchor)
+      }
+      sample.refresh(language)
+    }
+    const paper = await loadPaper(entry, { fetcher: sample.fetcher })
+    expect(paper.blocks.map(block => block.en)).toEqual(sample.original.blocks.map(block => block.en))
+    expect(paper.blocks.map(block => block.zh)).toEqual(sample.original.blocks.map(block => block.zh))
+    sample.documents.en = sample.documents.en.replace(anchor, '<span id="other"></span>')
+    sample.refresh('en')
+    await expect(loadPaper(entry, { fetcher: sample.fetcher })).rejects.toThrow(/wrapper boundaries/)
+  })
+
   it('loads checked English and Chinese documents and reconstructs exact formulas, assets and ordered blocks in memory', async () => {
     const sample = publication()
     const paper = await loadPaper(entry, { baseUrl: 'https://storage.example/papero', fetcher: sample.fetcher })

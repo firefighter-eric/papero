@@ -37,6 +37,8 @@ GAN 的原 HTML 把两段作者致谢嵌入标题标签，本轮将致谢完整�
 
 DQN 第 10–13 页的四张补充表格，以及 AlphaGo 第 13 页的补充表格，缺少可用的文字层，使用 macOS Apple Vision `VNRecognizeTextRequest`：300 dpi、`accurate`、`en-US`、关闭语言纠错。识别结果与渲染的原始表格逐行逐格对照；DQN 的实验表保留全部 49 款游戏。AlphaGo 最后三页的胜率矩阵使用原生 PDF 行文本和原始标签矢量恢复，避免列边界切断数字。OCR 没有调用千问模型。
 
+上段记录首次转换。2026-10-15 按用户要求，另用现有 Qwen3.6 35B A3B 视觉模型重新识别这五张表格，并由 GPT-6 Luna 独立对照原始图像核验。共 479 个表头／正文单元格与既有转写一致，其中 349 个数值单元格全部吻合；当前中英文 HTML 的数值、符号、行列和线上文件指纹也一致。原始 Apple Vision 输出存在漏格和 ± 识别错误，网页使用的是此前修正后的转写。本次没有重写已正确的正文，也没有改写最初的转换或翻译模型记录。实际千问模型、图像、提示词和响应指纹及核验范围保存于 DQN、AlphaGo 发布元数据的 `source.conversion.parameters.ocrVerification`。详见 [OCR 复核与完整库发布验收](ocr-verification.md)。
+
 ## 翻译与核验
 
 主译复用 LM Studio 已安装的 `mlx-community/Qwen3.6-35B-A3B-4bit`，API 标识为 `qwen3.6-35b-a3b`。初轮上下文为 8192，续跑为 16384，`reasoning_effort: none`，全局最多四个请求；实际采样参数、提示词指纹、模型身份及响应分别记录。没有下载新的模型权重。
