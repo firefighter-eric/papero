@@ -5,6 +5,7 @@ import { load } from 'cheerio'
 import { sanitizeHtml, sha256, safeId, catalogEntry, assertTranslationFidelity, visibleProseText, scientificSignature } from './paper-lib.mjs'
 import { verifyRawPdf } from './pdf-provenance.mjs'
 import { assertAuthorArticleProvenance } from './author-article-lib.mjs'
+import { assertChineseHeadingCompleteness } from './heading-provenance.mjs'
 
 export async function verifyData({ dataDir = process.env.DATA_DIR || 'data', strictTranslation = false, requireData = false } = {}) {
   let catalog
@@ -45,6 +46,7 @@ export async function verifyData({ dataDir = process.env.DATA_DIR || 'data', str
     if (paper.translation.modelHistory && paper.translation.modelHistory.some(run => !translationModels.has(run.model) || run.modelIdentity?.apiModelId !== run.model)) throw new Error(`Invalid translation model history: ${entry.id}`)
     if (paper.translation.coverage?.complete !== complete || paper.translation.coverage?.total !== paper.blocks.length) throw new Error(`Invalid coverage: ${entry.id}`)
     if ((strictTranslation || paper.translation.status === 'machine') && (complete !== paper.blocks.length || !paper.titleZh || !paper.translation.model)) throw new Error(`Translation incomplete: ${complete}/${paper.blocks.length}`)
+    if (strictTranslation || paper.translation.status === 'machine') assertChineseHeadingCompleteness(paper)
     for (const block of paper.blocks) {
       if (blockIds.has(block.id) || !sectionIds.has(block.sectionId) || !block.en) throw new Error(`Invalid block: ${block.id}`)
       blockIds.add(block.id)
