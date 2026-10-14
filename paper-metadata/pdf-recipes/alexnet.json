@@ -1,0 +1,945 @@
+{
+  "title": "ImageNet Classification with Deep Convolutional Neural Networks",
+  "expectedPdfSha256": "90137160c57217953d5f61857e64ca58e85f06e1b13b4f475c918b1b582b9771",
+  "mathMode": "original-pdf-vectors",
+  "explicitHeaderRegions": true,
+  "requireMathFontForDisplay": true,
+  "anchorTargets": {},
+  "pages": [
+    {
+      "page": 1,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            175
+          ],
+          "reason": "Repeated page furniture"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            108,
+            180,
+            230,
+            225
+          ],
+          "headings": false
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            230,
+            180,
+            364,
+            225
+          ],
+          "headings": false
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            364,
+            180,
+            505,
+            225
+          ],
+          "headings": false
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            108,
+            240,
+            505,
+            738
+          ]
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            740,
+            612,
+            792
+          ],
+          "reason": "Repeated page furniture"
+        }
+      ]
+    },
+    {
+      "page": 2,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            70
+          ],
+          "reason": "Repeated page furniture"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            108,
+            75,
+            505,
+            706
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            108,
+            710,
+            505,
+            738
+          ],
+          "headings": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            740,
+            612,
+            792
+          ],
+          "reason": "Repeated page furniture"
+        }
+      ]
+    },
+    {
+      "page": 3,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            70
+          ],
+          "reason": "Repeated page furniture"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            108,
+            78,
+            329,
+            427
+          ]
+        },
+        {
+          "kind": "figure",
+          "number": 1,
+          "bounds": [
+            333,
+            115,
+            505,
+            265
+          ],
+          "caption": [
+            333,
+            270,
+            505,
+            410
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            108,
+            430,
+            505,
+            704
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            108,
+            705,
+            505,
+            738
+          ],
+          "headings": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            740,
+            612,
+            792
+          ],
+          "reason": "Repeated page furniture"
+        }
+      ]
+    },
+    {
+      "page": 4,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            70
+          ],
+          "reason": "Repeated page furniture"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            108,
+            75,
+            505,
+            172
+          ]
+        },
+        {
+          "kind": "equation",
+          "bounds": [
+            108,
+            172,
+            505,
+            211
+          ],
+          "html": "<math display=\"block\"><mrow><msubsup><mi>b</mi><mrow><mi>x</mi><mo>,</mo><mi>y</mi></mrow><mi>i</mi></msubsup><mo>=</mo><mfrac><msubsup><mi>a</mi><mrow><mi>x</mi><mo>,</mo><mi>y</mi></mrow><mi>i</mi></msubsup><msup><mrow><mo>(</mo><mi>k</mi><mo>+</mo><mi>α</mi><munderover><mo>∑</mo><mrow><mi>j</mi><mo>=</mo><mi>max</mi><mo>(</mo><mn>0</mn><mo>,</mo><mi>i</mi><mo>−</mo><mi>n</mi><mo>/</mo><mn>2</mn><mo>)</mo></mrow><mrow><mi>min</mi><mo>(</mo><mi>N</mi><mo>−</mo><mn>1</mn><mo>,</mo><mi>i</mi><mo>+</mo><mi>n</mi><mo>/</mo><mn>2</mn><mo>)</mo></mrow></munderover><msup><mrow><mo>(</mo><msubsup><mi>a</mi><mrow><mi>x</mi><mo>,</mo><mi>y</mi></mrow><mi>j</mi></msubsup><mo>)</mo></mrow><mn>2</mn></msup><mo>)</mo></mrow><mi>β</mi></msup></mfrac></mrow></math>"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            108,
+            212,
+            505,
+            705
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            108,
+            707,
+            505,
+            738
+          ],
+          "headings": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            740,
+            612,
+            792
+          ],
+          "reason": "Repeated page furniture"
+        }
+      ]
+    },
+    {
+      "page": 5,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            70
+          ],
+          "reason": "Repeated page furniture"
+        },
+        {
+          "kind": "figure",
+          "number": 2,
+          "bounds": [
+            105,
+            75,
+            505,
+            210
+          ],
+          "caption": [
+            108,
+            215,
+            505,
+            275
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            108,
+            280,
+            505,
+            709
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            108,
+            710,
+            505,
+            738
+          ],
+          "headings": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            740,
+            612,
+            792
+          ],
+          "reason": "Repeated page furniture"
+        }
+      ]
+    },
+    {
+      "page": 6,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            70
+          ],
+          "reason": "Repeated page furniture"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            108,
+            75,
+            505,
+            124
+          ]
+        },
+        {
+          "kind": "equation",
+          "bounds": [
+            230,
+            124,
+            380,
+            140
+          ],
+          "html": "<math display=\"block\"><mrow><mo>[</mo><msub><mi>p</mi><mn>1</mn></msub><mo>,</mo><msub><mi>p</mi><mn>2</mn></msub><mo>,</mo><msub><mi>p</mi><mn>3</mn></msub><mo>]</mo><msup><mrow><mo>[</mo><msub><mi>α</mi><mn>1</mn></msub><msub><mi>λ</mi><mn>1</mn></msub><mo>,</mo><msub><mi>α</mi><mn>2</mn></msub><msub><mi>λ</mi><mn>2</mn></msub><mo>,</mo><msub><mi>α</mi><mn>3</mn></msub><msub><mi>λ</mi><mn>3</mn></msub><mo>]</mo></mrow><mi>T</mi></msup></mrow></math>"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            108,
+            140,
+            505,
+            420
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            108,
+            430,
+            343,
+            542
+          ]
+        },
+        {
+          "kind": "figure",
+          "number": 3,
+          "bounds": [
+            348,
+            425,
+            505,
+            494
+          ],
+          "caption": [
+            348,
+            495,
+            505,
+            578
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            108,
+            542,
+            343,
+            588
+          ],
+          "headings": false
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            108,
+            588,
+            505,
+            738
+          ]
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            740,
+            612,
+            792
+          ],
+          "reason": "Repeated page furniture"
+        }
+      ]
+    },
+    {
+      "page": 7,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            70
+          ],
+          "reason": "Repeated page furniture"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            108,
+            78,
+            505,
+            225
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            108,
+            225,
+            333,
+            334
+          ]
+        },
+        {
+          "kind": "table",
+          "number": 1,
+          "rows": [
+            [
+              {
+                "bounds": [
+                  341.5,
+                  230,
+                  435,
+                  245
+                ],
+                "header": true
+              },
+              {
+                "bounds": [
+                  435,
+                  230,
+                  470,
+                  245
+                ],
+                "header": true
+              },
+              {
+                "bounds": [
+                  470,
+                  230,
+                  504,
+                  245
+                ],
+                "header": true
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  341.5,
+                  245,
+                  435,
+                  258
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  435,
+                  245,
+                  470,
+                  258
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  470,
+                  245,
+                  504,
+                  258
+                ],
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  341.5,
+                  258,
+                  435,
+                  269
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  435,
+                  258,
+                  470,
+                  269
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  470,
+                  258,
+                  504,
+                  269
+                ],
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  341.5,
+                  269,
+                  435,
+                  282
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  435,
+                  269,
+                  470,
+                  282
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  470,
+                  269,
+                  504,
+                  282
+                ],
+                "header": false
+              }
+            ]
+          ],
+          "caption": [
+            341,
+            288,
+            505,
+            328
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            108,
+            334,
+            505,
+            416
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            108,
+            416,
+            245,
+            570
+          ]
+        },
+        {
+          "kind": "table",
+          "number": 2,
+          "rows": [
+            [
+              {
+                "bounds": [
+                  250.5,
+                  428,
+                  315.5,
+                  442
+                ],
+                "header": true
+              },
+              {
+                "bounds": [
+                  315.5,
+                  428,
+                  386.5,
+                  442
+                ],
+                "header": true
+              },
+              {
+                "bounds": [
+                  386.5,
+                  428,
+                  447.3,
+                  442
+                ],
+                "header": true
+              },
+              {
+                "bounds": [
+                  447.3,
+                  428,
+                  504,
+                  442
+                ],
+                "header": true
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  250.5,
+                  442,
+                  315.5,
+                  455
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  315.5,
+                  442,
+                  386.5,
+                  455
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  386.5,
+                  442,
+                  447.3,
+                  455
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  447.3,
+                  442,
+                  504,
+                  455
+                ],
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  250.5,
+                  455,
+                  315.5,
+                  466
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  315.5,
+                  455,
+                  386.5,
+                  466
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  386.5,
+                  455,
+                  447.3,
+                  466
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  447.3,
+                  455,
+                  504,
+                  466
+                ],
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  250.5,
+                  466,
+                  315.5,
+                  478
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  315.5,
+                  466,
+                  386.5,
+                  478
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  386.5,
+                  466,
+                  447.3,
+                  478
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  447.3,
+                  466,
+                  504,
+                  478
+                ],
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  250.5,
+                  478,
+                  315.5,
+                  489
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  315.5,
+                  478,
+                  386.5,
+                  489
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  386.5,
+                  478,
+                  447.3,
+                  489
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  447.3,
+                  478,
+                  504,
+                  489
+                ],
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  250.5,
+                  489,
+                  315.5,
+                  502
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  315.5,
+                  489,
+                  386.5,
+                  502
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  386.5,
+                  489,
+                  447.3,
+                  502
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  447.3,
+                  489,
+                  504,
+                  502
+                ],
+                "header": false
+              }
+            ]
+          ],
+          "caption": [
+            250,
+            509,
+            505,
+            558
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            108,
+            570,
+            505,
+            704
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            108,
+            708,
+            505,
+            738
+          ],
+          "headings": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            740,
+            612,
+            792
+          ],
+          "reason": "Repeated page furniture"
+        }
+      ]
+    },
+    {
+      "page": 8,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            70
+          ],
+          "reason": "Repeated page furniture"
+        },
+        {
+          "kind": "figure",
+          "number": 4,
+          "bounds": [
+            105,
+            75,
+            505,
+            238
+          ],
+          "caption": [
+            108,
+            240,
+            505,
+            302
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            108,
+            310,
+            505,
+            738
+          ]
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            740,
+            612,
+            792
+          ],
+          "reason": "Repeated page furniture"
+        }
+      ]
+    },
+    {
+      "page": 9,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            70
+          ],
+          "reason": "Repeated page furniture"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            108,
+            78,
+            505,
+            738
+          ],
+          "references": true
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            740,
+            612,
+            792
+          ],
+          "reason": "Repeated page furniture"
+        }
+      ]
+    }
+  ],
+  "review": {
+    "method": "machine-assisted full-page visual and character-coverage review",
+    "humanReviewed": false
+  },
+  "geometricSuperscripts": true
+}

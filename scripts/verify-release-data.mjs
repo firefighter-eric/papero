@@ -25,6 +25,45 @@ const literalTransports = new Set(['opaque-think-delimiters-v1', 'opaque-model-d
 const assistedCorrectionKeys = ['id', 'blockId', 'sourceId', 'method', 'assistingModel', 'assistingProvider', 'primaryModel', 'sourceSha256', 'sourceBlockSha256', 'draftSha256', 'instructionsSha256', 'appliedAt']
 const fragmentCorrectionKeys = ['id', 'blockId', 'sourceId', 'method', 'assistingModel', 'assistingProvider', 'primaryModel', 'sourceSha256', 'sourceBlockSha256', 'draftSha256', 'previousChineseSha256', 'correctedChineseSha256', 'unitIds', 'appliedAt']
 
+/** Reused responses may span model contexts; bind each unit to its actual run. */
+export function assertLocalResponseReplay(paper, block) {
+  const metadata = block.translation, replay = metadata?.responseReplay
+  const units = translationUnits(block.en, block.kind).units
+  const fail = () => { throw new Error(`Invalid local response replay provenance: ${paper.id}/${block.id}.`) }
+  if (metadata?.provider !== 'LM Studio local API' || replay?.method !== 'validated-local-response-replay'
+    || replay.sourcePaperSha256 !== paper.source.sha256 || replay.sourceBlockSha256 !== sha256(block.en)
+    || replay.translatedBlockSha256 !== sha256(block.zh) || !timestamp(replay.assembledAt)
+    || replay.assembledAt !== metadata.translatedAt || Date.parse(replay.assembledAt) > Date.parse(paper.translation.updatedAt)
+    || !Array.isArray(replay.units) || replay.units.length !== units.length || !units.length) fail()
+  replay.units.forEach((receipt, index) => {
+    if (!record(receipt) || receipt.unitId !== index || receipt.sourceTextSha256 !== sha256(units[index].text)
+      || !/^translation-response-[0-9-]+\.json$/.test(receipt.responseFile || '')
+      || !fingerprint(receipt.responseSha256) || !fingerprint(receipt.promptSha256)
+      || receipt.model !== metadata.model || receipt.provider !== 'LM Studio local API'
+      || !validProviderIdentity(receipt.modelIdentity, receipt.model, receipt.provider)
+      || !validLocalParameters(receipt.parameters) || !timestamp(receipt.requestRunStartedAt)) fail()
+    const run = paper.translation.modelHistory?.find(run => run.model === receipt.model && run.provider === receipt.provider
+      && run.startedAt === receipt.requestRunStartedAt && same(identityFacts(run.modelIdentity), identityFacts(receipt.modelIdentity)))
+    // The translator adds at most two to its configured seed on a retry.
+    if (!run || !same({ ...receipt.parameters, seed: run.parameters.seed }, run.parameters)
+      || receipt.parameters.seed < run.parameters.seed || receipt.parameters.seed > run.parameters.seed + 2) fail()
+  })
+}
+
+export function historicalBlockCounts(paper) {
+  const counts = new Set([paper.blocks.length])
+  for (const repair of paper.source.repairs || []) {
+    if (repair.method !== 'separate-title-publication-notes-into-frontmatter') continue
+    const added = paper.blocks.find(block => block.id === repair.addedBlockId)
+    if (!Number.isSafeInteger(repair.previousBlockCount) || repair.previousBlockCount < 1
+      || repair.previousBlockCount + 1 !== paper.blocks.length || repair.title !== paper.title
+      || !added || added.kind !== 'paragraph' || added.sectionId !== 'frontmatter'
+      || repair.notesSha256 !== sha256(added.en)) throw new Error(`Invalid title-note block revision: ${paper.id}.`)
+    counts.add(repair.previousBlockCount)
+  }
+  return counts
+}
+
 function assertAssistedCorrections(paper) {
   const ledger = paper.translation.assistedCorrections
   const assisted = paper.blocks.filter(block => block.translation?.assistedCorrection !== undefined)
@@ -175,6 +214,7 @@ function assertTranslationMetadata(paper) {
   }
   if (!same(t.usage, summedUsage)) throw new Error(`Aggregate token usage disagrees with model history: ${paper.id}.`)
   const historyModels = new Set()
+  const blockCounts = historicalBlockCounts(paper)
   let previousStart = -Infinity
   for (const [index, entry] of t.modelHistory.entries()) {
     const start = Date.parse(entry?.startedAt)
@@ -186,7 +226,7 @@ function assertTranslationMetadata(paper) {
       || !validParameters(entry.parameters, entry.provider, entry.model) || !validBudget(entry.requestBudget, entry.parameters) || !fingerprint(entry.promptSha256)
       || !timestamp(entry.startedAt) || start < previousStart
       || !['initial-model', 'legacy-provenance', 'resume-model', 'explicit-model-change'].includes(entry.reason)
-      || !Number.isSafeInteger(coverage?.complete) || coverage.complete < 0 || coverage.complete > paper.blocks.length || coverage.total !== paper.blocks.length
+      || !Number.isSafeInteger(coverage?.complete) || coverage.complete < 0 || coverage.complete > coverage.total || !blockCounts.has(coverage.total)
       || (!index && (!['initial-model', 'legacy-provenance'].includes(entry.reason) || entry.previousModel !== undefined))
       || (index > 0 && previousModel === entry.model && (entry.reason !== 'resume-model' || entry.previousModel !== undefined))
       || (index > 0 && previousModel !== entry.model && (entry.reason !== 'explicit-model-change' || entry.previousModel !== previousModel))) throw new Error(`Invalid model history entry: ${paper.id}.`)
@@ -261,9 +301,11 @@ export async function verifyReleaseData({ dataDir = 'paper-data', report = value
         }
       }
       if (metadata?.status === 'machine' && modelHistory) {
+        const replayed = metadata.responseReplay !== undefined
+        if (replayed) assertLocalResponseReplay(paper, block)
         const translatedAt = Date.parse(metadata.translatedAt)
-        const runs = modelHistory.filter((run, index) => run.model === metadata.model && Date.parse(run.startedAt) <= translatedAt
-          && (index === modelHistory.length - 1 || translatedAt < Date.parse(modelHistory[index + 1].startedAt)))
+        const runs = modelHistory.filter((run, index) => run.model === metadata.model && (replayed || Date.parse(run.startedAt) <= translatedAt
+          && (index === modelHistory.length - 1 || translatedAt < Date.parse(modelHistory[index + 1].startedAt))))
         if (!validProviderIdentity(metadata.modelIdentity, metadata.model, metadata.provider) || !validParameters(metadata.parameters, metadata.provider, metadata.model)
           || !validBudget(metadata.requestBudget, metadata.parameters)
           || !runs.some(run => (run.provider !== 'Codex subagent' || metadata.provider === run.provider)

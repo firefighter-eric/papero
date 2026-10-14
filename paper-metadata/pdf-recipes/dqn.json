@@ -1,0 +1,5685 @@
+{
+  "title": "Human-level control through deep reinforcement learning",
+  "expectedPdfSha256": "3ae04e292f2882483ad539e24cd532743165afce51d45df4e31bd1e3ed9753bb",
+  "mathMode": "original-pdf-vectors",
+  "explicitHeaderRegions": true,
+  "requireMathFontForDisplay": true,
+  "anchorTargets": {
+    "Abstract": {
+      "pdfPage": 1,
+      "sourceId": "pdf-p1-block-002",
+      "textPrefix": "The theory of reinforcement learning provides a normative account  1  ,   deeply rooted in psycholog"
+    },
+    "Authors": {
+      "pdfPage": 1,
+      "sourceId": "pdf-p1-block-001",
+      "textPrefix": "Volodymyr Mnih 1  , Koray Kavukcuoglu 1  , David Silver 1  , Andrei A. Rusu 1 , Joel Veness 1 , Marc"
+    },
+    "BOOKMARK_1": {
+      "pdfPage": 2,
+      "sourceId": "pdf-p2-block-014",
+      "textPrefix": "Figure 1 | Schematic illustration of the convolutional neural network.  The details of the architect"
+    },
+    "BOOKMARK_2": {
+      "pdfPage": 2,
+      "sourceId": "pdf-p2-block-014",
+      "textPrefix": "Figure 1 | Schematic illustration of the convolutional neural network.  The details of the architect"
+    },
+    "BOOKMARK_3": {
+      "pdfPage": 3,
+      "sourceId": "pdf-p3-block-018",
+      "textPrefix": "Figure 3 | Comparison of the DQN agent with the best reinforcement   learning methods  15   in the l"
+    },
+    "BOOKMARK_4": {
+      "pdfPage": 4,
+      "sourceId": "pdf-p4-block-023",
+      "textPrefix": "Figure 4 | Two-dimensional t-SNE embedding of the representations in the   last hidden layer assigne"
+    },
+    "Methods": {
+      "pdfPage": 7,
+      "sourceId": "pdf-p7-block-111",
+      "textPrefix": "sometimes a nonlinear function approximator is used instead, such as a neural network. We refer to a"
+    },
+    "References": {
+      "pdfPage": 4,
+      "sourceId": "pdf-p4-block-029",
+      "textPrefix": "1. Sutton, R. & Barto, A. Reinforcement Learning: An Introduction (MIT Press, 1998). 2. Thorndike, E"
+    },
+    "SECTIONTITLE_1": {
+      "pdfPage": 6,
+      "sourceId": "pdf-p6-block-087",
+      "textPrefix": "METHODS"
+    },
+    "SECTIONTITLE_2": {
+      "pdfPage": 6,
+      "sourceId": "pdf-p6-block-088",
+      "textPrefix": "Preprocessing."
+    },
+    "SECTIONTITLE_3": {
+      "pdfPage": 6,
+      "sourceId": "pdf-p6-block-090",
+      "textPrefix": "Model architecture."
+    },
+    "SECTIONTITLE_4": {
+      "pdfPage": 6,
+      "sourceId": "pdf-p6-block-090",
+      "textPrefix": "Model architecture."
+    },
+    "SECTIONTITLE_5": {
+      "pdfPage": 6,
+      "sourceId": "pdf-p6-block-093",
+      "textPrefix": "Training details."
+    },
+    "SECTIONTITLE_6": {
+      "pdfPage": 6,
+      "sourceId": "pdf-p6-block-099",
+      "textPrefix": "Evaluation procedure."
+    },
+    "SECTIONTITLE_7": {
+      "pdfPage": 6,
+      "sourceId": "pdf-p6-block-102",
+      "textPrefix": "Algorithm."
+    },
+    "SECTIONTITLE_8": {
+      "pdfPage": 7,
+      "sourceId": "pdf-p7-block-121",
+      "textPrefix": "Algorithm 1: deep Q-learning with experience replay.     Initialize replay memory   to capacity    I"
+    },
+    "SECTIONTITLE_9": {
+      "pdfPage": 7,
+      "sourceId": "pdf-p7-block-121",
+      "textPrefix": "Algorithm 1: deep Q-learning with experience replay.     Initialize replay memory   to capacity    I"
+    },
+    "TABLE_1": {
+      "pdfPage": 10,
+      "sourceId": "pdf-p10-block-130",
+      "textPrefix": "Hyperparameter  Value  Description    minibatch size  32  Number of training cases over which each s"
+    },
+    "TABLE_2": {
+      "pdfPage": 11,
+      "sourceId": "pdf-p11-block-132",
+      "textPrefix": "Game  Random Play  Best Linear Learner  Contingency (SARSA)  Human  DQN (± std)  Normalized DQN (% H"
+    },
+    "TABLE_3": {
+      "pdfPage": 12,
+      "sourceId": "pdf-p12-block-134",
+      "textPrefix": "Game  With replay, with target Q  With replay, without target Q  Without replay, with target Q  With"
+    },
+    "TABLE_4": {
+      "pdfPage": 13,
+      "sourceId": "pdf-p13-block-136",
+      "textPrefix": "Game  DQN  Linear    Breakout  316.8  3.00    Enduro  1006.3  62.0    River Raid  7446.6  2346.9    "
+    },
+    "Title": {
+      "pdfPage": 1,
+      "sourceId": "pdf-p1-block-001",
+      "textPrefix": "Volodymyr Mnih 1  , Koray Kavukcuoglu 1  , David Silver 1  , Andrei A. Rusu 1 , Joel Veness 1 , Marc"
+    }
+  },
+  "pages": [
+    {
+      "page": 1,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            596,
+            145
+          ],
+          "reason": "Repeated page furniture"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            42,
+            150,
+            562,
+            190
+          ],
+          "headings": false
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            42,
+            203,
+            303,
+            732
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            305,
+            203,
+            562,
+            243
+          ]
+        },
+        {
+          "kind": "vector-equation",
+          "bounds": [
+            305,
+            243,
+            562,
+            263
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            305,
+            263,
+            562,
+            600
+          ]
+        },
+        {
+          "kind": "vector-equation",
+          "bounds": [
+            305,
+            600,
+            562,
+            635
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            305,
+            635,
+            562,
+            746
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            42,
+            732,
+            303,
+            748
+          ],
+          "headings": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            751,
+            596,
+            783
+          ],
+          "reason": "Repeated page furniture"
+        }
+      ]
+    },
+    {
+      "page": 2,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            596,
+            45
+          ],
+          "reason": "Repeated page furniture"
+        },
+        {
+          "kind": "figure",
+          "number": 1,
+          "bounds": [
+            36,
+            50,
+            562,
+            274
+          ],
+          "caption": [
+            36,
+            277,
+            562,
+            320
+          ],
+          "captionRegions": [
+            [
+              36,
+              277,
+              298,
+              320
+            ],
+            [
+              300,
+              277,
+              562,
+              320
+            ]
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            36,
+            322,
+            298,
+            457
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            300,
+            322,
+            562,
+            457
+          ]
+        },
+        {
+          "kind": "figure",
+          "number": 2,
+          "bounds": [
+            36,
+            457,
+            562,
+            699
+          ],
+          "caption": [
+            36,
+            700,
+            562,
+            749
+          ],
+          "captionRegions": [
+            [
+              36,
+              700,
+              298,
+              749
+            ],
+            [
+              300,
+              700,
+              562,
+              749
+            ]
+          ]
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            751,
+            596,
+            783
+          ],
+          "reason": "Repeated page furniture"
+        }
+      ]
+    },
+    {
+      "page": 3,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            596,
+            45
+          ],
+          "reason": "Repeated page furniture"
+        },
+        {
+          "kind": "figure",
+          "number": 3,
+          "bounds": [
+            36,
+            50,
+            562,
+            514
+          ],
+          "caption": [
+            42,
+            515,
+            562,
+            580
+          ],
+          "captionRegions": [
+            [
+              42,
+              515,
+              303,
+              580
+            ],
+            [
+              305,
+              515,
+              562,
+              580
+            ]
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            42,
+            586,
+            303,
+            749
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            305,
+            586,
+            562,
+            749
+          ]
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            751,
+            596,
+            783
+          ],
+          "reason": "Repeated page furniture"
+        }
+      ]
+    },
+    {
+      "page": 4,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            596,
+            45
+          ],
+          "reason": "Repeated page furniture"
+        },
+        {
+          "kind": "figure",
+          "number": 4,
+          "bounds": [
+            36,
+            50,
+            562,
+            380
+          ],
+          "caption": [
+            36,
+            382,
+            562,
+            477
+          ],
+          "captionRegions": [
+            [
+              36,
+              382,
+              298,
+              477
+            ],
+            [
+              300,
+              382,
+              562,
+              477
+            ]
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            36,
+            480,
+            298,
+            749
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            300,
+            480,
+            562,
+            664
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            300,
+            664,
+            562,
+            749
+          ],
+          "references": true
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            751,
+            596,
+            783
+          ],
+          "reason": "Repeated page furniture"
+        }
+      ]
+    },
+    {
+      "page": 5,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            596,
+            45
+          ],
+          "reason": "Repeated page furniture"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            42,
+            50,
+            303,
+            749
+          ],
+          "references": true
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            305,
+            50,
+            562,
+            203
+          ],
+          "references": true
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            305,
+            203,
+            562,
+            749
+          ]
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            751,
+            596,
+            783
+          ],
+          "reason": "Repeated page furniture"
+        }
+      ]
+    },
+    {
+      "page": 6,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            596,
+            45
+          ],
+          "reason": "Repeated page furniture"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            36,
+            50,
+            298,
+            749
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            300,
+            50,
+            562,
+            642
+          ]
+        },
+        {
+          "kind": "vector-equation",
+          "bounds": [
+            300,
+            642,
+            562,
+            666
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            300,
+            666,
+            562,
+            749
+          ]
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            751,
+            596,
+            783
+          ],
+          "reason": "Repeated page furniture"
+        }
+      ]
+    },
+    {
+      "page": 7,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            596,
+            45
+          ],
+          "reason": "Repeated page furniture"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            42,
+            50,
+            303,
+            122
+          ]
+        },
+        {
+          "kind": "vector-equation",
+          "bounds": [
+            42,
+            122,
+            303,
+            156
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            42,
+            156,
+            303,
+            239
+          ]
+        },
+        {
+          "kind": "vector-equation",
+          "bounds": [
+            42,
+            239,
+            303,
+            272
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            42,
+            272,
+            303,
+            749
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            305,
+            50,
+            562,
+            340
+          ]
+        },
+        {
+          "kind": "algorithm",
+          "bounds": [
+            305,
+            355,
+            562,
+            557
+          ],
+          "caption": [
+            305,
+            341,
+            562,
+            355
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            305,
+            557,
+            562,
+            749
+          ],
+          "references": true
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            751,
+            596,
+            783
+          ],
+          "reason": "Repeated page furniture"
+        }
+      ]
+    },
+    {
+      "page": 8,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            596,
+            45
+          ],
+          "reason": "Repeated page furniture"
+        },
+        {
+          "kind": "figure",
+          "number": "extended-1",
+          "bounds": [
+            36,
+            50,
+            562,
+            475
+          ],
+          "caption": [
+            36,
+            477,
+            562,
+            558
+          ],
+          "captionRegions": [
+            [
+              36,
+              477,
+              298,
+              558
+            ],
+            [
+              300,
+              477,
+              562,
+              558
+            ]
+          ]
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            751,
+            596,
+            783
+          ],
+          "reason": "Repeated page furniture"
+        }
+      ]
+    },
+    {
+      "page": 9,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            596,
+            45
+          ],
+          "reason": "Repeated page furniture"
+        },
+        {
+          "kind": "figure",
+          "number": "extended-2",
+          "bounds": [
+            36,
+            50,
+            562,
+            568
+          ],
+          "caption": [
+            42,
+            570,
+            562,
+            685
+          ],
+          "captionRegions": [
+            [
+              42,
+              570,
+              303,
+              685
+            ],
+            [
+              305,
+              570,
+              562,
+              685
+            ]
+          ]
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            751,
+            596,
+            783
+          ],
+          "reason": "Repeated page furniture"
+        }
+      ]
+    },
+    {
+      "page": 10,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            596,
+            45
+          ],
+          "reason": "Repeated page furniture"
+        },
+        {
+          "kind": "table",
+          "number": "extended-1",
+          "rows": [
+            [
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "Hyperparameter",
+                "header": true
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "Value",
+                "header": true
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "Description",
+                "header": true
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "minibatch size",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "32",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "Number of training cases over which each stochastic gradient descent (SGD) update is computed.",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "replay memory size",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "1000000",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "SGD updates are sampled from this number of most recent frames.",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "agent history length",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "4",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "The number of most recent frames experienced by the agent that are given as input to the Q network.",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "target network update frequency",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "10000",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "The frequency (measured in the number of parameter updates) with which the target network is updated (this corresponds to the parameter C from Algorithm 1).",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "discount factor",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "0.99",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "Discount factor gamma used in the Q-learning update.",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "action repeat",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "4",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "Repeat each action selected by the agent this many times. Using a value of 4 results in the agent seeing only every 4th input frame.",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "update frequency",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "4",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "The number of actions selected by the agent between successive SGD updates. Using a value of 4 results in the agent selecting 4 actions between each pair of successive updates.",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "learning rate",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "0.00025",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "The learning rate used by RMSProp.",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "gradient momentum",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "0.95",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "Gradient momentum used by RMSProp.",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "squared gradient momentum",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "0.95",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "Squared gradient (denominator) momentum used by RMSProp.",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "min squared gradient",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "0.01",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "Constant added to the squared gradient in the denominator of the RMSProp update.",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "initial exploration",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "1",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "Initial value of ε in ε-greedy exploration.",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "final exploration",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "0.1",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "Final value of ε in ε-greedy exploration.",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "final exploration frame",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "1000000",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "The number of frames over which the initial value of ε is linearly annealed to its final value.",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "replay start size",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "50000",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "A uniform random policy is run for this number of frames before learning starts and the resulting experience is used to populate the replay memory.",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "no-op max",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "30",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "Maximum number of &quot;do nothing&quot; actions to be performed by the agent at the start of an episode.",
+                "header": false
+              }
+            ]
+          ],
+          "caption": [
+            36,
+            50,
+            562,
+            67
+          ],
+          "transcription": "Apple Vision accurate OCR followed by bounded full-table visual correction; not human reviewed"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            36,
+            364,
+            562,
+            382
+          ],
+          "headings": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            751,
+            596,
+            783
+          ],
+          "reason": "Repeated page furniture"
+        }
+      ]
+    },
+    {
+      "page": 11,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            596,
+            45
+          ],
+          "reason": "Repeated page furniture"
+        },
+        {
+          "kind": "table",
+          "number": "extended-2",
+          "rows": [
+            [
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "Game",
+                "header": true
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "Random Play",
+                "header": true
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "Best Linear Learner",
+                "header": true
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "Contingency (SARSA)",
+                "header": true
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "Human",
+                "header": true
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "DQN (± std)",
+                "header": true
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "Normalized DQN (% Human)",
+                "header": true
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "Alien",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "227.8",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "939.2",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "103.2",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "6875",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "3069 (±1093)",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "42.7%",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "Amidar",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "5.8",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "103.4",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "183.6",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "1676",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "739.5 (±3024)",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "43.9%",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "Assault",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "222.4",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "628",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "537",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "1496",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "3359 (±775)",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "246.2%",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "Asterix",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "210",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "987.3",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "1332",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "8503",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "6012 (±1744)",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "70.0%",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "Asteroids",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "719.1",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "907.3",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "89",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "13157",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "1629 (±542)",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "7.3%",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "Atlantis",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "12850",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "62687",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "852.9",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "29028",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "85641 (±17600)",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "449.9%",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "Bank Heist",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "14.2",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "190.8",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "67.4",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "734.4",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "429.7 (±650)",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "57.7%",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "Battle Zone",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "2360",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "15820",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "16.2",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "37800",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "26300 (±7725)",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "67.6%",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "Beam Rider",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "363.9",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "929.4",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "1743",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "5775",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "6846 (±1619)",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "119.8%",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "Bowling",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "23.1",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "43.9",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "36.4",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "154.8",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "42.4 (±88)",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "14.7%",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "Boxing",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "0.1",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "44",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "9.8",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "4.3",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "71.8 (±8.4)",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "1707.9%",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "Breakout",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "1.7",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "5.2",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "6.1",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "31.8",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "401.2 (±26.9)",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "1327.2%",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "Centipede",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "2091",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "8803",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "4647",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "11963",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "8309 (±5237)",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "63.0%",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "Chopper Command",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "811",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "1582",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "16.9",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "9882",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "6687 (±2916)",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "64.8%",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "Crazy Climber",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "10781",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "23411",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "149.8",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "35411",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "114103 (±22797)",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "419.5%",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "Demon Attack",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "152.1",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "520.5",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "0",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "3401",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "9711 (±2406)",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "294.2%",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "Double Dunk",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "-18.6",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "-13.1",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "-16",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "-15.5",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "-18.1 (±2.6)",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "17.1%",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "Enduro",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "0",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "129.1",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "159.4",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "309.6",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "301.8 (±24.6)",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "97.5%",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "Fishing Derby",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "-91.7",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "-89.5",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "-85.1",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "5.5",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "-0.8 (±19.0)",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "93.5%",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "Freeway",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "0",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "19.1",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "19.7",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "29.6",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "30.3 (±0.7)",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "102.4%",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "Frostbite",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "65.2",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "216.9",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "180.9",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "4335",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "328.3 (±250.5)",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "6.2%",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "Gopher",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "257.6",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "1288",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "2368",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "2321",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "8520 (±3279)",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "400.4%",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "Gravitar",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "173",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "387.7",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "429",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "2672",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "306.7 (±223.9)",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "5.3%",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "H.E.R.O.",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "1027",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "6459",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "7295",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "25763",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "19950 (±158)",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "76.5%",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "Ice Hockey",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "-11.2",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "-9.5",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "-3.2",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "0.9",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "-1.6 (±2.5)",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "79.3%",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "James Bond",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "29",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "202.8",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "354.1",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "406.7",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "576.7 (±175.5)",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "145.0%",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "Kangaroo",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "52",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "1622",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "8.8",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "3035",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "6740 (±2959)",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "224.2%",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "Krull",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "1598",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "3372",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "3341",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "2395",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "3805 (±1033)",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "277.0%",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "Kung-Fu Master",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "258.5",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "19544",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "29151",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "22736",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "23270 (±5955)",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "102.4%",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "Montezuma&#x27;s Revenge",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "0",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "10.7",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "259",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "4367",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "0 (±0)",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "0.0%",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "Ms. Pacman",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "307.3",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "1692",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "1227",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "15693",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "2311 (±525)",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "13.0%",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "Name This Game",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "2292",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "2500",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "2247",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "4076",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "7257 (±547)",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "278.3%",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "Pong",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "-20.7",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "-19",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "-17.4",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "9.3",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "18.9 (±1.3)",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "132.0%",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "Private Eye",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "24.9",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "684.3",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "86",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "69571",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "1788 (±5473)",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "2.5%",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "Q*Bert",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "163.9",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "613.5",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "960.3",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "13455",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "10596 (±3294)",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "78.5%",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "River Raid",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "1339",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "1904",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "2650",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "13513",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "8316 (±1049)",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "57.3%",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "Road Runner",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "11.5",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "67.7",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "89.1",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "7845",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "18257 (±4268)",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "232.9%",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "Robotank",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "2.2",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "28.7",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "12.4",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "11.9",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "51.6 (±4.7)",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "509.0%",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "Seaquest",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "68.4",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "664.8",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "675.5",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "20182",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "5286 (±1310)",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "25.9%",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "Space Invaders",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "148",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "250.1",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "267.9",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "1652",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "1976 (±893)",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "121.5%",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "Star Gunner",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "664",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "1070",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "9.4",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "10250",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "57997 (±3152)",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "598.1%",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "Tennis",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "-23.8",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "-0.1",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "0",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "-8.9",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "-2.5 (±1.9)",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "143.2%",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "Time Pilot",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "3568",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "3741",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "24.9",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "5925",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "5947 (±1600)",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "100.9%",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "Tutankham",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "11.4",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "114.3",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "98.2",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "167.6",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "186.7 (±41.9)",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "112.2%",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "Up and Down",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "533.4",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "3533",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "2449",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "9082",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "8456 (±3162)",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "92.7%",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "Venture",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "0",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "66",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "0.6",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "1188",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "380.0 (±238.6)",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "32.0%",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "Video Pinball",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "16257",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "16871",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "19761",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "17298",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "42684 (±16287)",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "2539.4%",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "Wizard of Wor",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "563.5",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "1981",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "36.9",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "4757",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "3393 (±2019)",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "67.5%",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "Zaxxon",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "32.5",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "3365",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "21.4",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "9173",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "4977 (±1235)",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  80,
+                  1,
+                  81
+                ],
+                "html": "54.1%",
+                "header": false
+              }
+            ]
+          ],
+          "caption": [
+            42,
+            50,
+            562,
+            77
+          ],
+          "transcription": "Apple Vision accurate OCR followed by bounded full-table visual correction; not human reviewed"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            42,
+            730,
+            562,
+            749
+          ],
+          "headings": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            751,
+            596,
+            783
+          ],
+          "reason": "Repeated page furniture"
+        }
+      ]
+    },
+    {
+      "page": 12,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            596,
+            45
+          ],
+          "reason": "Repeated page furniture"
+        },
+        {
+          "kind": "table",
+          "number": "extended-3",
+          "rows": [
+            [
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "Game",
+                "header": true
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "With replay, with target Q",
+                "header": true
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "With replay, without target Q",
+                "header": true
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "Without replay, with target Q",
+                "header": true
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "Without replay, without target Q",
+                "header": true
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "Breakout",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "316.8",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "240.7",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "10.2",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "3.2",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "Enduro",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "1006.3",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "831.4",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "141.9",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "29.1",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "River Raid",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "7446.6",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "4102.8",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "2867.7",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "1453.0",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "Seaquest",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "2894.4",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "822.6",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "1003.0",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "275.8",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "Space Invaders",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "1088.9",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "826.3",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "373.2",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  70,
+                  1,
+                  71
+                ],
+                "html": "302.0",
+                "header": false
+              }
+            ]
+          ],
+          "caption": [
+            36,
+            50,
+            562,
+            67
+          ],
+          "transcription": "Apple Vision accurate OCR followed by bounded full-table visual correction; not human reviewed"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            36,
+            181,
+            562,
+            215
+          ],
+          "headings": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            751,
+            596,
+            783
+          ],
+          "reason": "Repeated page furniture"
+        }
+      ]
+    },
+    {
+      "page": 13,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            596,
+            45
+          ],
+          "reason": "Repeated page furniture"
+        },
+        {
+          "kind": "table",
+          "number": "extended-4",
+          "rows": [
+            [
+              {
+                "bounds": [
+                  0,
+                  77,
+                  1,
+                  78
+                ],
+                "html": "Game",
+                "header": true
+              },
+              {
+                "bounds": [
+                  0,
+                  77,
+                  1,
+                  78
+                ],
+                "html": "DQN",
+                "header": true
+              },
+              {
+                "bounds": [
+                  0,
+                  77,
+                  1,
+                  78
+                ],
+                "html": "Linear",
+                "header": true
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  77,
+                  1,
+                  78
+                ],
+                "html": "Breakout",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  77,
+                  1,
+                  78
+                ],
+                "html": "316.8",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  77,
+                  1,
+                  78
+                ],
+                "html": "3.00",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  77,
+                  1,
+                  78
+                ],
+                "html": "Enduro",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  77,
+                  1,
+                  78
+                ],
+                "html": "1006.3",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  77,
+                  1,
+                  78
+                ],
+                "html": "62.0",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  77,
+                  1,
+                  78
+                ],
+                "html": "River Raid",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  77,
+                  1,
+                  78
+                ],
+                "html": "7446.6",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  77,
+                  1,
+                  78
+                ],
+                "html": "2346.9",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  77,
+                  1,
+                  78
+                ],
+                "html": "Seaquest",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  77,
+                  1,
+                  78
+                ],
+                "html": "2894.4",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  77,
+                  1,
+                  78
+                ],
+                "html": "656.9",
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  0,
+                  77,
+                  1,
+                  78
+                ],
+                "html": "Space Invaders",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  77,
+                  1,
+                  78
+                ],
+                "html": "1088.9",
+                "header": false
+              },
+              {
+                "bounds": [
+                  0,
+                  77,
+                  1,
+                  78
+                ],
+                "html": "301.3",
+                "header": false
+              }
+            ]
+          ],
+          "caption": [
+            42,
+            50,
+            303,
+            75
+          ],
+          "transcription": "Apple Vision accurate OCR followed by bounded full-table visual correction; not human reviewed"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            42,
+            171,
+            303,
+            242
+          ],
+          "headings": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            751,
+            596,
+            783
+          ],
+          "reason": "Repeated page furniture"
+        }
+      ]
+    }
+  ],
+  "review": {
+    "method": "machine-assisted full-page visual and character-coverage review",
+    "humanReviewed": false
+  },
+  "mathFontPattern": "\\+(?:AdvP.*|AdvPi.*|AdvOT7d6df7ab\\.I)$",
+  "superscriptSize": 6,
+  "headingTitles": [
+    "METHODS"
+  ],
+  "indentParagraphs": true,
+  "ocr": {
+    "tool": "macOS Vision VNRecognizeTextRequest",
+    "parameters": {
+      "recognitionLevel": "accurate",
+      "recognitionLanguages": [
+        "en-US"
+      ],
+      "usesLanguageCorrection": false,
+      "renderDpi": 300
+    },
+    "scope": "table regions without a usable PDF text layer",
+    "pdfPages": [
+      10,
+      11,
+      12,
+      13
+    ],
+    "review": "all recovered table rows and cells compared against the rendered source regions; machine assisted, not human reviewed"
+  },
+  "sectionPrefixes": [
+    "Preprocessing.",
+    "Model architecture.",
+    "Training details.",
+    "Evaluation procedure.",
+    "Algorithm."
+  ],
+  "geometricSuperscripts": true
+}

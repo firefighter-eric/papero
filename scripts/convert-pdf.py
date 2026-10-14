@@ -18,9 +18,9 @@ import os
 
 import pdfplumber
 import pypdf
-from pdf_vector_math import PdfMathVectors, vector_math_css
+from pdf_vector_math import PdfMathVectors, vector_math_css, VERSION as VECTOR_MATH_VERSION
 
-VERSION = "1.3.0"
+VERSION = "1.4.0"
 MATH_FONT = re.compile(r"\+(?:CMMI|CMSY|CMR|CMEX)\d+$")
 
 def escaped(text):
@@ -76,8 +76,12 @@ def mathml(chars):
     return '<math><mrow>' + ''.join(n[0] for n in nodes) + '</mrow></math>'
 
 class Converter:
+    math_font = MATH_FONT
+    recipe = {}
+
     def __init__(self, pdf, recipe, output):
         self.pdf, self.recipe, self.output = pdf, recipe, output
+        self.math_font = re.compile(recipe['mathFontPattern']) if recipe.get('mathFontPattern') else MATH_FONT
         self.used = collections.Counter()
         self.skipped = set()
         self.blocks = []
@@ -92,14 +96,14 @@ class Converter:
             for index, char in enumerate(page.chars):
                 char['_source'] = (page_number, index)
             for char in page.chars:
-                if page_number > 1 and char['bottom'] < 61:
+                if not recipe.get('explicitHeaderRegions') and page_number > 1 and char['bottom'] < 61:
                     self.skipped.add(char['_source'])
         # Compose independently positioned accents by glyph overlap, retaining
         # the base glyph bounds so accents cannot swallow real word spaces.
         accent_marks = {'´': '\u0301', '`': '\u0300', 'ˆ': '\u0302'}
         for page in pdf.pages:
             for char in page.chars:
-                if char['text'] not in accent_marks or MATH_FONT.search(char['fontname']): continue
+                if char['text'] not in accent_marks or self.math_font.search(char['fontname']): continue
                 center = (char['x0'] + char['x1']) / 2
                 candidates = [base for base in page.chars if base is not char and len(base['text']) == 1 and base['text'].isalpha()
                               and abs((base['x0'] + base['x1']) / 2 - center) < 1.5 and abs(base['top'] - char['top']) < 3]
@@ -112,7 +116,7 @@ class Converter:
             x0, y0, x1, y1 = override['bounds']
             for char in pdf.pages[override['page'] - 1].chars:
                 if x0 <= (char['x0'] + char['x1']) / 2 < x1 and y0 <= (char['top'] + char['bottom']) / 2 < y1:
-                    if not MATH_FONT.search(char['fontname']):
+                    if not self.math_font.search(char['fontname']):
                         continue  # Tall radicals can overlap the previous prose line.
                     char['_math_override'] = override['html']
                     char['_math_baseline'] = override['baseline']
@@ -123,7 +127,10 @@ class Converter:
 
     @staticmethod
     def anchor(name):
-        return 'pdf-' + re.sub('[^A-Za-z0-9_.:-]', '-', str(name))
+        safe = re.sub('[^A-Za-z0-9_.:-]', '-', str(name))
+        if len(safe) > 160:
+            safe = safe[:80] + '-' + hashlib.sha256(str(name).encode()).hexdigest()[:16]
+        return 'pdf-' + safe
 
     def crop_chars(self, page_number, bounds):
         x0, y0, x1, y1 = bounds
@@ -141,7 +148,8 @@ class Converter:
                 action = annotation.get('data', {}).get('A', {})
                 dest = action.get('D')
                 if isinstance(dest, bytes):
-                    return '#' + self.anchor(dest.decode('utf-8'))
+                    encoding = 'utf-16' if dest.startswith((b'\xfe\xff', b'\xff\xfe')) else 'utf-8'
+                    return '#' + self.anchor(dest.decode(encoding))
                 if annotation.get('uri', '').startswith(('https://', 'http://')):
                     return annotation['uri']
         return None
@@ -150,6 +158,10 @@ class Converter:
         if self.math_vectors and chars and all(c.get('_display_math') for c in chars):
             return self.math_vectors.image(page, chars)
         chars = sorted([dict(c, text=c.get('_render_text', c['text'])) for c in chars if not c.get('_render_skip')], key=lambda c: (c['x0'], c['top']))
+        base_size = max((c['size'] for c in chars), default=0)
+        prose_baselines = [self.pdf.pages[page - 1].height - c['matrix'][5] for c in chars
+                           if not self.math_font.search(c['fontname']) and c['size'] >= base_size * .9]
+        prose_baseline = sorted(prose_baselines)[len(prose_baselines) // 2] if prose_baselines else None
         for char in chars:
             if char['text'].startswith('(cid:'):
                 code = int(char['text'][5:-1])
@@ -162,9 +174,10 @@ class Converter:
         previous = None
         for char in chars:
             font = char['fontname']
-            style = 'math' if MATH_FONT.search(font) else 'code' if 'NimbusMon' in font else 'strong' if '-Medi' in font else 'em' if 'Ital' in font or 'Slant' in font else ''
+            style = 'math' if self.math_font.search(font) else 'code' if 'NimbusMon' in font else 'strong' if '-Medi' in font or font.endswith('.B') or '-Bold' in font else 'em' if 'Ital' in font or 'Slant' in font else ''
             link = self.link(page, char) if style != 'math' else None
-            if style != 'math' and char['size'] < 8 and (char['text'].isdigit() or char['text'] == '*'):
+            raised = self.recipe.get('geometricSuperscripts') and prose_baseline is not None and char['size'] < base_size * .9 and self.pdf.pages[page - 1].height - char['matrix'][5] < prose_baseline - 1
+            if style != 'math' and (raised or char['size'] < self.recipe.get('superscriptSize', 8)) and (char['text'].isdigit() or char['text'] == '*'):
                 style = 'sup'
             key = (style, link)
             # Scale the gap threshold with type size so letter-spaced small caps
@@ -189,13 +202,13 @@ class Converter:
             return self.vector_lines(page, chars)
         # Establish prose baselines first, then attach mathematical subscripts,
         # superscripts and footnote markers to the nearest prose line.
-        regular = [c for c in chars if not MATH_FONT.search(c['fontname']) and c['size'] >= 8]
+        regular = [c for c in chars if not self.math_font.search(c['fontname']) and c['size'] >= 8]
         small_lines = collections.defaultdict(list)
         for c in chars:
-            if not MATH_FONT.search(c['fontname']) and c['size'] < 8:
+            if not self.math_font.search(c['fontname']) and c['size'] < 8:
                 small_lines[round(c['bottom'])].append(c)
         regular += [c for group in small_lines.values() if len(group) > 10 for c in group]
-        if not regular: regular = [c for c in chars if not MATH_FONT.search(c['fontname'])]
+        if not regular: regular = [c for c in chars if not self.math_font.search(c['fontname'])]
         groups = []
         for char in sorted(regular, key=lambda c: c['bottom']):
             target = next((g for g in groups if abs(g['baseline'] - char['bottom']) < 1.3), None)
@@ -215,7 +228,7 @@ class Converter:
         result = []
         for group in sorted(groups, key=lambda g: g['baseline']):
             chars = group['chars']
-            prose_chars = [c for c in chars if not MATH_FONT.search(c['fontname'])]
+            prose_chars = [c for c in chars if not self.math_font.search(c['fontname'])]
             result.append({'html': self.render_line(page, chars), 'text': ''.join(c['text'] for c in sorted(chars, key=lambda c: c['x0'])),
                            'prose_html': self.render_line(page, prose_chars) if prose_chars else '',
                            'prose_text': ''.join(c['text'] for c in sorted(prose_chars, key=lambda c: c['x0'])),
@@ -235,7 +248,7 @@ class Converter:
         """
         height = self.pdf.pages[page-1].height
         baseline = lambda c: height-c['matrix'][5]
-        is_math = lambda c: bool(MATH_FONT.search(c['fontname']))
+        is_math = lambda c: bool(self.math_font.search(c['fontname']))
         run = 0
         previous_math = False
         ordered_source = sorted(chars, key=lambda c: c['_source'][1])
@@ -291,7 +304,7 @@ class Converter:
         # treating them as prose would flatten sums, fractions and alignment.
         for g in ordered:
             roman = ''.join(' ' if is_math(c) else c['text'] for c in sorted(g['chars'], key=lambda c: c['x0']))
-            g['display_math'] = not re.search(r'[A-Za-z]{2,}', roman)
+            g['display_math'] = not re.search(r'[A-Za-z]{2,}', roman) and (not self.recipe.get('requireMathFontForDisplay') or any(is_math(c) for c in g['chars']))
             if g['display_math']:
                 for c in g['chars']: c['_display_math'] = True
         merged = []
@@ -329,18 +342,27 @@ class Converter:
             parts.append(('reference' if references else 'paragraph', '<p>' + ('<span class="ltx_bibblock">' + text + '</span>' if references else text) + '</p>', paragraph[0]['top']))
             paragraph.clear()
         for line in lines:
+            prefix = re.match(r'^<strong>(.*?)</strong>\s*(.*)$', line['html'], re.DOTALL)
+            if headings and prefix and html.unescape(re.sub('<[^>]+>', '', prefix[1])).strip() in self.recipe.get('sectionPrefixes', []):
+                flush()
+                parts.append(('heading', '<h3>' + prefix[1] + '</h3>', line['top']))
+                if prefix[2].strip():
+                    paragraph.append({**line, 'html': prefix[2]})
+                continue
             heading_text = line['prose_text'].strip()
             numbered_heading = re.match(r'^\d+(?:\.\d+)*(?:\s+|(?=[A-Z]))', heading_text)
             uppercase_heading = len(heading_text) > 4 and any(char.isalpha() for char in heading_text) and not any(char.islower() for char in heading_text)
             heading_style = line['bold'] or line['prose_size'] >= 10.5 or uppercase_heading
-            if headings and (heading_style or heading_text.casefold() in ['abstract', 'references', 'acknowledgments', 'acknowledgements']) \
-                    and (numbered_heading or heading_text.casefold() in ['abstract', 'references', 'acknowledgments', 'acknowledgements']):
+            explicit_heading = heading_text in self.recipe.get('headingTitles', [])
+            if headings and (explicit_heading or (heading_style or heading_text.casefold() in ['abstract', 'references', 'acknowledgments', 'acknowledgements']) \
+                    and (numbered_heading or heading_text.casefold() in ['abstract', 'references', 'acknowledgments', 'acknowledgements'])):
                 flush()
                 level = min(6, 2 + heading_text.count('.')) if re.match(r'^\d+\.\d+', heading_text) else 2
                 parts.append(('heading', f'<h{level}>{line["prose_html"]}</h{level}>', line['top']))
                 if heading_text.casefold() == 'references': references = True
             else:
-                if paragraph and (line['top'] - paragraph[-1]['bottom'] > 3.7 or references and line['x0'] < paragraph[-1]['x0'] - 3): flush()
+                if paragraph and (line['top'] - paragraph[-1]['bottom'] > 3.7 or references and line['x0'] < paragraph[-1]['x0'] - 3
+                                  or self.recipe.get('indentParagraphs') and line['x0'] > bounds[0] + 5 and paragraph[-1]['x0'] < line['x0'] - 3): flush()
                 paragraph.append(line)
         flush()
         return parts
@@ -360,12 +382,21 @@ class Converter:
         for row in spec['rows']:
             cells = []
             for cell in row:
-                inner = ''.join(content for _, content, _ in self.paragraphs(page, cell['bounds'], headings=False))
+                inner = cell.get('html')
+                if cell.get('consumeSource'):
+                    self.crop_chars(page, cell['bounds'])
+                if cell.get('vectorBounds'):
+                    x0, y0, x1, y1 = cell['vectorBounds']
+                    chars = [c for c in self.pdf.pages[page - 1].chars
+                             if x0 <= (c['x0'] + c['x1']) / 2 < x1 and y0 <= (c['top'] + c['bottom']) / 2 < y1]
+                    inner = self.math_vectors.image(page, chars)
+                if inner is None:
+                    inner = ''.join(content for _, content, _ in self.paragraphs(page, cell['bounds'], headings=False))
                 tag = 'th' if cell.get('header') else 'td'
                 colspan = f' colspan="{cell["colspan"]}"' if cell.get('colspan') else ''
                 cells.append(f'<{tag}{colspan}>{inner}</{tag}>')
             rows.append('<tr>' + ''.join(cells) + '</tr>')
-        caption = ''.join(content for _, content, _ in self.paragraphs(page, spec['caption'], headings=False))
+        caption = ''.join(content for bounds in spec.get('captionRegions', [spec['caption']]) for _, content, _ in self.paragraphs(page, bounds, headings=False))
         self.add(page, 'table', f'<figure id="table-{spec["number"]}" class="ltx_table"><table><tbody>' + ''.join(rows) + f'</tbody></table><figcaption>{caption}</figcaption></figure>', spec['rows'][0][0]['bounds'][1])
 
     def figure(self, page, spec):
@@ -374,7 +405,7 @@ class Converter:
         crop.to_image(resolution=180).save(self.output / 'assets' / filename)
         # Chart drawing labels are part of the preserved figure, not separately duplicated as prose.
         self.crop_chars(page, spec['bounds'])
-        caption = ''.join(content for _, content, _ in self.paragraphs(page, spec['caption'], headings=False))
+        caption = ''.join(content for bounds in spec.get('captionRegions', [spec['caption']]) for _, content, _ in self.paragraphs(page, bounds, headings=False))
         asset_bytes = (self.output / 'assets' / filename).read_bytes()
         self.assets.append({'filename': filename, 'pdfPage': page, 'pdfBounds': spec['bounds'], 'sha256': hashlib.sha256(asset_bytes).hexdigest(), 'bytes': len(asset_bytes)})
         self.add(page, 'figure', f'<figure id="figure-{spec["number"]}"><img src="assets/{filename}" alt="Figure {spec["number"]}"><figcaption>{caption}</figcaption></figure>', spec['bounds'][1])
@@ -398,6 +429,11 @@ class Converter:
                 elif kind == 'equation':
                     self.crop_chars(page, spec['bounds'])
                     self.add(page, 'equation', spec['html'], spec['bounds'][1])
+                elif kind == 'vector-equation':
+                    if not self.math_vectors:
+                        raise ValueError('Vector equations require original-pdf-vectors mode.')
+                    chars = self.crop_chars(page, spec['bounds'])
+                    self.add(page, 'equation', '<div class="ltx_equation">' + self.math_vectors.image(page, chars) + '</div>', spec['bounds'][1])
                 else: raise ValueError(f'Unsupported recipe kind: {kind}')
         missing, duplicate = [], []
         for page in self.pdf.pages:
@@ -435,7 +471,8 @@ class Converter:
         (self.output / 'en.html').write_text(document)
         pdf_bytes = pathlib.Path(self.recipe['inputPdf']).read_bytes()
         (self.output / 'conversion.json').write_text(json.dumps({'version': VERSION, 'inputPdf': {'sha256': hashlib.sha256(pdf_bytes).hexdigest(), 'bytes': len(pdf_bytes)}, 'recipeSha256': self.recipe['recipeSha256'], 'englishHtmlSha256': hashlib.sha256(document.encode()).hexdigest(), 'pdfplumber': pdfplumber.__version__, 'pypdf': pypdf.__version__,
-            **({'mathMode': 'original-pdf-vectors', 'pdftocairo': self.math_vectors.version, 'vectorMathModuleSha256': hashlib.sha256(pathlib.Path(__file__).with_name('pdf_vector_math.py').read_bytes()).hexdigest()} if self.math_vectors else {}),
+            **({'mathMode': 'original-pdf-vectors', 'pdftocairo': self.math_vectors.version, 'vectorMathVersion': VECTOR_MATH_VERSION, 'vectorMathModuleSha256': hashlib.sha256(pathlib.Path(__file__).with_name('pdf_vector_math.py').read_bytes()).hexdigest()} if self.math_vectors else {}),
+            **({'ocr': self.recipe['ocr']} if self.recipe.get('ocr') else {}),
             'blocks': self.blocks, 'assets': self.assets, 'resolvedDestinations': self.recipe.get('anchorTargets', {}), 'coverage': {'missing': 0, 'duplicate': 0, 'sourceCharacters': sum(len(p.chars) for p in self.pdf.pages), 'excludedSourceCharacters': len(self.skipped), 'excludedReason': 'Repeated running headers and document title retained in h1; no body text excluded', 'pageCount': len(self.pdf.pages)}}, indent=2))
         print(f'Converted {len(self.pdf.pages)} PDF pages: {len(self.blocks)} semantic blocks, {len(self.assets)} figures; all source characters covered exactly once.')
 
@@ -447,6 +484,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
     recipe_bytes = pathlib.Path(args.recipe).read_bytes()
     recipe = json.loads(recipe_bytes)
+    if recipe.get('expectedPdfSha256') and hashlib.sha256(pathlib.Path(args.pdf).read_bytes()).hexdigest() != recipe['expectedPdfSha256']:
+        raise ValueError('PDF fingerprint does not match the fixed-version layout recipe.')
     recipe['recipeSha256'] = hashlib.sha256(recipe_bytes).hexdigest()
     recipe['inputPdf'] = args.pdf
     output = pathlib.Path(args.out_dir)

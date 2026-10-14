@@ -250,13 +250,68 @@ function repairGemma2TableHeaders($, article, arxivId) {
   return repairs
 }
 
+// The fixed InstructGPT HTML renders Figure 45 Python as ordinary prose spans.
+// Bind this source repair to reviewed IDs and exact literal text fingerprints.
+const instructGptCodeSpans = [
+  {
+    "sourceId": "A6.F45.3.2.1.1.2.1",
+    "sha256": "b67c9ddef3e0c3715a3708ecfa296cc461a164bde94c8ba3fd112789b5bed926"
+  },
+  {
+    "sourceId": "A6.F45.3.2.1.1.3.1",
+    "sha256": "401d03d97959e10aea3c6202417885c45fa12ec1df4b3401c1475ad110ddd5c2"
+  },
+  {
+    "sourceId": "A6.F45.3.2.1.1.4.1",
+    "sha256": "7a8c57e379d95a0038f8cfbebf82d2fae58af8b09e08db77aaf1b2e52402d710"
+  },
+  {
+    "sourceId": "A6.F45.3.2.1.1.5.1",
+    "sha256": "339d3aad8db2fa1107621351dc1d7123a57fe6c35b9926c3a25da3a044c7b3de"
+  },
+  {
+    "sourceId": "A6.F45.3.2.1.1.6.1",
+    "sha256": "a7899b56acf76f2a1f242102f737d98ffcef85efb910dc73e5cec761ed15f873"
+  },
+  {
+    "sourceId": "A6.F45.3.2.1.1.7.1",
+    "sha256": "ef6c278aaff7a5e254509ef3c04af32acab9b8c8eede13e3982e2c757178e551"
+  },
+  {
+    "sourceId": "A6.F45.3.4.1.1.4.1",
+    "sha256": "1fbb913350eb4f3c47e604b70dde861fd3446815e02b6cfd79ba76bbaf0ddacb"
+  },
+  {
+    "sourceId": "A6.F45.3.4.1.1.6.1",
+    "sha256": "01a7c29ad118c1bc8c4cf9fdf57a779635369e481c46acfa7820b574b0a3d27b"
+  },
+  {
+    "sourceId": "A6.F45.3.4.1.1.8.1",
+    "sha256": "1fb9df655831d99acb0921850eb94f9cd017c9f7e78ec9fbfa1e3465aa924fe8"
+  }
+]
+export function repairInstructGptCode($, article, arxivId) {
+  if (arxivId !== '2203.02155v1' || !article.find('[id="A6.F45"]').length) return null
+  for (const item of instructGptCodeSpans) {
+    const node = article.find(`[id="${item.sourceId}"]`)
+    if (node.length !== 1 || sha256(node.text()) !== item.sha256) throw new Error(`Observed InstructGPT code source changed: ${item.sourceId}`)
+    node.addClass('ltx_verbatim')
+  }
+  return { method: 'preserve-observed-python-spans-as-literal-code', sourceId: 'A6.F45',
+    referenceUrl: 'https://arxiv.org/html/2203.02155v1#A6.F45', spans: instructGptCodeSpans }
+}
+
 export function parsePaper(html, { id, arxivId, htmlUrl, fetchedAt = new Date().toISOString() }) {
   const $ = load(html)
   const article = $('article.ltx_document').first()
   if (!article.length) throw new Error('Source does not contain an arXiv LaTeXML article; no substitute was imported.')
-  const title = article.find('h1.ltx_title_document').first().text().trim()
+  const titleNode = article.find('h1.ltx_title_document').first().clone()
+  titleNode.find('.ltx_note,.ltx_pubnotes').remove()
+  const title = titleNode.text().trim()
   if (!title) throw new Error('The arXiv article has no title.')
   const repairs = []
+  const codeRepair = repairInstructGptCode($, article, arxivId)
+  if (codeRepair) repairs.push(codeRepair)
   if (observedGemmaVersions.has(arxivId) && /^Gemma(?:\b|:)/.test(title)) {
     const footnoteRepair = repairGemmaAuthorFootnote($, article, arxivId)
     if (footnoteRepair) repairs.push(footnoteRepair)
@@ -279,7 +334,11 @@ export function parsePaper(html, { id, arxivId, htmlUrl, fetchedAt = new Date().
   const walk = (node) => {
     if (node.type !== 'tag') return
     const element = $(node)
-    if (element.is('h1.ltx_title_document')) return
+    if (element.is('h1.ltx_title_document')) {
+      element.find('.ltx_note,.ltx_pubnotes').filter((_, note) => !$(note).parentsUntil(element, '.ltx_note,.ltx_pubnotes').length)
+        .each((_, note) => add(note, 'paragraph'))
+      return
+    }
     if (element.is('h2,h3,h4,h5,h6')) {
       const container = element.parent()
       currentSection = container.attr('id') || `section-${sections.length}`
@@ -450,10 +509,32 @@ function calendarDates(text) {
     if (value === ' ') dates[dates.length - 1] += suffix
     return value
   }
+  const dayRange = (whole, year, month, first, last) => {
+    const y = Number(year), m = Number(month), start = Number(first), end = Number(last)
+    const validDay = day => {
+      const date = new Date(Date.UTC(y, m - 1, day))
+      return day >= 1 && date.getUTCDate() === day && date.getUTCMonth() === m - 1
+    }
+    if (m < 1 || m > 12 || start > end || !validDay(start) || !validDay(end)) throw new Error(`Invalid calendar date range: ${whole}`)
+    dates.push(`day-range:${y}-${m}-${start}..${y}-${m}-${end}`)
+    return ' '
+  }
   // Version numbers belong to model identifiers. In prose such as
   // "Gemma 2 may be used", "2 may" is not the calendar date 2 May.
   // Identifiers are checked separately before calendar normalization.
   let clean = text.replace(new RegExp(`(?:${modelPattern.source})[\\u2013\\u2014\\u2015]`, 'gi'), ' ').replace(modelPattern, ' ')
+    // A numbered equation followed by the modal "may" is not a day in May.
+    // Keep its number in the numeric checks and retain real calendar dates.
+    .replace(/(\b(?:equation|eq\.?|section|theorem|proposition|lemma|corollary|algorithm|figure|table)\s*\(?\d+(?:\.\d+)*\)?\s+)(may)\b/gi,
+      (whole, pointer, month) => month === 'may' ? `${pointer}might` : whole)
+    // AlphaGo shares its month and year across the match dates, 5–9 October
+    // 2015. Match both endpoints before the single-date recognizers.
+    .replace(new RegExp(`\\b(\\d{1,2})\\s*[-\\u2010-\\u2015]\\s*(\\d{1,2})\\s+(${monthPattern})[,]?\\s+((?:19|20)\\d{2})\\b`, 'gi'),
+      (whole, first, last, month, year) => dayRange(whole, year, monthNumber(month), first, last))
+    .replace(new RegExp(`\\b(${monthPattern})\\s+(\\d{1,2})\\s*[-\\u2010-\\u2015]\\s*(\\d{1,2})[,]?\\s+((?:19|20)\\d{2})\\b`, 'gi'),
+      (whole, month, first, last, year) => dayRange(whole, year, monthNumber(month), first, last))
+    .replace(/\b((?:19|20)\d{2})\s*年\s*(\d{1,2})\s*月\s*(\d{1,2})\s*[日号]?\s*(?:至|到|[-\u2010-\u2015])\s*(\d{1,2})\s*[日号]/g,
+      (whole, year, month, first, last) => dayRange(whole, year, month, first, last))
     // Reports share a year across named month ranges (June-August 2022),
     // while Chinese places it before the first month (2022年6月至8月).
     // Recognize the complete interval before individual month/year dates.
@@ -498,6 +579,8 @@ export function assertTranslationFidelity(source, translated) {
   if (isSacreBleuSignature(source) && source.trim() !== translated.trim()) throw new Error('Literal SacreBLEU signature changed')
   const normalize = (text) => text.normalize('NFKC').replace(/\u00a0/g, ' ')
   const normalizeNumbers = (text) => text.normalize('NFKC').replace(/[\u2010\u2011]/g, '-')
+    // Chinese uses two em dashes for an aside; it is not a negative sign.
+    .replace(/\u2014\u2014(?=\s*\d)/g, ' ')
     .replace(new RegExp(`(?:${modelPattern.source})[\\u2013\\u2014\\u2015]`, 'gi'), ' ').replace(modelPattern, '')
     // An en/em dash between two explicit multipliers is a positive range;
     // a mathematical minus sign (U+2212) still denotes a negative endpoint.
@@ -646,7 +729,7 @@ export function assertTranslationFidelity(source, translated) {
 export function normalizeHeadingNumber(en, zh) {
   const source = load(en, {}, false)
   const number = source('.ltx_tag').first().text().trim().replace(/\.$/, '')
-  if (!/^\d+(?:\.\d+)*$/.test(number)) return zh
+  if (!/^(?:\d+(?:\.\d+)*|[A-Z]\.\d+(?:\.\d+)*)$/.test(number)) return zh
   const prefix = new RegExp(`^\\s*${number.replace(/\./g, '\\.')}(?=\\s|[、:：]|\\.(?!\\d)|[\\u3400-\\u9fff]|$)[\\s、:：.]*`)
   const narrativeNodes = ($) => {
     const nodes = []

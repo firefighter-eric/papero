@@ -91,9 +91,11 @@ export async function importConvertedPdf({ convertedDir, pdfFile, recipeFile, me
             { name: 'pypdf', version: conversion.pypdf, parameters: { namedDestinations: 'reviewed-semantic-targets', sourcePageCount: coverage.pageCount } }],
           parameters: { recipeSha256: sha256(recipeBytes), sourceCharacters: coverage.sourceCharacters, excludedSourceCharacters: coverage.excludedSourceCharacters, excludedReason: coverage.excludedReason, missingCharacters: 0, duplicateCharacters: 0,
             tableCount: blocks.filter(block => block.kind === 'table').length, figureCount: assets.length, resolvedDestinations: Object.keys(conversion.resolvedDestinations).length,
-            columnOrder: 'reviewed-left-then-right-with-page-footnotes-after-body', ocr: false, humanReviewed: false },
+            columnOrder: 'reviewed-left-then-right-with-page-footnotes-after-body', ocr: conversion.ocr || false, humanReviewed: false },
           reviewedPdfPages: Array.from({ length: coverage.pageCount }, (_, index) => index + 1),
-          notes: ['Text-bearing PDF; no OCR or whole-page image substitute was used. Semantic layout, formula structure, all table grids, chart bounds and source page mappings were checked against rendered PDF pages.',
+          notes: [conversion.ocr
+            ? 'Native PDF text supplies the prose; OCR is limited to table regions without a usable text layer. Recovered table cells were compared against rendered source regions. No whole-page image substitute was used.'
+            : 'Text-bearing PDF; no OCR or whole-page image substitute was used. Semantic layout, formula structure, all table grids, chart bounds and source page mappings were checked against rendered PDF pages.',
             'Named PDF destinations use FitH without a column coordinate; citation targets were resolved using source author, year and title, then bound to reviewed semantic blocks.',
             ...(metadata.id === 'gpt-2-technical-report' ? ['Equation (1) preserves the published s_n terms and product index i exactly, including the source notation inconsistency.'] : []),
             'This is machine-assisted conversion with bounded visual and structural checks; no human review is claimed.'] } },
@@ -104,8 +106,8 @@ export async function importConvertedPdf({ convertedDir, pdfFile, recipeFile, me
       paper.source.conversion.parameters.mathExpressionCount = assets.filter(asset => asset.conversion.method === 'original-pdf-math-vectors').length
       paper.source.conversion.parameters.figureCount = assets.filter(asset => asset.conversion.method === 'reviewed-figure-crop').length
       paper.source.conversion.tools.push({ name: 'pdftocairo', version: conversion.pdftocairo, parameters: { output: 'svg', scope: 'mathematical-glyph-outlines-and-rules' } },
-        { name: 'papero/pdf_vector_math.py', version: '1.0.0', parameters: { sha256: conversion.vectorMathModuleSha256 } })
-      paper.source.conversion.notes.push('The pinned arXiv source archive contains a PDF wrapper, without mathematical TeX. Formula glyph mappings were unsafe to reconstruct as MathML, so mathematical expressions retain their original PDF vector outlines; surrounding prose, algorithms, references and page mappings remain semantic HTML.')
+        { name: 'papero/pdf_vector_math.py', version: conversion.vectorMathVersion || '1.0.0', parameters: { sha256: conversion.vectorMathModuleSha256 } })
+      paper.source.conversion.notes.push('Formula glyph mappings or positioned mathematical layouts were unsafe to reconstruct as MathML. Where a reviewed MathML transcription is unavailable, mathematical expressions retain their original PDF vector outlines; surrounding prose, algorithms, references and page mappings remain semantic HTML.')
     }
     assertPdfProvenance(paper)
     const ids = new Set(), links = new Set()
