@@ -6,8 +6,9 @@ export const PAPER_FAMILIES = [
   'Llama', 'OLMo', 'GPT', 'BERT', 'T5', 'Falcon', 'CLIP',
   'FineWeb', 'DCLM', 'DoReMi', 'Scaling Laws', 'μP', 'Dolma', 'Switch Transformer',
   'Adam', 'AdamW', 'Muon', 'Shampoo', 'SOAP', 'Adafactor', 'Lion', 'Dion',
+  'AlexNet', 'ResNet', 'Word2Vec', 'Seq2Seq', 'Attention', 'VAE', 'GAN', 'DDPM', 'ViT', 'DQN', 'AlphaGo', 'InstructGPT',
 ] as const
-export const RESEARCH_TAGS = ['预训练', '后训练', '模型架构', '监督训练', '缩放定律', '预训练数据', '数据混合', '训练优化', '优化器', '矩阵优化', '显存优化', '分布式训练'] as const
+export const RESEARCH_TAGS = ['预训练', '后训练', '模型架构', '监督训练', '缩放定律', '预训练数据', '数据混合', '训练优化', '优化器', '矩阵优化', '显存优化', '分布式训练', '经典论文', '计算机视觉', '自然语言处理', '生成模型', '强化学习'] as const
 
 export function tagLabel(tag: string): string {
   return tag === 'Qwen' ? 'Qwen / 千问' : tag
@@ -44,6 +45,23 @@ const searchAliases: Record<string, string> = {
   Adafactor: 'factorization 分解 内存 显存',
   Lion: 'symbolic discovery 符号发现 sign 符号更新',
   Dion: 'distributed orthonormalized 分布式 正交化',
+  AlexNet: 'ImageNet 卷积神经网络 CNN',
+  ResNet: 'residual learning 残差网络',
+  Word2Vec: 'word embeddings 词向量',
+  Seq2Seq: 'sequence to sequence 序列到序列',
+  Attention: 'Bahdanau 注意力',
+  VAE: 'variational autoencoder 变分自编码器',
+  GAN: 'generative adversarial 生成对抗网络',
+  DDPM: 'denoising diffusion 扩散模型',
+  ViT: 'vision transformer 视觉 Transformer',
+  DQN: 'deep Q network 深度 Q 网络',
+  AlphaGo: '围棋 蒙特卡洛树搜索',
+  InstructGPT: 'instruction tuning 指令微调 RLHF 人类反馈',
+  经典论文: 'classic seminal foundational',
+  计算机视觉: 'computer vision',
+  自然语言处理: 'natural language processing NLP',
+  生成模型: 'generative modeling',
+  强化学习: 'reinforcement learning',
   预训练: 'pretraining pre-training',
   后训练: 'posttraining post-training',
   模型架构: 'architecture',

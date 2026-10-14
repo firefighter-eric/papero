@@ -100,6 +100,18 @@ test('parser extracts nested sections, atomic tables and individual references w
   assert.throws(() => parsePaper('<p>Unavailable</p>', { id: 'example', arxivId: '1706.03762v7' }), /no substitute/)
 })
 
+test('title publication notes stay readable as front matter without polluting the paper identity', () => {
+  const html = '<article class="ltx_document"><h1 class="ltx_title_document">Generative Adversarial Nets<span class="ltx_pubnotes"><span class="ltx_pubnotes_content"><span class="ltx_pubnote"><span class="ltx_note_name">Thanks:</span><span id="id3">Sherjil Ozair is a visiting researcher.</span></span></span></span></h1><div class="ltx_authors"><span class="ltx_personname">Ian Goodfellow</span></div><section id="S1"><h2>Introduction</h2><p>Source body.</p></section></article>'
+  const paper = parsePaper(html, { id: 'gan', arxivId: '1406.2661v1', htmlUrl: 'https://arxiv.org/html/1406.2661v1' })
+  assert.equal(paper.title, 'Generative Adversarial Nets')
+  assert.equal(paper.blocks[0].sectionId, 'frontmatter')
+  assert.equal(paper.blocks[0].kind, 'paragraph')
+  assert.match(paper.blocks[0].en, /id="id3"/)
+  assert.equal(paper.blocks.filter(b => b.en.includes('visiting researcher')).length, 1)
+  assert.deepEqual(paper.authors, ['Ian Goodfellow'])
+  assert.equal(paper.blocks.at(-1).sectionId, 'S1')
+})
+
 test('translation edits only narrative text and preserves formula, citation and structural markup', () => {
   const source = '<p id="p1">The value <math><mi>x</mi></math> is large <cite>[<a href="#bib1">1</a>]</cite>.</p>'
   const prepared = translationUnits(source)
@@ -243,6 +255,33 @@ test('model versions next to modal may are not calendar dates, while actual date
   assert.doesNotThrow(() => assertTranslationFidelity('Gemma 3 may improve. The release is May 2.', 'Gemma 3 可能有所改进。发布于5月2日。'))
   assert.throws(() => assertTranslationFidelity('Gemma 3 may improve. The release is May 2.', 'Gemma 3 可能有所改进。发布于5月3日。'), /Calendar date/)
   assert.throws(() => assertTranslationFidelity('Gemma 2 may be used.', 'Gemma 2 可在5月2日使用。'), /Calendar dates added/)
+})
+
+test('numbered equations followed by modal may retain numeric identity without becoming dates', () => {
+  assert.doesNotThrow(() => assertTranslationFidelity('In practice, equation 1 may not provide sufficient gradient.', '在实践中，方程 1 可能无法提供足够的梯度。'))
+  assert.throws(() => assertTranslationFidelity('Equation 1 may be useful.', '方程 2 可能有用。'), /Numeric value/)
+  assert.doesNotThrow(() => assertTranslationFidelity('Equation 1 may be useful. Published on 1 May.', '方程 1 可能有用。发表于5月1日。'))
+  assert.throws(() => assertTranslationFidelity('Equation 1 may be useful. Published on 1 May.', '方程 1 可能有用。发表于5月2日。'), /Calendar date/)
+})
+
+test('shared-month day ranges preserve both ordered endpoints and unrelated scores', () => {
+  const source = 'Over 5–9 October 2015 AlphaGo won 5 games to 0.'
+  for (const range of ['2015年10月5–9日', '2015年10月5日至9日']) {
+    assert.doesNotThrow(() => assertTranslationFidelity(source, `${range}，AlphaGo 以5比0获胜。`))
+  }
+  assert.doesNotThrow(() => assertTranslationFidelity('October 5–9, 2015.', '2015年10月5日至9日。'))
+  for (const changed of ['2015年10月5日至8日', '2015年10月6日至9日', '2015年10月9日', '2015年11月5日至9日', '2015年10月9日至5日']) {
+    assert.throws(() => assertTranslationFidelity(source, `${changed}，AlphaGo 以5比0获胜。`), /Calendar date|calendar date/)
+  }
+  assert.throws(() => assertTranslationFidelity(source, '2015年10月5日至9日，AlphaGo 以6比0获胜。'), /Numeric value/)
+  assert.throws(() => assertTranslationFidelity('Over 28–29 February 2015.', '2015年2月28日至29日。'), /Invalid calendar date range/)
+})
+
+test('Chinese paired em dashes before a multiplier never change its sign', () => {
+  assert.doesNotThrow(() => assertTranslationFidelity('We evaluate 152 layers—8 times deeper.', '我们评估 152 层——8 倍深。'))
+  assert.throws(() => assertTranslationFidelity('A score of 8.', '得分为 −8。'), /Numeric value/)
+  assert.throws(() => assertTranslationFidelity('A score of -8.', '得分为——8。'), /Numeric value/)
+  assert.throws(() => assertTranslationFidelity('A score of 8.', '得分为 --8。'), /Numeric value/)
 })
 
 test('Gemini report names retain spaced tiers, version aliases and complete checkpoint suffixes', () => {
@@ -1043,4 +1082,65 @@ test('only explicitly labelled contributor name lists remain original, while lab
   assert.match(noted.render(['贡献者', '按字母顺序排列。']), /Shuai Bai, Keqin Chen, Xuejing Liu, Junyang Lin/)
   assert.equal(translationUnits(`<p><span>Examples:</span>${names}</p>`).units.length, 2)
   assert.equal(translationUnits('<p><span>Contributors:</span> These researchers trained a model, evaluated the result, and wrote this paper.</p>').units.length, 2)
+})
+
+test('fixed InstructGPT code repair preserves all published Python literals and rejects source drift', () => {
+  const fragments = [
+  {
+    "id": "A6.F45.3.2.1.1.2.1",
+    "text": "import math"
+  },
+  {
+    "id": "A6.F45.3.2.1.1.3.1",
+    "text": "def prime_sieve(num: int) -> list[int]:\nif num <= 0:\nraise ValueError(f\"\"num: Invalid input, please enter a positive integer.\"\")"
+  },
+  {
+    "id": "A6.F45.3.2.1.1.4.1",
+    "text": "sieve = [True] * (num + 1)\nprime = []\nstart = 2\nend = int(math.sqrt(num))"
+  },
+  {
+    "id": "A6.F45.3.2.1.1.5.1",
+    "text": "while start <= end:\nif sieve[start] is True:\nprime.append(start)\nfor i in range(start * start, num + 1, start):\nif sieve[i] is True:\nsieve[i] = False\nstart += 1"
+  },
+  {
+    "id": "A6.F45.3.2.1.1.6.1",
+    "text": "for j in range(end + 1, num + 1):\nif sieve[j] is True:\nprime.append(j)"
+  },
+  {
+    "id": "A6.F45.3.2.1.1.7.1",
+    "text": "return prime"
+  },
+  {
+    "id": "A6.F45.3.4.1.1.4.1",
+    "text": "def prime_sieve(num: int) -> list[int]:"
+  },
+  {
+    "id": "A6.F45.3.4.1.1.6.1",
+    "text": "if num <= 0: raise ValueError(f\"\"num: Invalid input, please enter a positive integer.\")"
+  },
+  {
+    "id": "A6.F45.3.4.1.1.8.1",
+    "text": "sieve = [True] * (num + 1)"
+  }
+]
+  const escape = text => text.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;')
+  const source = '<article class="ltx_document"><h1 class="ltx_title_document">InstructGPT</h1><figure id="A6.F45">' + fragments.map(f => '<span id="' + f.id + '" class="ltx_text">' + escape(f.text) + '</span>').join('') + '<figcaption>Describe the code.</figcaption></figure></article>'
+  const paper = parsePaper(source, { id:'instructgpt', arxivId:'2203.02155v1', htmlUrl:'https://arxiv.org/html/2203.02155v1' })
+  const block = paper.blocks[0]
+  const $ = load(block.en, {}, false)
+  assert.deepEqual($('span.ltx_verbatim').map((_,n) => $(n).text()).get(), fragments.map(f => f.text))
+  const units = translationUnits(block.en, block.kind)
+  assert.deepEqual(units.units.map(u => u.text), ['Describe the code.'])
+  assertBlockTranslationFidelity(block.en, units.render(['描述代码。']))
+  assert.throws(() => parsePaper(source.replace('import math','import os'), { id:'instructgpt', arxivId:'2203.02155v1' }), /code source changed/)
+  const later = parsePaper(source, { id:'instructgpt', arxivId:'2203.02155v2' })
+  assert.doesNotMatch(later.blocks[0].en, /ltx_verbatim/)
+})
+
+test('short narrative fragments cannot pass as untranslated technical labels', () => {
+  for (const source of ['The most common approach is to use an RNN such that', 'Breakdown of VTAB performance in ', 'Results are presented in Table', ', since we pre-train only for ']) {
+    const records = [{ id: 'fragment', text: source }]
+    assert.throws(() => parseUnitResponse(JSON.stringify({ translations: { fragment: source } }), records), /No Chinese translation/)
+  }
+  assert.doesNotThrow(() => parseUnitResponse('{"translations":{"fragment":"CBOW"}}', [{ id: 'fragment', text: 'CBOW' }]))
 })

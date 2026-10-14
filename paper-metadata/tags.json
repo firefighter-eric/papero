@@ -55,6 +55,18 @@
     "polar-express-muon": ["Muon", "优化器", "训练优化", "矩阵优化"],
     "adafactor-sublinear-memory": ["Adafactor", "优化器", "训练优化", "显存优化"],
     "lion-symbolic-optimizer": ["Lion", "优化器", "训练优化", "显存优化"],
-    "dion-distributed-orthonormalized-updates": ["Dion", "优化器", "训练优化", "预训练", "矩阵优化", "显存优化", "分布式训练"]
+    "dion-distributed-orthonormalized-updates": ["Dion", "优化器", "训练优化", "预训练", "矩阵优化", "显存优化", "分布式训练"],
+    "alexnet": ["AlexNet", "经典论文", "计算机视觉", "模型架构", "监督训练"],
+    "resnet": ["ResNet", "经典论文", "计算机视觉", "模型架构", "残差学习"],
+    "word2vec": ["Word2Vec", "经典论文", "自然语言处理", "词向量", "表示学习"],
+    "seq2seq": ["Seq2Seq", "经典论文", "自然语言处理", "模型架构", "机器翻译"],
+    "bahdanau-attention": ["Attention", "经典论文", "注意力机制", "机器翻译", "模型架构"],
+    "vae": ["VAE", "经典论文", "生成模型", "变分推断"],
+    "gan": ["GAN", "经典论文", "生成模型", "对抗学习"],
+    "ddpm": ["DDPM", "经典论文", "生成模型", "扩散模型"],
+    "vision-transformer": ["ViT", "经典论文", "计算机视觉", "Transformer", "模型架构"],
+    "dqn": ["DQN", "经典论文", "强化学习", "决策学习"],
+    "alphago": ["AlphaGo", "经典论文", "强化学习", "树搜索", "自博弈"],
+    "instructgpt": ["InstructGPT", "经典论文", "后训练", "指令微调", "RLHF"]
   }
 }

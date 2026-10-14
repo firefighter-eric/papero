@@ -3,6 +3,7 @@ import importlib.util
 import pathlib
 import sys
 import unittest
+import collections
 from types import SimpleNamespace
 
 
@@ -47,6 +48,31 @@ def converter_for(chars, bounds):
 
 
 class GeometryTests(unittest.TestCase):
+    def test_cairo_font_family_split_uses_unique_geometric_match_and_rejects_ambiguity(self):
+        char = glyph(0, 'b', 10, 40, 'PDF+MinionPro-It', size=9.3)
+        helper = vectors.PdfMathVectors.__new__(vectors.PdfMathVectors)
+        helper.pdf = SimpleNamespace(pages=[SimpleNamespace(height=100)])
+        grid = collections.defaultdict(list)
+        actual = {'symbol': 'glyph-15-0', 'x': 9.81, 'y': 39.65}
+        grid[(9, 39)].append(actual)
+        helper.pages = {1: {'cache': {}, 'families': {'PDF+MinionPro-It': '32'}, 'grid': grid}}
+        self.assertIs(helper.glyph(1, char), actual)
+        helper.pages[1]['cache'].clear()
+        grid[(9, 39)].append({'symbol': 'glyph-16-0', 'x': 10.19, 'y': 39.65})
+        with self.assertRaisesRegex(ValueError, 'no unique vector counterpart'):
+            helper.glyph(1, char)
+
+    def test_utf16_pdf_destinations_resolve_to_the_same_anchor_as_unicode_names(self):
+        char = glyph(0, 'x', 10, 40)
+        converter = converter_for([char], {})
+        name = 'nature16961.indd:Anchor 10:10'
+        converter.pdf.pages[0].annots = [{'x0': 0, 'x1': 50, 'top': 0, 'bottom': 100,
+                                         'data': {'A': {'D': b'\xfe\xff' + name.encode('utf-16-be')}}}]
+        self.assertEqual(converter.link(1, char), '#' + converter.anchor(name))
+        long_name = name + ': ' + 'reference ' * 30
+        self.assertLess(len(converter.anchor(long_name)), 160)
+        self.assertNotEqual(converter.anchor(long_name), converter.anchor(long_name + '2'))
+
     def test_path_bounds_handles_lines_cubics_negative_and_fractional_coordinates(self):
         self.assertEqual(vectors.path_bounds('M 2.25,-4 L 8,3 C 12,4 14,6 9,10 Z'),
                          (2.25, -4.0, 14.0, 10.0))

@@ -27,6 +27,8 @@ DATA_DIR=paper-data npm run dev
 
 已有报告涵盖 Attention、Qwen、DeepSeek、Kimi、MiniMax、Gemini、Gemma 和 Chinchilla。上一轮预训练扩展包括 Llama 1／2／3、OLMo 2／3、FineWeb、DataComp-LM、DoReMi、Scaling Laws、DeepSeekMoE、DeepSeek LLM、μP、GPT-2／3、BERT、T5、RefinedWeb、Dolma、Switch Transformers 和 CLIP。固定版本、来源及各系列记录见 [论文来源](docs/paper-sources.md)。Qwen3.5 明确标注为官方文章；GPT-2 来自官方 PDF，转换为完整英文 HTML 后翻译，标注为官方论文。
 
+经典论文扩展包括 AlexNet、ResNet、Word2Vec、Seq2Seq、Bahdanau Attention、VAE、GAN、DDPM、ViT、DQN、AlphaGo 和 InstructGPT。固定版本与 PDF／OCR／翻译记录见 [经典 AI 论文](docs/classic-papers.md)。
+
 新增论文保留已验收的本机 Qwen3.6 35B A3B 译文，缺失部分由实际 GPT-6 Luna（低思考）任务补齐；每块记录实际贡献及来源指纹。Llama 3、OLMo 3、μP 和 GPT-2 使用 Luna；Llama 1 和 Scaling Laws 使用 Qwen 并保留定向辅助修正记录；其余新增论文逐块记录两个模型的贡献。全部译文标记为机器翻译、`humanReviewed: false`，未经全篇人工审校。有限抽查发现的限定词遗漏、数值和公式衔接问题已经定向修正。
 
 本轮新增 12 个优化器条目（11 篇论文及 Muon 作者文章），包括 AdamW、Adam、Muon、Shampoo、SOAP、Adafactor、Lion、Dion，以及矩阵优化理论与对照实验。新增“优化器”“矩阵优化”“显存优化”“分布式训练”标签，并支持算法系列组合筛选；完整来源、固定版本、翻译和 Adam PDF 公式处理说明见 [优化器收录记录](docs/optimizer-papers.md)。所有条目均完成英文和中文 HTML，按用户本次“发布”授权加入公共库。

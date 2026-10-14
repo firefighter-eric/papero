@@ -13,6 +13,7 @@ import subprocess
 import xml.etree.ElementTree as ET
 
 SVG = 'http://www.w3.org/2000/svg'
+VERSION = '1.1.0'
 XLINK = 'http://www.w3.org/1999/xlink'
 ET.register_namespace('', SVG)
 ET.register_namespace('xlink', XLINK)
@@ -84,6 +85,7 @@ class PdfMathVectors:
                         if child.tag!=f'{{{SVG}}}defs': walk(child,matrix,ancestors)
             walk(tree)
             votes = collections.defaultdict(collections.Counter)
+            size_votes = collections.defaultdict(collections.Counter)
             grid = collections.defaultdict(list)
             for u in uses: grid[(int(u['x']),int(u['y']))].append(u)
             for c in page.chars:
@@ -91,17 +93,25 @@ class PdfMathVectors:
                 close = sorted(nearby(grid,x,y), key=lambda u: (u['x']-x)**2+(u['y']-y)**2)[:2]
                 if close and (close[0]['x']-x)**2+(close[0]['y']-y)**2 < 2 and (len(close)<2 or (close[1]['x']-x)**2+(close[1]['y']-y)**2 > 2):
                     votes[c['fontname']][close[0]['symbol'].split('-')[1]] += 1
+                    size_votes[(c['fontname'], round(c['size'], 3))][close[0]['symbol'].split('-')[1]] += 1
             families = {font: counts.most_common(1)[0][0] for font,counts in votes.items()}
-            self.pages[number] = {'defs': definitions, 'uses': uses, 'grid': grid, 'rules': rules, 'cache': {}, 'families': families}
+            size_families = {key: counts.most_common(1)[0][0] for key,counts in size_votes.items()}
+            self.pages[number] = {'defs': definitions, 'uses': uses, 'grid': grid, 'rules': rules, 'cache': {}, 'families': families, 'size_families': size_families}
 
     def glyph(self, page_number, char):
         page, data = self.pdf.pages[page_number-1], self.pages[page_number]
         key = char['_source']
         if key in data['cache']: return data['cache'][key]
         x, y = char['matrix'][4], page.height-char['matrix'][5]
-        family = data['families'].get(char['fontname'])
+        family = data.get('size_families', {}).get((char['fontname'], round(char['size'], 3)), data['families'].get(char['fontname']))
         candidates = sorted([u for u in nearby(data['grid'],x,y) if (family is None or u['symbol'].split('-')[1] == family) and abs(u['x']-x) < 2 and abs(u['y']-y) < 2],
                             key=lambda u:(u['x']-x)**2+(u['y']-y)**2)
+        # Cairo can split one PDF font/size into multiple glyph families.
+        # When the voted family has no match, use the same strict geometric
+        # correspondence and ambiguity check across families; never guess a glyph.
+        if not candidates:
+            candidates = sorted([u for u in nearby(data['grid'],x,y) if abs(u['x']-x) < 2 and abs(u['y']-y) < 2],
+                                key=lambda u:(u['x']-x)**2+(u['y']-y)**2)
         if not candidates or (len(candidates)>1 and abs((candidates[1]['x']-x)**2+(candidates[1]['y']-y)**2-((candidates[0]['x']-x)**2+(candidates[0]['y']-y)**2)) < .02):
             raise ValueError(f'PDF mathematical glyph has no unique vector counterpart: page {page_number}, {char["text"]}, {x}, {y}')
         data['cache'][key] = candidates[0]

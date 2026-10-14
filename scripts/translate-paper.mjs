@@ -336,7 +336,9 @@ export function parseUnitResponse(content, records, { collectFailures = false, r
     if (!raw) throw new Error(`Missing translation unit ${record.id}`)
     try {
       const result = { ...raw, text: restoreValue(record.id, raw.text) }
-      if (record.text.length > 70 && !/[\u3400-\u9fff]/.test(result.text)) {
+      const narrative = (record.text.match(/[A-Za-z][A-Za-z'-]*/g) || []).length >= 4
+        && /\b(?:the|we|our|is|are|was|were|since|only|in|of|for|with|such|that|this|but|and|to)\b/i.test(record.text)
+      if ((record.text.length > 70 || narrative) && !/[\u3400-\u9fff]/.test(result.text)) {
         const sameLabels = text => text.normalize('NFKC').replace(/[\s、,;:()。]/g, '').toLowerCase()
         if (!isTechnicalLabelOnly(record.text) || sameLabels(record.text) !== sameLabels(result.text)) throw new Error(`No Chinese translation for ${record.id}`)
       }

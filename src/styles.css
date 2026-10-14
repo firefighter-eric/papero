@@ -318,6 +318,7 @@ a { color: var(--green); text-underline-offset: 3px; }
 .paper-block .ltx_inline-block { max-width: 100%; }
 .block-table .block-html, .block-equation .block-html, .block-code .block-html { max-width: 100%; overflow-x: auto; scrollbar-width: thin; scrollbar-color: var(--scrollbar) var(--surface-bg); }
 .paper-block code { font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace; font-size: .82em; background: var(--surface-bg); padding: .08em .2em; border-radius: 2px; }
+.paper-block[data-source-id="A6.F45"] span.ltx_verbatim { display: block; white-space: pre-wrap; font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace; font-size: .82em; }
 .paper-block pre { width: max-content; min-width: 100%; margin: 0; padding: 14px 16px; background: var(--surface-bg); border: 1px solid var(--border); border-radius: 4px; font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace; font-size: .72em; line-height: 1.6; white-space: pre; }
 .paper-block pre code { font: inherit; padding: 0; border-radius: 0; background: transparent; white-space: pre; }
 .paper-content .ltx_listing.ltx_lstlisting { display: block; max-width: 100%; overflow-x: auto; margin: 12px 0; padding: 14px 16px; background: var(--surface-bg); border: 1px solid var(--border); border-radius: 4px; font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace; font-size: .72em; line-height: 1.6; white-space: normal; overflow-wrap: normal; scrollbar-width: thin; scrollbar-color: var(--scrollbar) var(--surface-bg); }
