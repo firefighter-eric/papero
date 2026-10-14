@@ -128,9 +128,9 @@ async function translateUnlocked({ id, dataDir, endpoint = process.env.LM_STUDIO
     await runBoundedTasks(batches, async ({ batch, size }, batchIndex) => {
     const batchNumber = batchIndex + 1
     const acceptedCache = new Map()
-    const records = batch.flatMap(({ id: recordId, texts }) => texts.map((sourceText, unitIndex) => {
+    const records = batch.flatMap(({ id: recordId, texts, block }) => texts.map((sourceText, unitIndex) => {
       const mustPreserve = technicalIdentifiers(sourceText)
-      return { id: `${recordId}:${unitIndex}`, text: sourceText, block: recordId, mustPreserve, mustPreserveValues: sourceNumericTokens(sourceText, mustPreserve) }
+      return { id: `${recordId}:${unitIndex}`, text: sourceText, block: recordId, ...(block?.kind === 'heading' ? { kind: 'heading' } : {}), mustPreserve, mustPreserveValues: sourceNumericTokens(sourceText, mustPreserve) }
     }))
     const contexts = batch.map(({ id: recordId, context }) => ({ block: recordId, context }))
     const correctedUnitIds = new Set()
@@ -336,6 +336,12 @@ export function parseUnitResponse(content, records, { collectFailures = false, r
     if (!raw) throw new Error(`Missing translation unit ${record.id}`)
     try {
       const result = { ...raw, text: restoreValue(record.id, raw.text) }
+      const heading = record.kind === 'heading' && !isTechnicalLabelOnly(record.text)
+        && !/^(?:Dropout|LSUN|Vision Transformer\s*\(ViT\))$/i.test(record.text.trim())
+      if (heading && !/[\u3400-\u9fff]/.test(result.text)) throw new Error(`No Chinese heading translation for ${record.id}`)
+      if (heading && result.text.length > Math.max(80, record.text.length * 1.5)) throw new Error(`Paragraph substituted for heading ${record.id}`)
+      if (heading && /\bSupervised learning of policy networks\b/i.test(record.text) && !/监督/.test(result.text)) throw new Error(`Supervised learning concept omitted from heading ${record.id}`)
+      if (heading && /\bResults on public NLP datasets\b/i.test(record.text) && !/结果/.test(result.text)) throw new Error(`Results concept omitted from heading ${record.id}`)
       const narrative = (record.text.match(/[A-Za-z][A-Za-z'-]*/g) || []).length >= 4
         && /\b(?:the|we|our|is|are|was|were|since|only|in|of|for|with|such|that|this|but|and|to)\b/i.test(record.text)
       if ((record.text.length > 70 || narrative) && !/[\u3400-\u9fff]/.test(result.text)) {

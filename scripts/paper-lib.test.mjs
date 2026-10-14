@@ -1144,3 +1144,21 @@ test('short narrative fragments cannot pass as untranslated technical labels', (
   }
   assert.doesNotThrow(() => parseUnitResponse('{"translations":{"fragment":"CBOW"}}', [{ id: 'fragment', text: 'CBOW' }]))
 })
+
+test('heading translation rejects untranslated labels and paragraph substitutions while keeping literal model names', () => {
+  const parse = (source, target) => parseUnitResponse(JSON.stringify({ translations: { heading: target } }), [{ id: 'heading', text: source, kind: 'heading' }])
+  assert.throws(() => parse('Abstract', 'Abstract'), /No Chinese heading/)
+  assert.throws(() => parse('Supervised learning of policy networks', '随后我们训练强化学习策略网络。'), /Supervised learning/)
+  assert.throws(() => parse('Results on public NLP datasets', '其次，公共 NLP 数据集很难获得多样性的输入。'), /Results concept/)
+  assert.throws(() => parse('Results', '这是一段正文。'.repeat(20)), /Paragraph substituted/)
+  assert.doesNotThrow(() => parse('Dropout', 'Dropout'))
+  assert.doesNotThrow(() => parse('Abstract', '摘要'))
+})
+
+test('letter-prefixed appendix section numbers are displayed once without changing original identifiers', () => {
+  const en = '<h3><span class="ltx_tag">A.2.3 </span>Model Size</h3>'
+  const zh = '<h3><span class="ltx_tag">A.2.3 </span>A.2.3 模型规模</h3>'
+  const normalized = normalizeHeadingNumber(en, zh)
+  assert.equal((normalized.match(/A\.2\.3/g) || []).length, 1)
+  assertBlockTranslationFidelity(en, normalized)
+})

@@ -729,7 +729,7 @@ export function assertTranslationFidelity(source, translated) {
 export function normalizeHeadingNumber(en, zh) {
   const source = load(en, {}, false)
   const number = source('.ltx_tag').first().text().trim().replace(/\.$/, '')
-  if (!/^\d+(?:\.\d+)*$/.test(number)) return zh
+  if (!/^(?:\d+(?:\.\d+)*|[A-Z]\.\d+(?:\.\d+)*)$/.test(number)) return zh
   const prefix = new RegExp(`^\\s*${number.replace(/\./g, '\\.')}(?=\\s|[、:：]|\\.(?!\\d)|[\\u3400-\\u9fff]|$)[\\s、:：.]*`)
   const narrativeNodes = ($) => {
     const nodes = []
