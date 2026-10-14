@@ -31,13 +31,15 @@ interface Props {
 interface RenderedBlock extends PaperBlock {
   htmlZh: string
   htmlEn: string
+  sectionAnchors?: Partial<Record<Language, string>>
 }
 
 /** Two language panes have distinct DOM IDs while keeping source anchors usable. */
-function namespaceSourceIds(html: string, prefix: string): string {
+function namespaceSourceIds(html: string, prefix: string, sourceIds?: Set<string>): string {
   const template = document.createElement('template')
   template.innerHTML = html
   template.content.querySelectorAll<HTMLElement>('[id]').forEach((element) => {
+    sourceIds?.add(element.id)
     element.dataset.sourceId = element.id
     element.id = `${prefix}-${element.id}`
   })
@@ -134,11 +136,29 @@ export const PaperReader = forwardRef<PaperReaderHandle, Props>(function PaperRe
   preferencesRef.current = preferences
   onPositionRef.current = onPosition
 
-  const blocks: RenderedBlock[] = useMemo(() => paper.blocks.map((block) => ({
-    ...block,
-    htmlEn: namespaceSourceIds(sanitizePaperHtml(block.en, entry.dataPath), `${paper.id}-en`),
-    htmlZh: namespaceSourceIds(sanitizePaperHtml(block.zh ?? block.en, entry.dataPath), `${paper.id}-zh`),
-  })), [paper, entry.dataPath])
+  const blocks: RenderedBlock[] = useMemo(() => {
+    const sourceIds = { en: new Set<string>(), zh: new Set<string>() }
+    const rendered = paper.blocks.map((block): RenderedBlock => ({
+      ...block,
+      htmlEn: namespaceSourceIds(sanitizePaperHtml(block.en, entry.dataPath), `${paper.id}-en`, sourceIds.en),
+      htmlZh: namespaceSourceIds(sanitizePaperHtml(block.zh ?? block.en, entry.dataPath), `${paper.id}-zh`, sourceIds.zh),
+    }))
+    const sections = new Set(paper.sections.map(section => section.id))
+    const seen = new Set<string>()
+    for (const block of rendered) {
+      if (seen.has(block.sectionId) || !sections.has(block.sectionId)) continue
+      seen.add(block.sectionId)
+      // Source section containers sit outside extracted blocks. Restore only
+      // their missing anchors, without duplicating IDs present in the body.
+      for (const language of ['en', 'zh'] as const) {
+        if (!sourceIds[language].has(block.sectionId)) {
+          block.sectionAnchors ??= {}
+          block.sectionAnchors[language] = block.sectionId
+        }
+      }
+    }
+    return rendered
+  }, [paper, entry.dataPath])
 
   const languages: Language[] = preferences.mode === 'bilingual'
     ? preferences.swapped ? ['en', 'zh'] : ['zh', 'en']
@@ -337,6 +357,8 @@ export const PaperReader = forwardRef<PaperReaderHandle, Props>(function PaperRe
         <article className="paper-content" lang={language === 'zh' ? 'zh-CN' : 'en'}>
           {blocks.map((block) => <div key={block.id} data-block-id={block.id} data-source-id={block.sourceId}
             data-section-id={block.sectionId} className={`paper-block block-${block.kind} ${language === 'zh' && block.zh === null ? 'translation-pending' : ''}`}>
+            {block.sectionAnchors?.[language] && <span id={`${paper.id}-${language}-${block.sectionAnchors[language]}`}
+              data-source-id={block.sectionAnchors[language]} />}
             {language === 'zh' && block.zh === null && block.kind !== 'heading' && <span className="pending-label">译文待生成 · 英文原文</span>}
             <div className="block-html" lang={language === 'zh' && block.zh === null ? 'en' : undefined}
               tabIndex={block.kind === 'code' ? 0 : undefined}

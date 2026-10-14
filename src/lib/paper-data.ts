@@ -473,6 +473,11 @@ async function loadHtmlBlocks(
     catch (error) { throw new PaperDataError('invalid', 'HTML block offsets split a UTF-8 character.', { cause: error }) }
   }
   const closing = '</div>\n'
+  const firstSectionBlocks = new Map<string, number>()
+  for (const [index, block] of paper.blocks.entries()) {
+    if (!firstSectionBlocks.has(block.sectionId)) firstSectionBlocks.set(block.sectionId, index)
+  }
+  const sectionIds = new Set(paper.sections.map(section => section.id))
   return Promise.all(wrappers.map(async (wrapper, index) => {
     const block = paper.blocks[index]
     if (wrapper.tagName.toLowerCase() !== 'div' || wrapper.getAttribute('data-block-id') !== block.id
@@ -481,7 +486,18 @@ async function loadHtmlBlocks(
     // Chromium can escape angle brackets inside attribute values when serializing
     // innerHTML. Preserve and hash the original bytes, never a DOM serialization.
     const { start, end } = block.contentOffsets![language]
-    const opening = `<div class="paper-block" data-block-id="${escapeAttribute(block.id)}" data-block-kind="${escapeAttribute(block.kind)}" data-source-id="${escapeAttribute(block.sourceId!)}" data-section-id="${escapeAttribute(block.sectionId)}">`
+    const baseOpening = `<div class="paper-block" data-block-id="${escapeAttribute(block.id)}" data-block-kind="${escapeAttribute(block.kind)}" data-source-id="${escapeAttribute(block.sourceId!)}" data-section-id="${escapeAttribute(block.sectionId)}">`
+    const openings = [baseOpening]
+    if (sectionIds.has(block.sectionId) && firstSectionBlocks.get(block.sectionId) === index) {
+      openings.push(`${baseOpening}<span id="${escapeAttribute(block.sectionId)}"></span>`)
+    }
+    // An exporter-generated empty section anchor can precede the hashed body.
+    // Its exact bytes and placement are checked; arbitrary wrapper content is
+    // still rejected, and older documents remain readable during deployment.
+    const opening = openings.find(value => {
+      const length = new TextEncoder().encode(value).byteLength
+      return start >= length && decode(start - length, start) === value
+    }) ?? baseOpening
     const openingBytes = new TextEncoder().encode(opening).byteLength
     const wrapperStart = start - openingBytes
     const preceding = index ? closing : `<article data-paper-id="${escapeAttribute(paper.id)}" data-language="${language}">\n`

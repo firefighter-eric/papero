@@ -103,6 +103,27 @@ async function scroll(language: 'zh' | 'en', top: number) {
 }
 
 describe('reading header folding', () => {
+  it('resolves section references in each language without duplicating existing source anchors', async () => {
+    const linked = structuredClone(paper)
+    for (const language of ['en', 'zh'] as const) {
+      linked.blocks[0][language] = '<p><a href="#introduction">Introduction</a><a href="#results">Results</a></p>'
+      linked.blocks[3][language] = '<h2 id="results">Results</h2>'
+    }
+    await act(() => root.render(<PaperReader paper={linked} entry={entry} preferences={preferences} onPosition={vi.fn()} />))
+    for (const language of ['en', 'zh'] as const) {
+      const body = pane(language)
+      expect(body.querySelectorAll(`[id="${paper.id}-${language}-introduction"]`)).toHaveLength(1)
+      expect(body.querySelectorAll(`[id="${paper.id}-${language}-results"]`)).toHaveLength(1)
+      for (const link of body.querySelectorAll<HTMLAnchorElement>('a[href^="#"]')) {
+        expect(document.getElementById(link.hash.slice(1))?.closest('.pane-scroll')).toBe(body)
+      }
+    }
+    await act(() => pane('zh').querySelector<HTMLAnchorElement>('a')!.click())
+    expect(window.location.hash).toBe('#introduction')
+    expect(pane('zh').scrollTop).toBe(628)
+    expect(pane('en').scrollTop).toBe(908)
+  })
+
   it('keeps details accessible when expanded and preserves a manual expansion until the automatic state or paper changes', async () => {
     await act(() => root.render(<PaperHeader entry={entry} paper={paper} collapseProgress={1} />))
     const details = host.querySelector<HTMLDivElement>('.paper-heading-details')!

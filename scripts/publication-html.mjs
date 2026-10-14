@@ -25,8 +25,18 @@ export function renderReadingDocument(paper, language, blocks = paper.blocks) {
   const prefix = `<!doctype html>\n<html lang="${language === 'zh' ? 'zh-CN' : 'en'}"><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' file:; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escape(title)}</title><style>${css}${codeCss}${mathCss}</style></head><body><header><h1>${escape(title)}</h1><p>${escape(publicationAuthors(paper).join(', '))}</p><p><a href="${escape(paper.source.url)}">${escape(sourceLabel)}</a></p>${translationNote}</header><article data-paper-id="${escape(paper.id)}" data-language="${language}">\n`
   const parts = [prefix], offsets = []
   let byteOffset = Buffer.byteLength(prefix, 'utf8')
+  const sourceIds = new Set(blocks.flatMap(block => {
+    const $ = load(block[language] ?? '', {}, false)
+    return $('[id]').map((_, node) => $(node).attr('id')).get()
+  }))
+  const sections = new Set((paper.sections ?? []).map(section => section.id))
   for (const block of blocks) {
-    const open = `<div class="paper-block" data-block-id="${escape(block.id)}" data-block-kind="${escape(block.kind)}" data-source-id="${escape(block.sourceId)}" data-section-id="${escape(block.sectionId)}">`
+    // Section containers are outside extracted body blocks. Keep their links
+    // usable in standalone HTML as well as in the app's reading panes.
+    const sectionAnchor = sections.has(block.sectionId) && !sourceIds.has(block.sectionId)
+      ? `<span id="${escape(block.sectionId)}"></span>` : ''
+    if (sectionAnchor) sourceIds.add(block.sectionId)
+    const open = `<div class="paper-block" data-block-id="${escape(block.id)}" data-block-kind="${escape(block.kind)}" data-source-id="${escape(block.sourceId)}" data-section-id="${escape(block.sectionId)}">${sectionAnchor}`
     const body = block[language] ?? ''
     byteOffset += Buffer.byteLength(open, 'utf8')
     const start = byteOffset
