@@ -2,7 +2,7 @@ import { readFile, writeFile, rename } from 'node:fs/promises'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { load } from 'cheerio'
-import { translationUnits, normalizeHeadingNumber, assertTranslationFidelity, assertBlockTranslationFidelity, technicalIdentifiers, isTechnicalLabelOnly, safeId, sha256, translatedAbstractText } from './paper-lib.mjs'
+import { translationUnits, normalizeHeadingNumber, assertTranslationFidelity, assertBlockTranslationFidelity, technicalIdentifiers, isTechnicalLabelOnly, isRlVerbatimLabel, safeId, sha256, translatedAbstractText } from './paper-lib.mjs'
 import { updateCatalog } from './import-paper.mjs'
 import { withExclusivePaperLock } from './catalog-lock.mjs'
 import { createRequestGate, runBoundedTasks, createSerialWriter, validateConcurrency, extractCompletionText, translationRequestBudget, protectSourceDelimiters, normalizeProseRequestWhitespace, sourceNumericTokens } from './translation-workers.mjs'
@@ -344,6 +344,14 @@ export function parseUnitResponse(content, records, { collectFailures = false, r
     try {
       if (!raw.text.trim()) throw new Error(`Empty translation unit ${record.id}`)
       const result = { ...raw, text: restoreValue(record.id, raw.text) }
+      if (!/validationFailure|mustPreserve|retryAttempt|对应中文片段|修正为/.test(record.text)
+        && /validationFailure|mustPreserve|retryAttempt|对应中文片段|\}\}\s*(?:->|→)\s*修正为/.test(result.text)) {
+        throw new Error(`Translation instruction leaked into prose: ${record.id}`)
+      }
+      if (isRlVerbatimLabel(record.text)) {
+        const identity = text => text.normalize('NFKC').replace(/[^\p{L}\p{N}]/gu, '').toLowerCase()
+        if (identity(record.text) !== identity(result.text)) throw new Error(`RL algorithm or benchmark label changed: ${record.id}`)
+      }
       const heading = record.kind === 'heading' && !isTechnicalLabelOnly(record.text)
         && !/^(?:Dropout|LSUN|Vision Transformer\s*\(ViT\))$/i.test(record.text.trim())
       if (heading && !/[\u3400-\u9fff]/.test(result.text)) throw new Error(`No Chinese heading translation for ${record.id}`)
@@ -355,6 +363,25 @@ export function parseUnitResponse(content, records, { collectFailures = false, r
       if ((record.text.length > 70 || narrative) && !/[\u3400-\u9fff]/.test(result.text)) {
         const sameLabels = text => text.normalize('NFKC').replace(/[\s、,;:()。]/g, '').toLowerCase()
         if (!isTechnicalLabelOnly(record.text) || sameLabels(record.text) !== sameLabels(result.text)) throw new Error(`No Chinese translation for ${record.id}`)
+      }
+      if (!/[\u3400-\u9fff]/.test(result.text) && /[A-Za-z]{2}/.test(record.text) && /[A-Za-z]{2}/.test(result.text)
+        && !isTechnicalLabelOnly(record.text)
+        && record.text.normalize('NFKC').replace(/\b(?:the|a|an)\b/gi, '').replace(/[^\p{L}\p{N}]/gu, '').toLowerCase() !== result.text.normalize('NFKC').replace(/\b(?:the|a|an)\b/gi, '').replace(/[^\p{L}\p{N}]/gu, '').toLowerCase()) {
+        throw new Error(`Untranslated English fragment substituted: ${record.id}`)
+      }
+      const sourceLength = record.text.replace(/\s+/g, ' ').trim().length
+      const translatedLength = result.text.replace(/\s+/g, ' ').trim().length
+      if (narrative && sourceLength > 120 && translatedLength < sourceLength * 0.15) throw new Error(`Narrative fragment severely shortened: ${record.id}`)
+      if (translatedLength > Math.max(120, sourceLength * 1.5)) throw new Error(`Unrelated context expanded into fragment: ${record.id}`)
+      if (/\bexpectiles?\b/i.test(record.text) && !/expectile|期望分位数|期望位数/i.test(result.text)) throw new Error(`Expectile confused with quantile: ${record.id}`)
+      if (/\boff[-\u2010-\u2015]\s*policy\b/i.test(record.text) && !/离策略|异策略|off[-\u2010-\u2015]\s*policy/i.test(result.text)) throw new Error(`Off-policy confused with offline: ${record.id}`)
+      if (/\boffline\b/i.test(record.text) && !/离线|offline/i.test(result.text)) throw new Error(`Offline learning concept omitted: ${record.id}`)
+      if (/\bnon[- ]?expansion\b/i.test(record.text) && !/非扩张|非膨胀|non[- ]?expansion/i.test(result.text)) throw new Error(`Non-expansion confused with contraction: ${record.id}`)
+      const sourceCommands = [...(record.text.match(/\\[A-Za-z]+/g) || [])]
+      for (const command of result.text.match(/\\[A-Za-z]+/g) || []) {
+        const index = sourceCommands.indexOf(command)
+        if (index < 0) throw new Error(`LaTeX command added to prose translation: ${command}`)
+        sourceCommands.splice(index, 1)
       }
       assertTranslationFidelity(record.text, result.text)
       results.push(result)

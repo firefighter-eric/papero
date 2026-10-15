@@ -26,8 +26,8 @@ describe('reinforcement-learning collection boundaries', () => {
   })
   it('does not label Double DQN, Dueling DQN or replay prioritization as distributional value methods', () => {
     for (const id of ['double-dqn','dueling-dqn','prioritized-experience-replay'] as const) {
-      expect(registry.papers[id]).not.toContain('分布式回报')
+      expect(registry.papers[id]).not.toContain('回报分布')
     }
-    expect(registry.papers['c51']).toContain('分布式回报')
+    expect(registry.papers['c51']).toContain('回报分布')
   })
 })

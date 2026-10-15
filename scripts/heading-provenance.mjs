@@ -1,5 +1,5 @@
 import { load } from 'cheerio'
-import { isTechnicalLabelOnly, sha256, visibleProseText } from './paper-lib.mjs'
+import { isTechnicalLabelOnly, isRlVerbatimLabel, sha256, visibleProseText } from './paper-lib.mjs'
 
 /** Short headings need the same completeness gate as longer narrative text. */
 export function assertChineseHeadingCompleteness(paper) {
@@ -8,6 +8,14 @@ export function assertChineseHeadingCompleteness(paper) {
     if (block.kind !== 'heading' || !block.zh) continue
     const source = visibleProseText(load(block.en, {}, false))
     const target = visibleProseText(load(block.zh, {}, false))
+    const sourceLabel = load(block.en, {}, false), targetLabel = load(block.zh, {}, false)
+    sourceLabel('.ltx_tag').remove(); targetLabel('.ltx_tag').remove()
+    const label = visibleProseText(sourceLabel), translatedLabel = visibleProseText(targetLabel)
+    if (isRlVerbatimLabel(label)) {
+      const identity = value => value.normalize('NFKC').replace(/[^\p{L}\p{N}]/gu, '').toLowerCase()
+      if (identity(label) !== identity(translatedLabel)) throw Error(`Translated heading changes an RL label: ${paper.id}/${block.id}.`)
+      continue
+    }
     if (!/[A-Za-z]{2}/.test(source) || /[\u3400-\u9fff]/.test(target) || isTechnicalLabelOnly(source)) continue
     const review = reviews.get(block.id)
     if (review?.decision !== 'preserve-label' || review.model !== 'gpt-6-luna' || review.provider !== 'Codex subagent'

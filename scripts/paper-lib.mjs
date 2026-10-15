@@ -495,8 +495,10 @@ const gemmaModelFamilies = String.raw`Gemma${gemmaSeparator}?(?:${gemmaSize}(?:$
 // "8B and 70B Llama 3" may translate naturally as "Llama 3 8B 和 70B".
 // Hyphenated checkpoint identifiers still retain their full size/suffix.
 const pretrainingModelFamilies = String.raw`(?:(?:Mistral|Mixtral|OPT)[-_\s]?\d+(?:[xX]\d+)?(?:\.\d+)?B(?:[-_][A-Za-z0-9.]+)*|(?:Llama|LLaMA|OLMo)[-_\s]?\d+(?:\.\d+)*(?:B|[-_]\d+(?:\.\d+)?B)?(?:[-_][A-Za-z0-9.]+)*)`
-const rlAlgorithmIdentifiers = String.raw`(?:Dreamer(?:V?[23])?|DoomRNN|DoomTakeCover-v0|DQN|DDPG|TD3|SAC|PPO|TRPO|A3C|BCQ|CQL|IQL|MBPO|PETS|QMIX|VDN|MADDPG|GAIL|REINFORCE|MuZero|AlphaZero)`
+const rlAlgorithmIdentifiers = String.raw`(?:Dreamer(?:V?[23])?|SimPLe|Decision Transformer|DoomRNN|DoomTakeCover-v0|(?:Double |Dueling )?DQN|C51|Rainbow|IMPALA|DPG|GAE|Option-Critic|QR-DQN(?:-[01])?|IQN|ICM|RND|HER|DDPG|TD3|SAC|PPO|TRPO|A3C|BCQ|CQL|IQL|MBPO|PETS|QMIX|VDN|MADDPG|GAIL|REINFORCE|MuZero|AlphaZero)`
 const rlAlgorithmLabel = new RegExp(`^${rlAlgorithmIdentifiers}$`, 'i')
+const rlBenchmarkLabel = /^(?:Atari|OpenAI Gym|MuJoCo|Minecraft|Transformers?)$/i
+export const isRlVerbatimLabel = text => rlAlgorithmLabel.test(identifierText(text).trim()) || rlBenchmarkLabel.test(identifierText(text).trim())
 const modelPattern = new RegExp(String.raw`\b${gemmaModelFamilies}\b|\b${geminiModelFamilies}\b|\b${reportModelFamilies}\b|\b${pretrainingModelFamilies}\b|${legacyModelPattern.source}`, 'gi')
 // These report tables split brand, tier and training stage into separate
 // text nodes (including Gemma 2 Table 17's PT / IT headings). Protect exact
@@ -509,6 +511,8 @@ export const technicalIdentifiers = (text) => {
   const normalized = identifierText(text)
   const identifiers = (normalized.match(modelPattern) || []).map(value => value.replace(/-(?:level|scale|sized|based|like)$/i, ''))
   const label = normalized.trim()
+  const chessOpening = label.match(/^([A-E]\d{2}):/)
+  if (chessOpening) identifiers.push(chessOpening[1])
   if (!identifiers.length && isolatedModelLabel.test(label)) identifiers.push(label)
   if (!identifiers.length && /^DoomTakeCover-v\d+$/.test(label)) identifiers.push(label)
   return identifiers
@@ -533,7 +537,9 @@ export function isTechnicalLabelOnly(text) {
   // Author-year credits embedded in theorem headings are bibliography, not descriptive English headings.
   if (/^\([A-Z][A-Za-z'’-]+(?:\s+(?:et al\.|[A-Z][A-Za-z'’-]+)|(?:,\s*|\s+(?:and|&)\s+)[A-Z][A-Za-z'’-]+)*,\s*(?:18|19|20)\d{2}[a-z]?\)$/.test(text.trim())) return true
   if (/^[A-Z][A-Za-z'’-]+\s+et\s+al\.\s*\[\d+\]$/.test(text.trim())) return true
-  if (rlAlgorithmLabel.test(identifierText(text).trim())) return true
+  if (/^[\p{Lu}][\p{L}'’.-]+(?:\s+et\s+al\.)?\s*\((?:18|19|20)\d{2}[a-z]?\)$/u.test(text.trim())) return true
+  if (isRlVerbatimLabel(text)) return true
+  if (isRlVerbatimLabel(text.replace(/^\s*\d+(?:\.\d+)*\.?\s+/, ''))) return true
   if (isPythonAssertion(text) || isSacreBleuSignature(text)) return true
   if (isolatedModelLabel.test(identifierText(text).trim())) return true
   if (isBenchmarkLanguageList(text) || isIsoBenchmarkLanguageList(text)) return true
@@ -584,7 +590,7 @@ function calendarDates(text) {
   let clean = text.replace(new RegExp(`(?:${modelPattern.source})[\\u2013\\u2014\\u2015]`, 'gi'), ' ').replace(modelPattern, ' ')
     // A numbered equation followed by the modal "may" is not a day in May.
     // Keep its number in the numeric checks and retain real calendar dates.
-    .replace(/(\b(?:equation|eq\.?|section|theorem|proposition|lemma|corollary|algorithm|figure|table)\s*\(?\d+(?:\.\d+)*\)?\s+)(may)\b/gi,
+    .replace(/(\b(?:equation|eq\.?|section|theorem|proposition|lemma|corollary|algorithm|figure|table|agent)\s*\(?\d+(?:\.\d+)*\)?\s+)(may)\b/gi,
       (whole, pointer, month) => month === 'may' ? `${pointer}might` : whole)
     // AlphaGo shares its month and year across the match dates, 5–9 October
     // 2015. Match both endpoints before the single-date recognizers.
@@ -667,7 +673,7 @@ export function assertTranslationFidelity(source, translated) {
   }
   if (protocolRoles.length) throw new Error('Literal protocol roles added to translation')
   const advantageConcepts = en.replace(/\b(?:take|takes|taking|taken|took)\s+advantage\s+of\b/gi, '')
-  if (/\badvantages?\b/i.test(advantageConcepts) && /\bmodels?\b/i.test(en) && (!/优势|优点|益处|长处|好处/.test(zh) || !/模型/.test(zh))) throw new Error('Core concepts omitted: advantages/models')
+  if (/\badvantages?\b/i.test(advantageConcepts) && /\bmodels?\b/i.test(en) && (!/优势|优点|益处|长处|好处/.test(zh) || !(/\bto\s+model\b/i.test(en) ? /模型|建模/ : /模型/).test(zh))) throw new Error('Core concepts omitted: advantages/models')
   const sourceHumanAnnotations = (en.match(/\b(?:human annotation|manual annotation|manually annotated)\b/gi) || []).length
   if (/\bartificially annotated\b/i.test(en) && (zh.match(/人工标注/g) || []).length > sourceHumanAnnotations) throw new Error('Automated annotation incorrectly translated as human annotation')
   if (/\bare (?:reported|shown|presented|listed|provided) in Section\s*$/i.test(en) && !/章节|小节|节中|节内/.test(zh)) throw new Error('Section reporting concept omitted from fragment')
@@ -694,7 +700,7 @@ export function assertTranslationFidelity(source, translated) {
   }
   if (remainingDates.length) throw new Error(`Calendar dates added to translation: ${remainingDates.join(', ')}`)
   const unitScale = { billion: 1e9, million: 1e6, trillion: 1e12, thousand: 1e3, B: 1e9, M: 1e6, T: 1e12, K: 1e3, k: 1e3, 千: 1e3, 万: 1e4, 百万: 1e6, 十亿: 1e9, 亿: 1e8, 万亿: 1e12 }
-  const quantityNumber = '[+-]?\\d+(?:,\\d{3})*(?:\\.\\d+)?'
+  const quantityNumber = '[+-]?\\d+(?:,\\d{3}(?!\\d))*(?:\\.\\d+)?'
   const quantityUnit = '(?:[Bb]illion|[Mm]illion|[Tt]rillion|[Tt]housand|百万|十亿|万亿|亿|万|千|[BMTKk]\\b)'
   const canonicalQuantity = (value, unit) => String(Number((Number(value.replace(/,/g, '')) * (unitScale[unit] || unitScale[unit.toLowerCase()])).toPrecision(15)))
   // Report compound modifiers bind a number to its scale: "1-million-token",
@@ -716,7 +722,7 @@ export function assertTranslationFidelity(source, translated) {
     // A trailing unit applies to both ends of a quantity range (0.5 to 72 billion).
     normalized = normalized.replace(new RegExp(`(?<![\\w.])(${quantityNumber})\\s*(?:to|到|至|-)\\s*(${quantityNumber})\\s*(${quantityUnit})`, 'g'), (_, first, last, unit) => `${canonicalQuantity(first, unit)} to ${canonicalQuantity(last, unit)}`)
     normalized = normalized.replace(new RegExp(`(?<![\\w.])(${quantityNumber})\\s*(${quantityUnit})`, 'g'), (_, value, unit) => canonicalQuantity(value, unit))
-    return normalized.match(/(?<![\w.])[+-]?\d+(?:,\d{3})*(?:\.\d+)?(?:[eE][+-]?\d+)?\s*%?/g)?.map(value => value.replace(/[,\s]/g, '')) || []
+    return normalized.match(/(?<![\w.])[+-]?\d+(?:,\d{3}(?!\d))*(?:\.\d+)?(?:[eE][+-]?\d+)?\s*%?/g)?.map(value => value.replace(/[,\s]/g, '')) || []
   }
   let sourceNumericText = sourceCalendar.clean, targetNumericText = targetCalendar.clean
   // "3rd-party" is the lexical third-party relationship, not a count of

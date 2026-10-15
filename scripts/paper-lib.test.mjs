@@ -1257,3 +1257,86 @@ test('table cell boundaries prevent label prefixes from multiplying scores and r
   assert.throws(() => assertBlockTranslationFidelity(en, zh.replace('742', '101').replace('100', '742')), /Numeric value/)
   assert.throws(() => assertBlockTranslationFidelity(en, zh.replace('742', '100').replace('100</td></tr></table>', '742</td></tr></table>')), /Numeric value/)
 })
+
+test('exact RL algorithm abbreviations are labels while descriptive learning headings remain translatable', () => {
+  for (const label of ['Double DQN', 'Dueling DQN', 'QR-DQN-0', 'IQN', 'ICM', 'RND', 'HER']) assert.equal(isTechnicalLabelOnly(label), true)
+  for (const prose of ['Double Q-learning', 'Double', 'The advantages of Double DQN']) assert.equal(isTechnicalLabelOnly(prose), false)
+})
+
+
+test('SimPLe is an exact algorithm label while its descriptive prose still requires translation', () => {
+  assert.ok(isTechnicalLabelOnly('SimPLe'))
+  assert.ok(isTechnicalLabelOnly('Transformers'))
+  assert.equal(isTechnicalLabelOnly('Transformer sequence models'), false)
+  assert.equal(isTechnicalLabelOnly('SimPLe model performance'), false)
+  assertTranslationFidelity('SimPLe', 'SimPLe', {kind: 'heading'})
+})
+
+
+test('verb to model accepts 建模 while model nouns and advantages remain required', () => {
+  assertTranslationFidelity('They can model long sequences. Their models have advantages.', '它们可以对长序列建模。它们的模型具有优势。')
+  assertTranslationFidelity('Besides their ability to model long sequences, transformers have other advantages.', '除了对长序列建模的能力，Transformer 还有其他优势。')
+  assert.throws(() => assertTranslationFidelity('Besides their ability to model long sequences, transformers have other advantages.', 'Transformer 还有其他优势。'), /Core concepts omitted/)
+  assert.throws(() => assertTranslationFidelity('These models have advantages.', '建模具有优势。'), /Core concepts omitted/)
+})
+
+
+test('prose cannot acquire source compiler commands and ECO opening identities remain fixed', () => {
+  assert.throws(() => parseUnitResponse(JSON.stringify({translations:{u:'新游戏 \\newgame'}}), [{id:'u',text:'A10: English Opening'}]), /LaTeX command/)
+  assertTranslationFidelity('A10: English Opening', 'A10：英国开局')
+  assert.throws(() => assertTranslationFidelity('A10: English Opening', 'D06：英国开局'), /identifier/)
+  assert.ok(isTechnicalLabelOnly('Bellemare et al. (2016)'))
+  assert.equal(isTechnicalLabelOnly('This method performs well (2016)'), false)
+  assert.ok(isTechnicalLabelOnly('Atari'))
+  assert.ok(isTechnicalLabelOnly('Decision Transformer'))
+})
+
+
+test('short descriptive fragments cannot be replaced with unrelated English labels', () => {
+  assert.throws(() => parseUnitResponse('{"translations":{"u":"Adam"}}', [{id:'u',text:'Learning rate'}]), /Untranslated English fragment/)
+  assert.deepEqual(parseUnitResponse('{"translations":{"u":"学习率"}}', [{id:'u',text:'Learning rate'}]), [{id:'u',text:'学习率'}])
+  assert.deepEqual(parseUnitResponse('{"translations":{"u":"CartPole"}}', [{id:'u',text:'Cartpole'}]), [{id:'u',text:'CartPole'}])
+})
+
+
+test('fragment validation rejects extreme omission and copied neighboring sentences', () => {
+  const source = 'We compare the policies of the agents and explain why learning from their observations can recover the information needed for training complex communication behaviour in simulation.'
+  assert.throws(() => parseUnitResponse('{"translations":{"u":"章节"}}', [{id:'u',text:source}]), /severely shortened/)
+  assert.throws(() => parseUnitResponse(JSON.stringify({translations:{u:'相邻的模型性能描述。'.repeat(20)}}), [{id:'u',text:'using the standard constant'}]), /context expanded/)
+  assert.throws(() => parseUnitResponse(JSON.stringify({translations:{u:'强化比较。}} -> 修正为：{'}}), [{id:'u',text:'Reinforcement comparison.'}]), /instruction leaked/)
+})
+
+
+test('numbered agent followed by modal may retains its ID without inventing a May date', () => {
+  assertTranslationFidelity('Then agent 1 may store additional information.', '随后智能体1可以存储额外信息。')
+  assert.throws(() => assertTranslationFidelity('Then agent 1 may store additional information.', '随后智能体2可以存储额外信息。'), /Numeric value/)
+  assertTranslationFidelity('We met on 1 May.', '我们在5月1日见面。')
+  assert.throws(() => assertTranslationFidelity('We met on 1 May.', '我们在5月2日见面。'), /Calendar date/)
+})
+
+
+test('RL algorithm and benchmark labels retain their identities in short fragments', () => {
+  assert.throws(() => parseUnitResponse('{"translations":{"u":"IMPALA"}}', [{id:'u',text:'Rainbow'}]), /label changed/)
+  assert.deepEqual(parseUnitResponse('{"translations":{"u":"MuJoCo"}}', [{id:'u',text:'MuJoCo',kind:'heading'}]), [{id:'u',text:'MuJoCo'}])
+  assert.equal(isTechnicalLabelOnly('2 DreamerV2'), true)
+  assert.equal(isTechnicalLabelOnly('2 Learning the model'), false)
+})
+
+test('adjacent citation years remain separate after full-width comma normalization', () => {
+  assertTranslationFidelity('in expected value (Williams, 1988, 1992).', '在期望值中（Williams，1988，1992）。')
+  assert.throws(() => assertTranslationFidelity('(Williams, 1988, 1992)', '（Williams，1989，1992）'), /Numeric value/)
+  assertTranslationFidelity('A score of 1,234,567.', '得分为1,234,567。')
+  assert.throws(() => assertTranslationFidelity('A score of 1,234,567.', '得分为1,234,568。'), /Numeric value/)
+})
+
+
+test('RL fragment terminology distinguishes expectiles, off-policy, offline and non-expansion', () => {
+  const check = (text, zh) => parseUnitResponse(JSON.stringify({translations:{u:zh}}), [{id:'u',text}])
+  assert.throws(() => check('expectile regression objective', '分位数回归目标'), /Expectile confused/)
+  assert.doesNotThrow(() => check('expectile regression objective', '期望分位数（expectile）回归目标'))
+  assert.throws(() => check('off-policy methods', '离线方法'), /Off-policy confused/)
+  assert.doesNotThrow(() => check('off-policy methods', '离策略方法'))
+  assert.throws(() => check('offline learning', '离策略学习'), /Offline learning/)
+  assert.throws(() => check('not a non-expansion', '不是压缩映射'), /Non-expansion confused/)
+  assert.doesNotThrow(() => check('not a non-expansion', '不是非扩张映射'))
+})

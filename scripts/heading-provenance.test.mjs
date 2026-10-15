@@ -23,3 +23,11 @@ test('an intentionally preserved benchmark needs a current source-and-target-bou
   review.chineseBlockSha256 = sha256('stale translation')
   assert.throws(() => assertChineseHeadingCompleteness(paper), /verified label review/)
 })
+
+test('appendix numbering is separate from exact RL algorithm and benchmark labels', () => {
+  const paper = fixture('<span class="ltx_tag">A.2.1 </span>Decision Transformer')
+  assert.doesNotThrow(() => assertChineseHeadingCompleteness(paper))
+  paper.blocks[0].zh = '<h3><span class="ltx_tag">A.2.1 </span>Rainbow</h3>'
+  assert.throws(() => assertChineseHeadingCompleteness(paper), /changes an RL label/)
+  assert.throws(() => assertChineseHeadingCompleteness(fixture('<span class="ltx_tag">A.2 </span>Learning from data')), /Untranslated heading/)
+})

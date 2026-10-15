@@ -1,11 +1,11 @@
 {
   "title": "Q-learning",
   "expectedPdfSha256": "3f1938a6001991f3171e13a93196fc8fc27978f18c87445321bb25058f35776f",
-  "sourceBlocksSha256": "2e00c0eae4587188dde8b04038fb99611e548be3a8fa379c2f3917aad2e80d86",
-  "reviewSha256": "a4e83e1da35cdc499ad00b0cdbfb3c17937a61d1a8a452ac1b745551e0c7d900",
+  "sourceBlocksSha256": "e96306047d4ab14bd4a42b8f37e77ff632b851bdce1f210b7f8d76fa6fa4569c",
+  "reviewSha256": "420f52b8f45b8bcaed40a50c9dc9715297a14e0fd114202bc53a935ab52c0b8c",
   "ocr": {
     "scope": "full-pages",
-    "method": "scanned PDF text-layer extraction; full-page gpt-6 transcription correction; independent gpt-6-luna review and crop rechecks",
+    "method": "scanned PDF text-layer extraction; initial full-page gpt-6 transcription correction; gpt-6-luna inline-mathematics correction, full-page visual verification and crop rechecks",
     "primaryModel": "gpt-6",
     "parameters": {
       "reasoning_effort": "not exposed in session"
@@ -35,7 +35,20 @@
     "originalReviewedBlocksSha256": "a83b86a17c9d664258a98dafe595614ce642c2927c8f0b0ad67025ec5dd55302",
     "correctionNotesSha256": "5dba9367948faf2434f69cbeedcc417e25f6ff0d5d177ebdb8fbc252cf7bd25e",
     "priorFullPageReviewSha256": "45ee3eab2c4de48a3a084a4623134d6b80cb5ce50ef6c0a180e96858e9fa9464",
-    "normalization": "Extracts each reviewed body element by its verified source id; omits the three empty running-header markers; title shown once by document h1."
+    "normalization": "Extracts each reviewed body element by its verified source id; omits the three empty running-header markers; title shown once by document h1.",
+    "inlineCorrectionModels": [
+      {
+        "model": "gpt-6-luna",
+        "provider": "Codex subagent",
+        "parameters": {
+          "reasoning_effort": "low"
+        },
+        "humanReviewed": false,
+        "reportSha256": "2d3596571752075dc71a3e91ab4e35a86db7d6017f70cbd93431511f51cab2ba",
+        "changedBlocks": 78
+      }
+    ],
+    "inlineReviewedBlocksSha256": "e96306047d4ab14bd4a42b8f37e77ff632b851bdce1f210b7f8d76fa6fa4569c"
   },
   "imageReceipts": {
     "assets/formula-p04-01.png": {
@@ -362,5 +375,8 @@
       "resolution": 200,
       "filename": "formula-p13-04.png"
     }
-  }
+  },
+  "sourceNotes": [
+    "Subsequent real GPT-6 Luna review compared all 14 source pages, corrected 78 blocks of inline OCR notation, and restored structured indices, exponents, primes and bars. The source and retained formula crops remain the same fixed PDF. No human or character-level guarantee is claimed."
+  ]
 }
