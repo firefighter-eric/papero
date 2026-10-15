@@ -1,0 +1,699 @@
+{
+  "title": "Maximum Entropy Inverse Reinforcement Learning",
+  "expectedPdfSha256": "60e021415c811952d3a6a41e1cd9507983f7a54e9d9b74aaad6f24b41e3b45e3",
+  "mathMode": "original-pdf-vectors",
+  "mathFontPattern": "(?:CMMI|CMSY|CMEX|CMR|MSAM|MSBM)\\d+$",
+  "explicitHeaderRegions": true,
+  "requireMathFontForDisplay": true,
+  "geometricSuperscripts": true,
+  "mathGlyphPattern": "ˆ",
+  "indentParagraphs": true,
+  "anchorTargets": {},
+  "pages": [
+    {
+      "page": 1,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            120
+          ],
+          "reason": "Conference running line and title retained by metadata"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            50,
+            120,
+            565,
+            200
+          ],
+          "headings": false
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            50,
+            200,
+            306,
+            714
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            310,
+            200,
+            565,
+            714
+          ]
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            714,
+            612,
+            792
+          ],
+          "reason": "Page number"
+        }
+      ]
+    },
+    {
+      "page": 2,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            45
+          ],
+          "reason": "Page margin"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            50,
+            45,
+            306,
+            714
+          ]
+        },
+        {
+          "kind": "figure",
+          "number": 1,
+          "bounds": [
+            313,
+            45,
+            565,
+            220
+          ],
+          "caption": [
+            310,
+            220,
+            565,
+            268
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            310,
+            268,
+            565,
+            714
+          ]
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            714,
+            612,
+            792
+          ],
+          "reason": "Page number"
+        }
+      ]
+    },
+    {
+      "page": 3,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            45
+          ],
+          "reason": "Page margin"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            50,
+            45,
+            306,
+            714
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            310,
+            45,
+            565,
+            282
+          ]
+        },
+        {
+          "kind": "algorithm",
+          "caption": [
+            310,
+            282,
+            565,
+            305
+          ],
+          "bounds": [
+            310,
+            305,
+            565,
+            575
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            310,
+            575,
+            565,
+            714
+          ]
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            714,
+            612,
+            792
+          ],
+          "reason": "Page number"
+        }
+      ]
+    },
+    {
+      "page": 4,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            45
+          ],
+          "reason": "Page margin"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            50,
+            45,
+            306,
+            714
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            310,
+            45,
+            565,
+            470
+          ]
+        },
+        {
+          "kind": "figure",
+          "number": 2,
+          "bounds": [
+            313,
+            470,
+            565,
+            540
+          ],
+          "caption": [
+            310,
+            540,
+            565,
+            570
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            310,
+            570,
+            565,
+            714
+          ]
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            714,
+            612,
+            792
+          ],
+          "reason": "Page number"
+        }
+      ]
+    },
+    {
+      "page": 5,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            45
+          ],
+          "reason": "Page margin"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            50,
+            45,
+            306,
+            344
+          ]
+        },
+        {
+          "kind": "table",
+          "number": 1,
+          "rows": [
+            [
+              {
+                "bounds": [
+                  50,
+                  344,
+                  126,
+                  359
+                ],
+                "header": true
+              },
+              {
+                "bounds": [
+                  126,
+                  344,
+                  188,
+                  359
+                ],
+                "header": true
+              },
+              {
+                "bounds": [
+                  188,
+                  344,
+                  249,
+                  359
+                ],
+                "header": true
+              },
+              {
+                "bounds": [
+                  249,
+                  344,
+                  298,
+                  359
+                ],
+                "header": true
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  50,
+                  359,
+                  126,
+                  370.5
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  126,
+                  359,
+                  188,
+                  370.5
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  188,
+                  359,
+                  249,
+                  370.5
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  249,
+                  359,
+                  298,
+                  370.5
+                ],
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  50,
+                  370.5,
+                  126,
+                  382
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  126,
+                  370.5,
+                  188,
+                  382
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  188,
+                  370.5,
+                  249,
+                  382
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  249,
+                  370.5,
+                  298,
+                  382
+                ],
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  50,
+                  382,
+                  126,
+                  393.3
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  126,
+                  382,
+                  188,
+                  393.3
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  188,
+                  382,
+                  249,
+                  393.3
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  249,
+                  382,
+                  298,
+                  393.3
+                ],
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  50,
+                  393.3,
+                  126,
+                  404.7
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  126,
+                  393.3,
+                  188,
+                  404.7
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  188,
+                  393.3,
+                  249,
+                  404.7
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  249,
+                  393.3,
+                  298,
+                  404.7
+                ],
+                "header": false
+              }
+            ],
+            [
+              {
+                "bounds": [
+                  50,
+                  404.7,
+                  126,
+                  420
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  126,
+                  404.7,
+                  188,
+                  420
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  188,
+                  404.7,
+                  249,
+                  420
+                ],
+                "header": false
+              },
+              {
+                "bounds": [
+                  249,
+                  404.7,
+                  298,
+                  420
+                ],
+                "header": false
+              }
+            ]
+          ],
+          "caption": [
+            50,
+            427,
+            306,
+            487
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            50,
+            487,
+            306,
+            538
+          ]
+        },
+        {
+          "kind": "figure",
+          "number": 3,
+          "bounds": [
+            50,
+            538,
+            306,
+            634
+          ],
+          "caption": [
+            50,
+            634,
+            306,
+            670
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            50,
+            670,
+            306,
+            714
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            310,
+            45,
+            565,
+            410
+          ]
+        },
+        {
+          "kind": "figure",
+          "number": 4,
+          "bounds": [
+            313,
+            410,
+            565,
+            509
+          ],
+          "caption": [
+            310,
+            509,
+            565,
+            547
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            310,
+            547,
+            565,
+            714
+          ]
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            714,
+            612,
+            792
+          ],
+          "reason": "Page number"
+        }
+      ]
+    },
+    {
+      "page": 6,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            45
+          ],
+          "reason": "Page margin"
+        },
+        {
+          "kind": "figure",
+          "number": 5,
+          "bounds": [
+            50,
+            45,
+            306,
+            185
+          ],
+          "caption": [
+            50,
+            185,
+            306,
+            218
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            50,
+            218,
+            306,
+            714
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            310,
+            45,
+            565,
+            317
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            310,
+            317,
+            565,
+            714
+          ],
+          "references": true
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            714,
+            612,
+            792
+          ],
+          "reason": "Page number"
+        }
+      ]
+    }
+  ],
+  "review": {
+    "method": "machine-assisted page rendering and complete source character coverage",
+    "humanReviewed": false
+  },
+  "tableBaselineCoordinates": true,
+  "allowMathRasterFallback": true,
+  "headingTitles": [
+    "Introduction",
+    "Background",
+    "Maximum Entropy IRL",
+    "Deterministic Path Distributions",
+    "Non-Deterministic Path Distributions",
+    "Stochastic Policies",
+    "Learning from Demonstrated Behavior",
+    "Efficient State Frequency Calculations",
+    "Driver Route Modeling",
+    "Route Choices as an MDP",
+    "Collecting and Processing GPS Data",
+    "Path Features",
+    "Comparative Evaluation",
+    "Applications",
+    "Related Work",
+    "Conclusions and Future Work"
+  ],
+  "sourceNotes": [
+    "The original AAAI 2008 algorithm is preserved as published. The author separately notes an off-by-one correction in a later copy: https://www.cs.cmu.edu/~bziebart/publications/maximum-entropy-inverse-reinforcement-learning.html . This library version does not silently substitute that later corrected algorithm."
+  ]
+}

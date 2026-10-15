@@ -1,0 +1,33 @@
+{
+  "title": "Policy Gradient Methods for Reinforcement Learning with Function Approximation",
+  "expectedPdfSha256": "a7b400e47be17013611cc945455e03e4b973d52cca6bc487bcfe03fe64514a77",
+  "sourceBlocksSha256": "8b87456bbc3f910abf116f406a89b14bb6fa5783646b0ab1e62744a4b95924e3",
+  "reviewSha256": "1e8cf0138c126ab12af45440d510061e3221872fcc1373d5edae8f3a78be47f4",
+  "ocr": {
+    "scope": "full-pages",
+    "method": "scanned-text extraction followed by full-page machine transcription correction and independent Luna formula verification",
+    "primaryModel": "gpt-6",
+    "parameters": {
+      "reasoning_effort": "not exposed in session"
+    },
+    "reviewerModel": "gpt-6-luna",
+    "reviewerParameters": {
+      "reasoning_effort": "low"
+    },
+    "reviewedPdfPages": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "humanReviewed": false,
+    "correctionNotesSha256": "02a38b16ffff446a4c7247d5db38b0b522c7c8f8750fdadabf8277299a25cb06",
+    "priorFullPageReviewSha256": "0c19caa975369449c9751bfab7c2fd5450deb2af48fa2c9653cbfe7e48cc08cd"
+  },
+  "sourceNotes": [
+    "Printed paper is the original seven-page NIPS 1999 proceedings scan (1057–1063). MathML was checked and repaired against the source pages; a second independent targeted pass verified all nine initially flagged formula scope/index errors."
+  ]
+}

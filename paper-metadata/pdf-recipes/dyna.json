@@ -1,0 +1,89 @@
+{
+  "title": "Dyna, an integrated architecture for learning, planning, and reacting",
+  "expectedPdfSha256": "da83b37a7df06a105b338ed91b872c00f1596625b479de24dc4e7a54c2da7629",
+  "sourceBlocksSha256": "623f609fa2a1980cb3d995400935e9c0cd8f76af0d541f85903f8bcca9d7b17f",
+  "reviewSha256": "966e6191f0de83f43bb0162910dd1337f87a911f2e8350f3686b7856d7edde52",
+  "ocr": {
+    "scope": "full-pages",
+    "method": "Qwen3.6-35B-A3B vision OCR followed by independent gpt-6-luna review and correction",
+    "primaryModel": "qwen3.6-35b-a3b",
+    "primaryModelIdentity": {
+      "type": "llm",
+      "publisher": "mlx-community",
+      "key": "qwen3.6-35b-a3b",
+      "display_name": "Qwen3.6 35B A3B",
+      "architecture": "qwen3_5_moe",
+      "quantization": {
+        "name": "4bit",
+        "bits_per_weight": 4
+      },
+      "size_bytes": 20429166969,
+      "params_string": "35B",
+      "loaded_instances": [
+        {
+          "id": "qwen3.6-35b-a3b",
+          "config": {
+            "context_length": 16384,
+            "parallel": 4
+          }
+        }
+      ],
+      "max_context_length": 262144,
+      "format": "mlx",
+      "capabilities": {
+        "vision": true,
+        "trained_for_tool_use": true
+      },
+      "description": null
+    },
+    "parameters": {
+      "temperature": 0,
+      "top_p": 0.9,
+      "max_tokens": 7000,
+      "seed": 42,
+      "reasoning_effort": "none",
+      "stream": false
+    },
+    "reviewerModel": "gpt-6-luna",
+    "reviewerParameters": {
+      "reasoning_effort": "low"
+    },
+    "reviewedPdfPages": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "humanReviewed": false,
+    "responseFingerprints": {
+      "response-1.json": "6b98566a5c208717aa100ebb5c53cec9a32ee3bca85398ece3fe05e3e7a26105",
+      "response-2.json": "85b5d1884a9bf8ab6b1dd6e009ceecd8b5b190c0cd21e816ed2ed327d758f2a0",
+      "response-3.json": "9161c96ffc4d293f698e2e22b5af03fe336789f9a039e8a74c72c18083b6012a",
+      "response-4.json": "7b9b5c20be97395f458ab0938fd618894f8ebb81e634113b4642c964c3319746"
+    }
+  },
+  "assetOverrides": {
+    "placeholder_figure_1.png": {
+      "pdfPage": 1,
+      "pdfBounds": [
+        345,
+        140,
+        530,
+        211
+      ],
+      "filename": "figure-1.png",
+      "resolution": 240
+    },
+    "placeholder.png": {
+      "pdfPage": 3,
+      "pdfBounds": [
+        48,
+        33,
+        300,
+        215
+      ],
+      "filename": "figure-3.png",
+      "resolution": 240
+    }
+  }
+}

@@ -1,0 +1,1371 @@
+{
+  "title": "Learning to predict by the methods of temporal differences",
+  "expectedPdfSha256": "42d1430f27bd834c599a8f655bea50f199c9e67ecc74c92033de0ad849ab0ae4",
+  "mathMode": "original-pdf-vectors",
+  "mathFontPattern": "(?:CMMI|CMSY|CMEX|MSAM|MSBM)\\d+$",
+  "explicitHeaderRegions": true,
+  "requireMathFontForDisplay": true,
+  "geometricSuperscripts": true,
+  "mathGlyphPattern": "ˆ",
+  "indentParagraphs": true,
+  "anchorTargets": {},
+  "pages": [
+    {
+      "page": 1,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            213
+          ],
+          "reason": "Publisher header and document title retained by metadata"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            126,
+            213,
+            480,
+            676
+          ]
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            676,
+            612,
+            792
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 2,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            120
+          ],
+          "reason": "Repeated running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            126,
+            120,
+            480,
+            676
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            676,
+            612,
+            792
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 3,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            120
+          ],
+          "reason": "Repeated running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            126,
+            120,
+            480,
+            676
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            676,
+            612,
+            792
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 4,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            120
+          ],
+          "reason": "Repeated running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            126,
+            120,
+            480,
+            676
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            676,
+            612,
+            792
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 5,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            120
+          ],
+          "reason": "Repeated running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            126,
+            120,
+            480,
+            676
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            676,
+            612,
+            792
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 6,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            120
+          ],
+          "reason": "Repeated running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            126,
+            120,
+            480,
+            676
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            676,
+            612,
+            792
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 7,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            120
+          ],
+          "reason": "Repeated running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            126,
+            120,
+            480,
+            676
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            676,
+            612,
+            792
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 8,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            120
+          ],
+          "reason": "Repeated running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            126,
+            120,
+            480,
+            676
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            676,
+            612,
+            792
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 9,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            120
+          ],
+          "reason": "Repeated running header"
+        },
+        {
+          "kind": "figure",
+          "number": 1,
+          "bounds": [
+            130,
+            120,
+            478,
+            319
+          ],
+          "caption": [
+            126,
+            319,
+            480,
+            370
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            126,
+            370,
+            480,
+            676
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            676,
+            612,
+            792
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 10,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            120
+          ],
+          "reason": "Repeated running header"
+        },
+        {
+          "kind": "figure",
+          "number": 2,
+          "bounds": [
+            130,
+            143,
+            478,
+            218
+          ],
+          "caption": [
+            126,
+            218,
+            480,
+            281
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            126,
+            281,
+            480,
+            676
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            676,
+            612,
+            792
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 11,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            120
+          ],
+          "reason": "Repeated running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            126,
+            120,
+            480,
+            676
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            676,
+            612,
+            792
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 12,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            120
+          ],
+          "reason": "Repeated running header"
+        },
+        {
+          "kind": "figure",
+          "number": 3,
+          "bounds": [
+            130,
+            116,
+            478,
+            322
+          ],
+          "caption": [
+            126,
+            322,
+            480,
+            388
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            126,
+            388,
+            480,
+            676
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            676,
+            612,
+            792
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 13,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            120
+          ],
+          "reason": "Repeated running header"
+        },
+        {
+          "kind": "figure",
+          "number": 4,
+          "bounds": [
+            130,
+            116,
+            478,
+            322
+          ],
+          "caption": [
+            126,
+            322,
+            480,
+            385
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            126,
+            385,
+            480,
+            676
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            676,
+            612,
+            792
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 14,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            120
+          ],
+          "reason": "Repeated running header"
+        },
+        {
+          "kind": "figure",
+          "number": 5,
+          "bounds": [
+            130,
+            116,
+            478,
+            312
+          ],
+          "caption": [
+            126,
+            312,
+            480,
+            370
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            126,
+            370,
+            480,
+            676
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            676,
+            612,
+            792
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 15,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            120
+          ],
+          "reason": "Repeated running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            126,
+            120,
+            480,
+            676
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            676,
+            612,
+            792
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 16,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            120
+          ],
+          "reason": "Repeated running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            126,
+            120,
+            480,
+            676
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            676,
+            612,
+            792
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 17,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            120
+          ],
+          "reason": "Repeated running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            126,
+            120,
+            480,
+            676
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            676,
+            612,
+            792
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 18,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            120
+          ],
+          "reason": "Repeated running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            126,
+            120,
+            480,
+            676
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            676,
+            612,
+            792
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 19,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            120
+          ],
+          "reason": "Repeated running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            126,
+            120,
+            480,
+            676
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            676,
+            612,
+            792
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 20,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            120
+          ],
+          "reason": "Repeated running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            126,
+            120,
+            480,
+            676
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            676,
+            612,
+            792
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 21,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            120
+          ],
+          "reason": "Repeated running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            126,
+            120,
+            480,
+            676
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            676,
+            612,
+            792
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 22,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            120
+          ],
+          "reason": "Repeated running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            126,
+            120,
+            480,
+            676
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            676,
+            612,
+            792
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 23,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            120
+          ],
+          "reason": "Repeated running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            126,
+            120,
+            480,
+            676
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            676,
+            612,
+            792
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 24,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            120
+          ],
+          "reason": "Repeated running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            126,
+            120,
+            480,
+            676
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            676,
+            612,
+            792
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 25,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            120
+          ],
+          "reason": "Repeated running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            126,
+            120,
+            480,
+            676
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            676,
+            612,
+            792
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 26,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            120
+          ],
+          "reason": "Repeated running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            126,
+            120,
+            480,
+            676
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            676,
+            612,
+            792
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 27,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            120
+          ],
+          "reason": "Repeated running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            126,
+            120,
+            480,
+            676
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            676,
+            612,
+            792
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 28,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            120
+          ],
+          "reason": "Repeated running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            126,
+            120,
+            480,
+            676
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            676,
+            612,
+            792
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 29,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            120
+          ],
+          "reason": "Repeated running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            126,
+            120,
+            480,
+            676
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            676,
+            612,
+            792
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 30,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            120
+          ],
+          "reason": "Repeated running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            126,
+            120,
+            480,
+            676
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            676,
+            612,
+            792
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 31,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            120
+          ],
+          "reason": "Repeated running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            126,
+            120,
+            480,
+            676
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            676,
+            612,
+            792
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 32,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            120
+          ],
+          "reason": "Repeated running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            126,
+            120,
+            480,
+            676
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            676,
+            612,
+            792
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 33,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            120
+          ],
+          "reason": "Repeated running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            126,
+            120,
+            480,
+            676
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            676,
+            612,
+            792
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 34,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            120
+          ],
+          "reason": "Repeated running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            126,
+            120,
+            480,
+            676
+          ],
+          "references": true
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            676,
+            612,
+            792
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 35,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            120
+          ],
+          "reason": "Repeated running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            126,
+            120,
+            480,
+            676
+          ],
+          "references": true
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            676,
+            612,
+            792
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 36,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            120
+          ],
+          "reason": "Repeated running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            126,
+            120,
+            480,
+            676
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            676,
+            612,
+            792
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    }
+  ],
+  "review": {
+    "method": "machine-assisted page rendering and complete source character coverage",
+    "humanReviewed": false
+  },
+  "expandMathRuns": true,
+  "allowMathRasterFallback": true,
+  "headingTitles": [
+    "1. Introduction",
+    "Appendix: Accessory Theorems"
+  ],
+  "sourceCopy": {
+    "kind": "author-digitally-remastered-copy",
+    "dated": "2014-07-09",
+    "note": "Same 1988 article; author discloses minor typesetting and wording differences, remade figures, and restored Figure 3. Original published scan and appended erratum retained in private provenance."
+  },
+  "sourceNotes": [
+    "Official author copy dated 2014-07-09 digitally remasters the 1988 publication, explicitly discloses minor wording/typesetting differences and remade figures, and restores the missing Figure 3. Original published scan plus erratum is retained separately, SHA-256 c77b59bfd9bff8dbbc7ae5b35c1b9725a4cb1f930d18ebb3165cc7c3e4e4bbe8."
+  ]
+}

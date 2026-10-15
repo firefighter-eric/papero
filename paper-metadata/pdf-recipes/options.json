@@ -1,0 +1,1301 @@
+{
+  "title": "Between MDPs and semi-MDPs: A framework for temporal abstraction in reinforcement learning",
+  "expectedPdfSha256": "124fbfc2a35d22a08d80abf3298d6c24ed87bc972e5cdd8847f0342740bd3485",
+  "mathMode": "original-pdf-vectors",
+  "mathFontPattern": "(?:MTMI|MTSYN|MTSY|MTEX|CMMI|CMSY|CMEX|MSAM|EUFM|wasy)",
+  "explicitHeaderRegions": true,
+  "requireMathFontForDisplay": true,
+  "geometricSuperscripts": true,
+  "mathGlyphPattern": "ˆ",
+  "indentParagraphs": true,
+  "anchorTargets": {},
+  "pages": [
+    {
+      "page": 1,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            595,
+            315
+          ],
+          "reason": "Publisher logos and title retained by document metadata"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            110,
+            315,
+            485,
+            730
+          ],
+          "headings": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            730,
+            595,
+            841
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 2,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            595,
+            150
+          ],
+          "reason": "Repeated journal running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            110,
+            150,
+            485,
+            730
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            730,
+            595,
+            841
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 3,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            595,
+            150
+          ],
+          "reason": "Repeated journal running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            110,
+            150,
+            485,
+            730
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            730,
+            595,
+            841
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 4,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            595,
+            150
+          ],
+          "reason": "Repeated journal running header"
+        },
+        {
+          "kind": "figure",
+          "number": 1,
+          "bounds": [
+            190,
+            150,
+            402,
+            296
+          ],
+          "caption": [
+            110,
+            296,
+            485,
+            326
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            110,
+            326,
+            485,
+            730
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            730,
+            595,
+            841
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 5,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            595,
+            150
+          ],
+          "reason": "Repeated journal running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            110,
+            150,
+            485,
+            730
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            730,
+            595,
+            841
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 6,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            595,
+            150
+          ],
+          "reason": "Repeated journal running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            110,
+            150,
+            485,
+            730
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            730,
+            595,
+            841
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 7,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            595,
+            150
+          ],
+          "reason": "Repeated journal running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            110,
+            150,
+            485,
+            730
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            730,
+            595,
+            841
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 8,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            595,
+            150
+          ],
+          "reason": "Repeated journal running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            110,
+            150,
+            485,
+            730
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            730,
+            595,
+            841
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 9,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            595,
+            150
+          ],
+          "reason": "Repeated journal running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            110,
+            150,
+            485,
+            730
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            730,
+            595,
+            841
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 10,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            595,
+            150
+          ],
+          "reason": "Repeated journal running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            110,
+            150,
+            485,
+            730
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            730,
+            595,
+            841
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 11,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            595,
+            150
+          ],
+          "reason": "Repeated journal running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            110,
+            150,
+            485,
+            730
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            730,
+            595,
+            841
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 12,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            595,
+            150
+          ],
+          "reason": "Repeated journal running header"
+        },
+        {
+          "kind": "figure",
+          "number": 2,
+          "bounds": [
+            155,
+            150,
+            438,
+            314
+          ],
+          "caption": [
+            110,
+            314,
+            485,
+            352
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            110,
+            352,
+            485,
+            730
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            730,
+            595,
+            841
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 13,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            595,
+            150
+          ],
+          "reason": "Repeated journal running header"
+        },
+        {
+          "kind": "figure",
+          "number": 3,
+          "bounds": [
+            220,
+            150,
+            373,
+            261
+          ],
+          "caption": [
+            110,
+            261,
+            485,
+            284
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            110,
+            284,
+            485,
+            287
+          ],
+          "references": false
+        },
+        {
+          "kind": "figure",
+          "number": 4,
+          "bounds": [
+            136,
+            287,
+            457,
+            488
+          ],
+          "caption": [
+            110,
+            488,
+            485,
+            548
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            110,
+            548,
+            485,
+            730
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            730,
+            595,
+            841
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 14,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            595,
+            150
+          ],
+          "reason": "Repeated journal running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            110,
+            150,
+            485,
+            462
+          ],
+          "references": false
+        },
+        {
+          "kind": "figure",
+          "number": 5,
+          "bounds": [
+            135,
+            462,
+            457,
+            658
+          ],
+          "caption": [
+            110,
+            658,
+            485,
+            698
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            110,
+            698,
+            485,
+            730
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            730,
+            595,
+            841
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 15,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            595,
+            150
+          ],
+          "reason": "Repeated journal running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            110,
+            150,
+            485,
+            730
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            730,
+            595,
+            841
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 16,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            595,
+            150
+          ],
+          "reason": "Repeated journal running header"
+        },
+        {
+          "kind": "figure",
+          "number": 6,
+          "bounds": [
+            110,
+            150,
+            482,
+            292
+          ],
+          "caption": [
+            110,
+            292,
+            485,
+            347
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            110,
+            347,
+            485,
+            730
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            730,
+            595,
+            841
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 17,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            595,
+            150
+          ],
+          "reason": "Repeated journal running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            110,
+            150,
+            485,
+            730
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            730,
+            595,
+            841
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 18,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            595,
+            150
+          ],
+          "reason": "Repeated journal running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            110,
+            150,
+            485,
+            730
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            730,
+            595,
+            841
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 19,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            595,
+            150
+          ],
+          "reason": "Repeated journal running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            110,
+            150,
+            485,
+            730
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            730,
+            595,
+            841
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 20,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            595,
+            150
+          ],
+          "reason": "Repeated journal running header"
+        },
+        {
+          "kind": "figure",
+          "number": 7,
+          "bounds": [
+            110,
+            150,
+            482,
+            496
+          ],
+          "caption": [
+            110,
+            496,
+            485,
+            572
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            110,
+            572,
+            485,
+            730
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            730,
+            595,
+            841
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 21,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            595,
+            150
+          ],
+          "reason": "Repeated journal running header"
+        },
+        {
+          "kind": "figure",
+          "number": 8,
+          "bounds": [
+            197,
+            150,
+            395,
+            312
+          ],
+          "caption": [
+            110,
+            312,
+            485,
+            375
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            110,
+            375,
+            485,
+            730
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            730,
+            595,
+            841
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 22,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            595,
+            150
+          ],
+          "reason": "Repeated journal running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            110,
+            150,
+            485,
+            730
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            730,
+            595,
+            841
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 23,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            595,
+            150
+          ],
+          "reason": "Repeated journal running header"
+        },
+        {
+          "kind": "figure",
+          "number": 9,
+          "bounds": [
+            110,
+            150,
+            482,
+            300
+          ],
+          "caption": [
+            110,
+            300,
+            485,
+            348
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            110,
+            348,
+            485,
+            730
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            730,
+            595,
+            841
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 24,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            595,
+            150
+          ],
+          "reason": "Repeated journal running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            110,
+            150,
+            485,
+            730
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            730,
+            595,
+            841
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 25,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            595,
+            150
+          ],
+          "reason": "Repeated journal running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            110,
+            150,
+            485,
+            730
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            730,
+            595,
+            841
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 26,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            595,
+            150
+          ],
+          "reason": "Repeated journal running header"
+        },
+        {
+          "kind": "figure",
+          "number": 10,
+          "bounds": [
+            121,
+            150,
+            471,
+            297
+          ],
+          "caption": [
+            110,
+            297,
+            485,
+            348
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            110,
+            348,
+            485,
+            730
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            730,
+            595,
+            841
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 27,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            595,
+            150
+          ],
+          "reason": "Repeated journal running header"
+        },
+        {
+          "kind": "figure",
+          "number": 11,
+          "bounds": [
+            110,
+            150,
+            482,
+            295
+          ],
+          "caption": [
+            110,
+            295,
+            485,
+            349
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            110,
+            349,
+            485,
+            730
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            730,
+            595,
+            841
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 28,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            595,
+            150
+          ],
+          "reason": "Repeated journal running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            110,
+            150,
+            485,
+            730
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            730,
+            595,
+            841
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 29,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            595,
+            150
+          ],
+          "reason": "Repeated journal running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            110,
+            150,
+            485,
+            730
+          ],
+          "references": true
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            730,
+            595,
+            841
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 30,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            595,
+            150
+          ],
+          "reason": "Repeated journal running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            110,
+            150,
+            485,
+            730
+          ],
+          "references": true
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            730,
+            595,
+            841
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 31,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            595,
+            150
+          ],
+          "reason": "Repeated journal running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            110,
+            150,
+            485,
+            730
+          ],
+          "references": true
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            730,
+            595,
+            841
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    }
+  ],
+  "review": {
+    "method": "machine-assisted page rendering and complete source character coverage",
+    "humanReviewed": false
+  },
+  "allowMathRasterFallback": true,
+  "expandMathRuns": true
+}

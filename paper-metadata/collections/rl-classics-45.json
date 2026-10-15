@@ -1,0 +1,772 @@
+{
+  "schemaVersion": 1,
+  "id": "rl-classics-45",
+  "title": "Classic reinforcement learning and related learning methods",
+  "paperCount": 45,
+  "sourceVerification": {
+    "arxivMetadataSnapshotSha256": "4ea3882e3ad8fff8ba53ecc9c284fbe7e1be4be020f3589259accdd56f39e457",
+    "method": "Pinned arXiv Atom metadata and original publisher or author sources; publication years follow the approved source versions"
+  },
+  "papers": [
+    {
+      "id": "td-learning",
+      "title": "Learning to predict by the methods of temporal differences",
+      "authors": [
+        "Richard S. Sutton"
+      ],
+      "year": 1988,
+      "version": "Machine Learning 3:9–44 (1988), DOI 10.1007/BF00115009",
+      "sourceUrl": "https://link.springer.com/article/10.1007/BF00115009",
+      "sourceKind": "official-paper",
+      "verifiedAt": "2026-10-15T17:53:55.695708+00:00",
+      "readingGroup": "基础与时间抽象"
+    },
+    {
+      "id": "q-learning",
+      "title": "Q-learning",
+      "authors": [
+        "Christopher J. C. H. Watkins",
+        "Peter Dayan"
+      ],
+      "year": 1992,
+      "version": "Machine Learning 8:279–292 (1992), DOI 10.1007/BF00992698",
+      "sourceUrl": "https://link.springer.com/article/10.1007/BF00992698",
+      "sourceKind": "official-paper",
+      "verifiedAt": "2026-10-15T17:53:55.695773+00:00",
+      "readingGroup": "基础与时间抽象"
+    },
+    {
+      "id": "reinforce",
+      "title": "Simple statistical gradient-following algorithms for connectionist reinforcement learning",
+      "authors": [
+        "Ronald J. Williams"
+      ],
+      "year": 1992,
+      "version": "Machine Learning 8:229–256 (1992), DOI 10.1007/BF00992696",
+      "sourceUrl": "https://link.springer.com/article/10.1007/BF00992696",
+      "sourceKind": "official-paper",
+      "verifiedAt": "2026-10-15T17:53:55.695777+00:00",
+      "readingGroup": "基础与时间抽象"
+    },
+    {
+      "id": "dyna",
+      "title": "Dyna, an integrated architecture for learning, planning, and reacting",
+      "authors": [
+        "Richard S. Sutton"
+      ],
+      "year": 1991,
+      "version": "SIGART Bulletin 2(4):160–163 (1991), DOI 10.1145/122344.122377",
+      "sourceUrl": "https://dl.acm.org/doi/10.1145/122344.122377",
+      "sourceKind": "official-paper",
+      "verifiedAt": "2026-10-15T17:53:55.695779+00:00",
+      "readingGroup": "基础与时间抽象"
+    },
+    {
+      "id": "policy-gradient-theorem",
+      "title": "Policy Gradient Methods for Reinforcement Learning with Function Approximation",
+      "authors": [
+        "Richard S. Sutton",
+        "David A. McAllester",
+        "Satinder P. Singh",
+        "Yishay Mansour"
+      ],
+      "year": 1999,
+      "version": "NeurIPS 12 / NIPS 1999 正式会议版",
+      "sourceUrl": "https://proceedings.neurips.cc/paper/1999/hash/464d828b85b0bed98e80ade0a5c43b0f-Abstract.html",
+      "sourceKind": "official-paper",
+      "verifiedAt": "2026-10-15T17:53:55.695782+00:00",
+      "readingGroup": "基础与时间抽象"
+    },
+    {
+      "id": "options",
+      "title": "Between MDPs and semi-MDPs: A framework for temporal abstraction in reinforcement learning",
+      "authors": [
+        "Richard S. Sutton",
+        "Doina Precup",
+        "Satinder Singh"
+      ],
+      "year": 1999,
+      "version": "Artificial Intelligence 112(1–2):181–211 (1999), DOI 10.1016/S0004-3702(99)00052-1",
+      "sourceUrl": "https://www.sciencedirect.com/science/article/pii/S0004370299000521",
+      "sourceKind": "official-paper",
+      "verifiedAt": "2026-10-15T17:53:55.695785+00:00",
+      "readingGroup": "基础与时间抽象"
+    },
+    {
+      "id": "double-dqn",
+      "title": "Deep Reinforcement Learning with Double Q-learning",
+      "authors": [
+        "Hado van Hasselt",
+        "Arthur Guez",
+        "David Silver"
+      ],
+      "year": 2015,
+      "version": "1509.06461v3",
+      "sourceUrl": "https://arxiv.org/abs/1509.06461v3",
+      "sourceKind": "arxiv",
+      "verifiedAt": "2026-10-15T17:53:55.695786+00:00",
+      "readingGroup": "价值学习与分布式回报"
+    },
+    {
+      "id": "dueling-dqn",
+      "title": "Dueling Network Architectures for Deep Reinforcement Learning",
+      "authors": [
+        "Ziyu Wang",
+        "Tom Schaul",
+        "Matteo Hessel",
+        "Hado van Hasselt",
+        "Marc Lanctot",
+        "Nando de Freitas"
+      ],
+      "year": 2015,
+      "version": "1511.06581v3",
+      "sourceUrl": "https://arxiv.org/abs/1511.06581v3",
+      "sourceKind": "arxiv",
+      "verifiedAt": "2026-10-15T17:53:55.695787+00:00",
+      "readingGroup": "价值学习与分布式回报"
+    },
+    {
+      "id": "prioritized-experience-replay",
+      "title": "Prioritized Experience Replay",
+      "authors": [
+        "Tom Schaul",
+        "John Quan",
+        "Ioannis Antonoglou",
+        "David Silver"
+      ],
+      "year": 2015,
+      "version": "1511.05952v4",
+      "sourceUrl": "https://arxiv.org/abs/1511.05952v4",
+      "sourceKind": "arxiv",
+      "verifiedAt": "2026-10-15T17:53:55.695788+00:00",
+      "readingGroup": "价值学习与分布式回报"
+    },
+    {
+      "id": "rainbow",
+      "title": "Rainbow: Combining Improvements in Deep Reinforcement Learning",
+      "authors": [
+        "Matteo Hessel",
+        "Joseph Modayil",
+        "Hado van Hasselt",
+        "Tom Schaul",
+        "Georg Ostrovski",
+        "Will Dabney",
+        "Dan Horgan",
+        "Bilal Piot",
+        "Mohammad Azar",
+        "David Silver"
+      ],
+      "year": 2017,
+      "version": "1710.02298v1",
+      "sourceUrl": "https://arxiv.org/abs/1710.02298v1",
+      "sourceKind": "arxiv",
+      "verifiedAt": "2026-10-15T17:53:55.695789+00:00",
+      "readingGroup": "价值学习与分布式回报"
+    },
+    {
+      "id": "c51",
+      "title": "A Distributional Perspective on Reinforcement Learning",
+      "authors": [
+        "Marc G. Bellemare",
+        "Will Dabney",
+        "Rémi Munos"
+      ],
+      "year": 2017,
+      "version": "1707.06887v1",
+      "sourceUrl": "https://arxiv.org/abs/1707.06887v1",
+      "sourceKind": "arxiv",
+      "verifiedAt": "2026-10-15T17:53:55.695789+00:00",
+      "readingGroup": "价值学习与分布式回报"
+    },
+    {
+      "id": "qr-dqn",
+      "title": "Distributional Reinforcement Learning with Quantile Regression",
+      "authors": [
+        "Will Dabney",
+        "Mark Rowland",
+        "Marc G. Bellemare",
+        "Rémi Munos"
+      ],
+      "year": 2017,
+      "version": "1710.10044v1",
+      "sourceUrl": "https://arxiv.org/abs/1710.10044v1",
+      "sourceKind": "arxiv",
+      "verifiedAt": "2026-10-15T17:53:55.695790+00:00",
+      "readingGroup": "价值学习与分布式回报"
+    },
+    {
+      "id": "iqn",
+      "title": "Implicit Quantile Networks for Distributional Reinforcement Learning",
+      "authors": [
+        "Will Dabney",
+        "Georg Ostrovski",
+        "David Silver",
+        "Rémi Munos"
+      ],
+      "year": 2018,
+      "version": "1806.06923v1",
+      "sourceUrl": "https://arxiv.org/abs/1806.06923v1",
+      "sourceKind": "arxiv",
+      "verifiedAt": "2026-10-15T17:53:55.695791+00:00",
+      "readingGroup": "价值学习与分布式回报"
+    },
+    {
+      "id": "deterministic-policy-gradient",
+      "title": "Deterministic Policy Gradient Algorithms",
+      "authors": [
+        "David Silver",
+        "Guy Lever",
+        "Nicolas Heess",
+        "Thomas Degris",
+        "Daan Wierstra",
+        "Martin Riedmiller"
+      ],
+      "year": 2014,
+      "version": "ICML 2014 / PMLR 32(1):387–395 正式会议版",
+      "sourceUrl": "https://proceedings.mlr.press/v32/silver14.html",
+      "sourceKind": "official-paper",
+      "verifiedAt": "2026-10-15T17:53:55.695793+00:00",
+      "readingGroup": "策略梯度与连续控制"
+    },
+    {
+      "id": "trpo",
+      "title": "Trust Region Policy Optimization",
+      "authors": [
+        "John Schulman",
+        "Sergey Levine",
+        "Philipp Moritz",
+        "Michael I. Jordan",
+        "Pieter Abbeel"
+      ],
+      "year": 2015,
+      "version": "1502.05477v5",
+      "sourceUrl": "https://arxiv.org/abs/1502.05477v5",
+      "sourceKind": "arxiv",
+      "verifiedAt": "2026-10-15T17:53:55.695794+00:00",
+      "readingGroup": "策略梯度与连续控制"
+    },
+    {
+      "id": "gae",
+      "title": "High-Dimensional Continuous Control Using Generalized Advantage Estimation",
+      "authors": [
+        "John Schulman",
+        "Philipp Moritz",
+        "Sergey Levine",
+        "Michael Jordan",
+        "Pieter Abbeel"
+      ],
+      "year": 2015,
+      "version": "1506.02438v6",
+      "sourceUrl": "https://arxiv.org/abs/1506.02438v6",
+      "sourceKind": "arxiv",
+      "verifiedAt": "2026-10-15T17:53:55.695794+00:00",
+      "readingGroup": "策略梯度与连续控制"
+    },
+    {
+      "id": "ppo",
+      "title": "Proximal Policy Optimization Algorithms",
+      "authors": [
+        "John Schulman",
+        "Filip Wolski",
+        "Prafulla Dhariwal",
+        "Alec Radford",
+        "Oleg Klimov"
+      ],
+      "year": 2017,
+      "version": "1707.06347v2",
+      "sourceUrl": "https://arxiv.org/abs/1707.06347v2",
+      "sourceKind": "arxiv",
+      "verifiedAt": "2026-10-15T17:53:55.695795+00:00",
+      "readingGroup": "策略梯度与连续控制"
+    },
+    {
+      "id": "a3c",
+      "title": "Asynchronous Methods for Deep Reinforcement Learning",
+      "authors": [
+        "Volodymyr Mnih",
+        "Adrià Puigdomènech Badia",
+        "Mehdi Mirza",
+        "Alex Graves",
+        "Timothy P. Lillicrap",
+        "Tim Harley",
+        "David Silver",
+        "Koray Kavukcuoglu"
+      ],
+      "year": 2016,
+      "version": "1602.01783v2",
+      "sourceUrl": "https://arxiv.org/abs/1602.01783v2",
+      "sourceKind": "arxiv",
+      "verifiedAt": "2026-10-15T17:53:55.695796+00:00",
+      "readingGroup": "策略梯度与连续控制"
+    },
+    {
+      "id": "ddpg",
+      "title": "Continuous control with deep reinforcement learning",
+      "authors": [
+        "Timothy P. Lillicrap",
+        "Jonathan J. Hunt",
+        "Alexander Pritzel",
+        "Nicolas Heess",
+        "Tom Erez",
+        "Yuval Tassa",
+        "David Silver",
+        "Daan Wierstra"
+      ],
+      "year": 2015,
+      "version": "1509.02971v6",
+      "sourceUrl": "https://arxiv.org/abs/1509.02971v6",
+      "sourceKind": "arxiv",
+      "verifiedAt": "2026-10-15T17:53:55.695797+00:00",
+      "readingGroup": "策略梯度与连续控制"
+    },
+    {
+      "id": "td3",
+      "title": "Addressing Function Approximation Error in Actor-Critic Methods",
+      "authors": [
+        "Scott Fujimoto",
+        "Herke van Hoof",
+        "David Meger"
+      ],
+      "year": 2018,
+      "version": "1802.09477v3",
+      "sourceUrl": "https://arxiv.org/abs/1802.09477v3",
+      "sourceKind": "arxiv",
+      "verifiedAt": "2026-10-15T17:53:55.695798+00:00",
+      "readingGroup": "策略梯度与连续控制"
+    },
+    {
+      "id": "sac",
+      "title": "Soft Actor-Critic: Off-Policy Maximum Entropy Deep Reinforcement Learning with a Stochastic Actor",
+      "authors": [
+        "Tuomas Haarnoja",
+        "Aurick Zhou",
+        "Pieter Abbeel",
+        "Sergey Levine"
+      ],
+      "year": 2018,
+      "version": "1801.01290v2",
+      "sourceUrl": "https://arxiv.org/abs/1801.01290v2",
+      "sourceKind": "arxiv",
+      "verifiedAt": "2026-10-15T17:53:55.695798+00:00",
+      "readingGroup": "策略梯度与连续控制"
+    },
+    {
+      "id": "alphazero",
+      "title": "Mastering Chess and Shogi by Self-Play with a General Reinforcement Learning Algorithm",
+      "authors": [
+        "David Silver",
+        "Thomas Hubert",
+        "Julian Schrittwieser",
+        "Ioannis Antonoglou",
+        "Matthew Lai",
+        "Arthur Guez",
+        "Marc Lanctot",
+        "Laurent Sifre",
+        "Dharshan Kumaran",
+        "Thore Graepel",
+        "Timothy Lillicrap",
+        "Karen Simonyan",
+        "Demis Hassabis"
+      ],
+      "year": 2017,
+      "version": "1712.01815v1",
+      "sourceUrl": "https://arxiv.org/abs/1712.01815v1",
+      "sourceKind": "arxiv",
+      "verifiedAt": "2026-10-15T17:53:55.695799+00:00",
+      "readingGroup": "世界模型与规划"
+    },
+    {
+      "id": "muzero",
+      "title": "Mastering Atari, Go, Chess and Shogi by Planning with a Learned Model",
+      "authors": [
+        "Julian Schrittwieser",
+        "Ioannis Antonoglou",
+        "Thomas Hubert",
+        "Karen Simonyan",
+        "Laurent Sifre",
+        "Simon Schmitt",
+        "Arthur Guez",
+        "Edward Lockhart",
+        "Demis Hassabis",
+        "Thore Graepel",
+        "Timothy Lillicrap",
+        "David Silver"
+      ],
+      "year": 2019,
+      "version": "1911.08265v2",
+      "sourceUrl": "https://arxiv.org/abs/1911.08265v2",
+      "sourceKind": "arxiv",
+      "verifiedAt": "2026-10-15T17:53:55.695800+00:00",
+      "readingGroup": "世界模型与规划"
+    },
+    {
+      "id": "world-models",
+      "title": "World Models",
+      "authors": [
+        "David Ha",
+        "Jürgen Schmidhuber"
+      ],
+      "year": 2018,
+      "version": "1803.10122v4",
+      "sourceUrl": "https://arxiv.org/abs/1803.10122v4",
+      "sourceKind": "arxiv",
+      "verifiedAt": "2026-10-15T17:53:55.695801+00:00",
+      "readingGroup": "世界模型与规划"
+    },
+    {
+      "id": "pets",
+      "title": "Deep Reinforcement Learning in a Handful of Trials using Probabilistic Dynamics Models",
+      "authors": [
+        "Kurtland Chua",
+        "Roberto Calandra",
+        "Rowan McAllister",
+        "Sergey Levine"
+      ],
+      "year": 2018,
+      "version": "1805.12114v2",
+      "sourceUrl": "https://arxiv.org/abs/1805.12114v2",
+      "sourceKind": "arxiv",
+      "verifiedAt": "2026-10-15T17:53:55.695801+00:00",
+      "readingGroup": "世界模型与规划"
+    },
+    {
+      "id": "mbpo",
+      "title": "When to Trust Your Model: Model-Based Policy Optimization",
+      "authors": [
+        "Michael Janner",
+        "Justin Fu",
+        "Marvin Zhang",
+        "Sergey Levine"
+      ],
+      "year": 2019,
+      "version": "1906.08253v3",
+      "sourceUrl": "https://arxiv.org/abs/1906.08253v3",
+      "sourceKind": "arxiv",
+      "verifiedAt": "2026-10-15T17:53:55.695802+00:00",
+      "readingGroup": "世界模型与规划"
+    },
+    {
+      "id": "dreamer",
+      "title": "Dream to Control: Learning Behaviors by Latent Imagination",
+      "authors": [
+        "Danijar Hafner",
+        "Timothy Lillicrap",
+        "Jimmy Ba",
+        "Mohammad Norouzi"
+      ],
+      "year": 2019,
+      "version": "1912.01603v3",
+      "sourceUrl": "https://arxiv.org/abs/1912.01603v3",
+      "sourceKind": "arxiv",
+      "verifiedAt": "2026-10-15T17:53:55.695803+00:00",
+      "readingGroup": "世界模型与规划"
+    },
+    {
+      "id": "dreamerv2",
+      "title": "Mastering Atari with Discrete World Models",
+      "authors": [
+        "Danijar Hafner",
+        "Timothy Lillicrap",
+        "Mohammad Norouzi",
+        "Jimmy Ba"
+      ],
+      "year": 2020,
+      "version": "2010.02193v4",
+      "sourceUrl": "https://arxiv.org/abs/2010.02193v4",
+      "sourceKind": "arxiv",
+      "verifiedAt": "2026-10-15T17:53:55.695804+00:00",
+      "readingGroup": "世界模型与规划"
+    },
+    {
+      "id": "dreamerv3",
+      "title": "Mastering Diverse Domains through World Models",
+      "authors": [
+        "Danijar Hafner",
+        "Jurgis Pasukonis",
+        "Jimmy Ba",
+        "Timothy Lillicrap"
+      ],
+      "year": 2023,
+      "version": "2301.04104v2",
+      "sourceUrl": "https://arxiv.org/abs/2301.04104v2",
+      "sourceKind": "arxiv",
+      "verifiedAt": "2026-10-15T17:53:55.695804+00:00",
+      "readingGroup": "世界模型与规划"
+    },
+    {
+      "id": "bcq",
+      "title": "Off-Policy Deep Reinforcement Learning without Exploration",
+      "authors": [
+        "Scott Fujimoto",
+        "David Meger",
+        "Doina Precup"
+      ],
+      "year": 2018,
+      "version": "1812.02900v3",
+      "sourceUrl": "https://arxiv.org/abs/1812.02900v3",
+      "sourceKind": "arxiv",
+      "verifiedAt": "2026-10-15T17:53:55.695805+00:00",
+      "readingGroup": "离线强化学习"
+    },
+    {
+      "id": "cql",
+      "title": "Conservative Q-Learning for Offline Reinforcement Learning",
+      "authors": [
+        "Aviral Kumar",
+        "Aurick Zhou",
+        "George Tucker",
+        "Sergey Levine"
+      ],
+      "year": 2020,
+      "version": "2006.04779v3",
+      "sourceUrl": "https://arxiv.org/abs/2006.04779v3",
+      "sourceKind": "arxiv",
+      "verifiedAt": "2026-10-15T17:53:55.695806+00:00",
+      "readingGroup": "离线强化学习"
+    },
+    {
+      "id": "iql",
+      "title": "Offline Reinforcement Learning with Implicit Q-Learning",
+      "authors": [
+        "Ilya Kostrikov",
+        "Ashvin Nair",
+        "Sergey Levine"
+      ],
+      "year": 2021,
+      "version": "2110.06169v1",
+      "sourceUrl": "https://arxiv.org/abs/2110.06169v1",
+      "sourceKind": "arxiv",
+      "verifiedAt": "2026-10-15T17:53:55.695807+00:00",
+      "readingGroup": "离线强化学习"
+    },
+    {
+      "id": "decision-transformer",
+      "title": "Decision Transformer: Reinforcement Learning via Sequence Modeling",
+      "authors": [
+        "Lili Chen",
+        "Kevin Lu",
+        "Aravind Rajeswaran",
+        "Kimin Lee",
+        "Aditya Grover",
+        "Michael Laskin",
+        "Pieter Abbeel",
+        "Aravind Srinivas",
+        "Igor Mordatch"
+      ],
+      "year": 2021,
+      "version": "2106.01345v2",
+      "sourceUrl": "https://arxiv.org/abs/2106.01345v2",
+      "sourceKind": "arxiv",
+      "verifiedAt": "2026-10-15T17:53:55.695807+00:00",
+      "readingGroup": "离线强化学习"
+    },
+    {
+      "id": "icm",
+      "title": "Curiosity-driven Exploration by Self-supervised Prediction",
+      "authors": [
+        "Deepak Pathak",
+        "Pulkit Agrawal",
+        "Alexei A. Efros",
+        "Trevor Darrell"
+      ],
+      "year": 2017,
+      "version": "1705.05363v1",
+      "sourceUrl": "https://arxiv.org/abs/1705.05363v1",
+      "sourceKind": "arxiv",
+      "verifiedAt": "2026-10-15T17:53:55.695808+00:00",
+      "readingGroup": "探索与稀疏奖励"
+    },
+    {
+      "id": "rnd",
+      "title": "Exploration by Random Network Distillation",
+      "authors": [
+        "Yuri Burda",
+        "Harrison Edwards",
+        "Amos Storkey",
+        "Oleg Klimov"
+      ],
+      "year": 2018,
+      "version": "1810.12894v1",
+      "sourceUrl": "https://arxiv.org/abs/1810.12894v1",
+      "sourceKind": "arxiv",
+      "verifiedAt": "2026-10-15T17:53:55.695809+00:00",
+      "readingGroup": "探索与稀疏奖励"
+    },
+    {
+      "id": "hindsight-experience-replay",
+      "title": "Hindsight Experience Replay",
+      "authors": [
+        "Marcin Andrychowicz",
+        "Filip Wolski",
+        "Alex Ray",
+        "Jonas Schneider",
+        "Rachel Fong",
+        "Peter Welinder",
+        "Bob McGrew",
+        "Josh Tobin",
+        "Pieter Abbeel",
+        "Wojciech Zaremba"
+      ],
+      "year": 2017,
+      "version": "1707.01495v3",
+      "sourceUrl": "https://arxiv.org/abs/1707.01495v3",
+      "sourceKind": "arxiv",
+      "verifiedAt": "2026-10-15T17:53:55.695810+00:00",
+      "readingGroup": "探索与稀疏奖励"
+    },
+    {
+      "id": "option-critic",
+      "title": "The Option-Critic Architecture",
+      "authors": [
+        "Pierre-Luc Bacon",
+        "Jean Harb",
+        "Doina Precup"
+      ],
+      "year": 2016,
+      "version": "1609.05140v2",
+      "sourceUrl": "https://arxiv.org/abs/1609.05140v2",
+      "sourceKind": "arxiv",
+      "verifiedAt": "2026-10-15T17:53:55.695810+00:00",
+      "readingGroup": "层次强化学习"
+    },
+    {
+      "id": "maddpg",
+      "title": "Multi-Agent Actor-Critic for Mixed Cooperative-Competitive Environments",
+      "authors": [
+        "Ryan Lowe",
+        "Yi Wu",
+        "Aviv Tamar",
+        "Jean Harb",
+        "Pieter Abbeel",
+        "Igor Mordatch"
+      ],
+      "year": 2017,
+      "version": "1706.02275v4",
+      "sourceUrl": "https://arxiv.org/abs/1706.02275v4",
+      "sourceKind": "arxiv",
+      "verifiedAt": "2026-10-15T17:53:55.695811+00:00",
+      "readingGroup": "多智能体强化学习"
+    },
+    {
+      "id": "vdn",
+      "title": "Value-Decomposition Networks For Cooperative Multi-Agent Learning",
+      "authors": [
+        "Peter Sunehag",
+        "Guy Lever",
+        "Audrunas Gruslys",
+        "Wojciech Marian Czarnecki",
+        "Vinicius Zambaldi",
+        "Max Jaderberg",
+        "Marc Lanctot",
+        "Nicolas Sonnerat",
+        "Joel Z. Leibo",
+        "Karl Tuyls",
+        "Thore Graepel"
+      ],
+      "year": 2017,
+      "version": "1706.05296v1",
+      "sourceUrl": "https://arxiv.org/abs/1706.05296v1",
+      "sourceKind": "arxiv",
+      "verifiedAt": "2026-10-15T17:53:55.695812+00:00",
+      "readingGroup": "多智能体强化学习"
+    },
+    {
+      "id": "qmix",
+      "title": "QMIX: Monotonic Value Function Factorisation for Deep Multi-Agent Reinforcement Learning",
+      "authors": [
+        "Tabish Rashid",
+        "Mikayel Samvelyan",
+        "Christian Schroeder de Witt",
+        "Gregory Farquhar",
+        "Jakob Foerster",
+        "Shimon Whiteson"
+      ],
+      "year": 2018,
+      "version": "1803.11485v2",
+      "sourceUrl": "https://arxiv.org/abs/1803.11485v2",
+      "sourceKind": "arxiv",
+      "verifiedAt": "2026-10-15T17:53:55.695813+00:00",
+      "readingGroup": "多智能体强化学习"
+    },
+    {
+      "id": "apprenticeship-learning-irl",
+      "title": "Apprenticeship Learning via Inverse Reinforcement Learning",
+      "authors": [
+        "Pieter Abbeel",
+        "Andrew Y. Ng"
+      ],
+      "year": 2004,
+      "version": "ICML 2004 作者公开正式会议版",
+      "sourceUrl": "https://ai.stanford.edu/~pabbeel/irl/",
+      "sourceKind": "official-paper",
+      "verifiedAt": "2026-10-15T17:53:55.695815+00:00",
+      "readingGroup": "模仿学习、逆强化学习与偏好对齐"
+    },
+    {
+      "id": "maximum-entropy-irl",
+      "title": "Maximum Entropy Inverse Reinforcement Learning",
+      "authors": [
+        "Brian D. Ziebart",
+        "Andrew Maas",
+        "J. Andrew Bagnell",
+        "Anind K. Dey"
+      ],
+      "year": 2008,
+      "version": "AAAI 2008 正式会议版，pp.1433–1438；保留作者勘误说明",
+      "sourceUrl": "https://cdn.aaai.org/AAAI/2008/AAAI08-227.pdf",
+      "sourceKind": "official-paper",
+      "verifiedAt": "2026-10-15T17:53:55.695816+00:00",
+      "readingGroup": "模仿学习、逆强化学习与偏好对齐"
+    },
+    {
+      "id": "gail",
+      "title": "Generative Adversarial Imitation Learning",
+      "authors": [
+        "Jonathan Ho",
+        "Stefano Ermon"
+      ],
+      "year": 2016,
+      "version": "1606.03476v1",
+      "sourceUrl": "https://arxiv.org/abs/1606.03476v1",
+      "sourceKind": "arxiv",
+      "verifiedAt": "2026-10-15T17:53:55.695817+00:00",
+      "readingGroup": "模仿学习、逆强化学习与偏好对齐"
+    },
+    {
+      "id": "deep-human-preferences",
+      "title": "Deep reinforcement learning from human preferences",
+      "authors": [
+        "Paul Christiano",
+        "Jan Leike",
+        "Tom B. Brown",
+        "Miljan Martic",
+        "Shane Legg",
+        "Dario Amodei"
+      ],
+      "year": 2017,
+      "version": "1706.03741v4",
+      "sourceUrl": "https://arxiv.org/abs/1706.03741v4",
+      "sourceKind": "arxiv",
+      "verifiedAt": "2026-10-15T17:53:55.695818+00:00",
+      "readingGroup": "模仿学习、逆强化学习与偏好对齐"
+    },
+    {
+      "id": "dpo",
+      "title": "Direct Preference Optimization: Your Language Model is Secretly a Reward Model",
+      "authors": [
+        "Rafael Rafailov",
+        "Archit Sharma",
+        "Eric Mitchell",
+        "Stefano Ermon",
+        "Christopher D. Manning",
+        "Chelsea Finn"
+      ],
+      "year": 2023,
+      "version": "2305.18290v3",
+      "sourceUrl": "https://arxiv.org/abs/2305.18290v3",
+      "sourceKind": "arxiv",
+      "verifiedAt": "2026-10-15T17:53:55.695819+00:00",
+      "readingGroup": "模仿学习、逆强化学习与偏好对齐"
+    }
+  ]
+}

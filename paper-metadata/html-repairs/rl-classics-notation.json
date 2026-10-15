@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "papers": [
+    {
+      "id": "alphazero",
+      "originalHtmlSha256": "ad8e029888efcfc11b5dbbf0f6eb43baf17bae8411da15b687db142ea2805f24",
+      "review": {
+        "model": "gpt-6-luna",
+        "reasoningEffort": "low",
+        "humanReviewed": false,
+        "sha256": "da3099d35dfe19908296be9d06da613a6c9b164e1ec43da8f9cd9a606bf16cf2"
+      },
+      "blocks": [
+        {
+          "id": "block-030",
+          "sourceId": "S0.T2",
+          "previousSha256": "f134ef664c71afce78a6bb6f993ff2efec47b846dce0c027e82f269cd8d62f87",
+          "mode": "literal-chess-pv-and-scores"
+        },
+        {
+          "id": "block-113",
+          "sourceId": "Sx1.T5",
+          "previousSha256": "4b54b96bb2c168deac7cc009fe7f2b7581723b4fcd765e50a4097ec6246d8a25",
+          "mode": "literal-chess-games"
+        }
+      ]
+    },
+    {
+      "id": "bcq",
+      "originalHtmlSha256": "57cc697f55f4db18cd4951f0db6369302df038fcbbb91d6be825511bbd69348d",
+      "review": {
+        "model": "gpt-6-luna",
+        "reasoningEffort": "low",
+        "humanReviewed": false,
+        "sha256": "2863b0e0199d38ce31bda1336a46230bcc381c05f5c6530bbcf2061906c671e4"
+      },
+      "blocks": [
+        {
+          "id": "block-005",
+          "sourceId": "p1.1",
+          "previousSha256": "d03851f186ebc5eee9710553a3203b4e697ca19be2eb99e781c8b6f055bfa5b8",
+          "mode": "empty-compiler-warning"
+        }
+      ]
+    }
+  ]
+}

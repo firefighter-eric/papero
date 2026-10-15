@@ -80,7 +80,12 @@ export function visibleProseText($) {
   const visit = node => {
     if (['math', 'code', 'pre'].includes(node.name) || node.type === 'tag' && ($(node).is('.ltx_listing.ltx_lstlisting') || isLiteralCodeSpanNode(node))) return
     if (node.type === 'text') text.push(node.data)
-    else for (const child of node.children ?? []) visit(child)
+    else {
+      for (const child of node.children ?? []) visit(child)
+      // A table cell ends a quantity. The next row's label (for example
+      // Centipede translated as 千足虫) cannot multiply the preceding score.
+      if (['td', 'th'].includes(node.name)) text.push(' | ')
+    }
   }
   visit($.root()[0])
   return text.join(' ')
@@ -94,6 +99,11 @@ export function assertBlockTranslationFidelity(sourceHtml, translatedHtml) {
   if (JSON.stringify(scientificSignature(source)) !== JSON.stringify(scientificSignature(translated))) {
     throw new Error('Scientific markup changed in translated block')
   }
+  const originalCells = source('td,th').toArray(), translatedCells = translated('td,th').toArray()
+  if (originalCells.length !== translatedCells.length) throw new Error('Table cell count changed in translated block')
+  originalCells.forEach((cell, index) => assertTranslationFidelity(
+    visibleProseText(load(source.html(cell), {}, false)),
+    visibleProseText(load(translated.html(translatedCells[index]), {}, false))))
   assertTranslationFidelity(visibleProseText(source), visibleProseText(translated))
 }
 
@@ -301,17 +311,57 @@ export function repairInstructGptCode($, article, arxivId) {
     referenceUrl: 'https://arxiv.org/html/2203.02155v1#A6.F45', spans: instructGptCodeSpans }
 }
 
+// These fixed arXiv conversions incorrectly promote a supplementary title to
+// the document title. The official versioned metadata supplies the identity;
+// leave every source body block intact and retain a repair receipt.
+const observedSupplementTitles = new Map([
+  ['1602.01783v2', ['Supplementary Material for "Asynchronous Methods for Deep Reinforcement Learning"', 'Asynchronous Methods for Deep Reinforcement Learning']],
+  ['1802.09477v3', ['Supplementary Material', 'Addressing Function Approximation Error in Actor-Critic Methods']],
+  ['1812.02900v3', ['Off-Policy Deep Reinforcement Learning without Exploration: Supplementary Material', 'Off-Policy Deep Reinforcement Learning without Exploration']],
+])
+
+function repairObservedRlSource($, article, arxivId) {
+  const repairs = []
+  if (arxivId === '2305.18290v3') {
+    const outputs = [
+      ['A3.T3.2.2.2.1.1', '44f67364b65ac5f000fefffa208896be7435c0ac0be9242eb679fc053619ff3b'],
+      ['A3.T3.2.3.2.1.1', '8c9852404dfdd9e46bda176a2512ea700329afff82a0fd6a077bd2ff3ef55ea6'],
+    ]
+    for (const [sourceId, textSha256] of outputs) {
+      const node = article.find(`[id="${sourceId}"]`)
+      if (node.length !== 1 || node.children().length || sha256(node.text()) !== textSha256) throw new Error(`Observed DPO model-output source changed: ${sourceId}`)
+      node.wrapInner('<code></code>')
+    }
+    repairs.push({ method: 'preserve-observed-verbatim-model-outputs', sourceId: 'A3.T3', referenceUrl: `https://arxiv.org/html/${arxivId}#A3.T3`, outputs: outputs.map(([sourceId, textSha256]) => ({ sourceId, textSha256 })) })
+  }
+  if (arxivId === '2301.04104v2') {
+    const captions = article.find('[id="Ax1.SSx1.4"]').children('figcaption')
+    const captionSha256 = '864429d1dc27a6af9035132e60c65b69c8dcd758661a1ffdb005a8a23e0bc664'
+    if (captions.length !== 2 || captions.toArray().some(node => sha256($.html(node)) !== captionSha256)) throw new Error('Observed duplicated DreamerV3 caption changed')
+    captions.eq(1).remove()
+    repairs.push({ method: 'deduplicate-identical-source-table-caption', sourceId: 'Ax1.SSx1.4', captionSha256, removedCopies: 1, referenceUrl: `https://arxiv.org/html/${arxivId}#Ax1.SSx1.4` })
+  }
+  return repairs
+}
+
 export function parsePaper(html, { id, arxivId, htmlUrl, fetchedAt = new Date().toISOString() }) {
   const $ = load(html)
   const article = $('article.ltx_document').first()
   if (!article.length) throw new Error('Source does not contain an arXiv LaTeXML article; no substitute was imported.')
   const titleNode = article.find('h1.ltx_title_document').first().clone()
   titleNode.find('.ltx_note,.ltx_pubnotes').remove()
-  const title = titleNode.text().trim()
+  let title = titleNode.text().trim()
   if (!title) throw new Error('The arXiv article has no title.')
   const repairs = []
+  const observedTitle = observedSupplementTitles.get(arxivId)
+  if (observedTitle && title.replace(/\s+/g, ' ') === observedTitle[0]) {
+    repairs.push({ method: 'restore-paper-title-from-versioned-arxiv-metadata', originalTitle: title,
+      title: observedTitle[1], referenceUrl: `https://arxiv.org/abs/${arxivId}` })
+    title = observedTitle[1]
+  }
   const codeRepair = repairInstructGptCode($, article, arxivId)
   if (codeRepair) repairs.push(codeRepair)
+  repairs.push(...repairObservedRlSource($, article, arxivId))
   if (observedGemmaVersions.has(arxivId) && /^Gemma(?:\b|:)/.test(title)) {
     const footnoteRepair = repairGemmaAuthorFootnote($, article, arxivId)
     if (footnoteRepair) repairs.push(footnoteRepair)
@@ -445,6 +495,10 @@ const gemmaModelFamilies = String.raw`Gemma${gemmaSeparator}?(?:${gemmaSize}(?:$
 // "8B and 70B Llama 3" may translate naturally as "Llama 3 8B 和 70B".
 // Hyphenated checkpoint identifiers still retain their full size/suffix.
 const pretrainingModelFamilies = String.raw`(?:(?:Mistral|Mixtral|OPT)[-_\s]?\d+(?:[xX]\d+)?(?:\.\d+)?B(?:[-_][A-Za-z0-9.]+)*|(?:Llama|LLaMA|OLMo)[-_\s]?\d+(?:\.\d+)*(?:B|[-_]\d+(?:\.\d+)?B)?(?:[-_][A-Za-z0-9.]+)*)`
+const rlAlgorithmIdentifiers = String.raw`(?:Dreamer(?:V?[23])?|SimPLe|Decision Transformer|DoomRNN|DoomTakeCover-v0|(?:Double |Dueling )?DQN|C51|Rainbow|IMPALA|DPG|GAE|Option-Critic|QR-DQN(?:-[01])?|IQN|ICM|RND|HER|DDPG|TD3|SAC|PPO|TRPO|A3C|BCQ|CQL|IQL|MBPO|PETS|QMIX|VDN|MADDPG|GAIL|REINFORCE|MuZero|AlphaZero)`
+const rlAlgorithmLabel = new RegExp(`^${rlAlgorithmIdentifiers}$`, 'i')
+const rlBenchmarkLabel = /^(?:Atari|OpenAI Gym|MuJoCo|Minecraft|Transformers?)$/i
+export const isRlVerbatimLabel = text => rlAlgorithmLabel.test(identifierText(text).trim()) || rlBenchmarkLabel.test(identifierText(text).trim())
 const modelPattern = new RegExp(String.raw`\b${gemmaModelFamilies}\b|\b${geminiModelFamilies}\b|\b${reportModelFamilies}\b|\b${pretrainingModelFamilies}\b|${legacyModelPattern.source}`, 'gi')
 // These report tables split brand, tier and training stage into separate
 // text nodes (including Gemma 2 Table 17's PT / IT headings). Protect exact
@@ -457,7 +511,10 @@ export const technicalIdentifiers = (text) => {
   const normalized = identifierText(text)
   const identifiers = (normalized.match(modelPattern) || []).map(value => value.replace(/-(?:level|scale|sized|based|like)$/i, ''))
   const label = normalized.trim()
+  const chessOpening = label.match(/^([A-E]\d{2}):/)
+  if (chessOpening) identifiers.push(chessOpening[1])
   if (!identifiers.length && isolatedModelLabel.test(label)) identifiers.push(label)
+  if (!identifiers.length && /^DoomTakeCover-v\d+$/.test(label)) identifiers.push(label)
   return identifiers
 }
 
@@ -475,6 +532,14 @@ function isBenchmarkLanguageList(text) {
 }
 
 export function isTechnicalLabelOnly(text) {
+  // Preserve the original publisher's copyright/PII notice as bibliographic metadata.
+  if (/^0004-3702\/99\/\$\s*[–-]\s*see front matter © 1999 Published by Elsevier Science B\.V\. All rights reserved\. PII: S0004-3702\(99\)[\d\s-]+$/.test(text.trim())) return true
+  // Author-year credits embedded in theorem headings are bibliography, not descriptive English headings.
+  if (/^\([A-Z][A-Za-z'’-]+(?:\s+(?:et al\.|[A-Z][A-Za-z'’-]+)|(?:,\s*|\s+(?:and|&)\s+)[A-Z][A-Za-z'’-]+)*,\s*(?:18|19|20)\d{2}[a-z]?\)$/.test(text.trim())) return true
+  if (/^[A-Z][A-Za-z'’-]+\s+et\s+al\.\s*\[\d+\]$/.test(text.trim())) return true
+  if (/^[\p{Lu}][\p{L}'’.-]+(?:\s+et\s+al\.)?\s*\((?:18|19|20)\d{2}[a-z]?\)$/u.test(text.trim())) return true
+  if (isRlVerbatimLabel(text)) return true
+  if (isRlVerbatimLabel(text.replace(/^\s*\d+(?:\.\d+)*\.?\s+/, ''))) return true
   if (isPythonAssertion(text) || isSacreBleuSignature(text)) return true
   if (isolatedModelLabel.test(identifierText(text).trim())) return true
   if (isBenchmarkLanguageList(text) || isIsoBenchmarkLanguageList(text)) return true
@@ -525,7 +590,7 @@ function calendarDates(text) {
   let clean = text.replace(new RegExp(`(?:${modelPattern.source})[\\u2013\\u2014\\u2015]`, 'gi'), ' ').replace(modelPattern, ' ')
     // A numbered equation followed by the modal "may" is not a day in May.
     // Keep its number in the numeric checks and retain real calendar dates.
-    .replace(/(\b(?:equation|eq\.?|section|theorem|proposition|lemma|corollary|algorithm|figure|table)\s*\(?\d+(?:\.\d+)*\)?\s+)(may)\b/gi,
+    .replace(/(\b(?:equation|eq\.?|section|theorem|proposition|lemma|corollary|algorithm|figure|table|agent)\s*\(?\d+(?:\.\d+)*\)?\s+)(may)\b/gi,
       (whole, pointer, month) => month === 'may' ? `${pointer}might` : whole)
     // AlphaGo shares its month and year across the match dates, 5–9 October
     // 2015. Match both endpoints before the single-date recognizers.
@@ -608,7 +673,7 @@ export function assertTranslationFidelity(source, translated) {
   }
   if (protocolRoles.length) throw new Error('Literal protocol roles added to translation')
   const advantageConcepts = en.replace(/\b(?:take|takes|taking|taken|took)\s+advantage\s+of\b/gi, '')
-  if (/\badvantages?\b/i.test(advantageConcepts) && /\bmodels?\b/i.test(en) && (!/优势|优点|益处|长处/.test(zh) || !/模型/.test(zh))) throw new Error('Core concepts omitted: advantages/models')
+  if (/\badvantages?\b/i.test(advantageConcepts) && /\bmodels?\b/i.test(en) && (!/优势|优点|益处|长处|好处/.test(zh) || !(/\bto\s+model\b/i.test(en) ? /模型|建模/ : /模型/).test(zh))) throw new Error('Core concepts omitted: advantages/models')
   const sourceHumanAnnotations = (en.match(/\b(?:human annotation|manual annotation|manually annotated)\b/gi) || []).length
   if (/\bartificially annotated\b/i.test(en) && (zh.match(/人工标注/g) || []).length > sourceHumanAnnotations) throw new Error('Automated annotation incorrectly translated as human annotation')
   if (/\bare (?:reported|shown|presented|listed|provided) in Section\s*$/i.test(en) && !/章节|小节|节中|节内/.test(zh)) throw new Error('Section reporting concept omitted from fragment')
@@ -634,9 +699,9 @@ export function assertTranslationFidelity(source, translated) {
     remainingDates.splice(index, 1)
   }
   if (remainingDates.length) throw new Error(`Calendar dates added to translation: ${remainingDates.join(', ')}`)
-  const unitScale = { billion: 1e9, million: 1e6, trillion: 1e12, B: 1e9, M: 1e6, T: 1e12, K: 1e3, k: 1e3, 千: 1e3, 万: 1e4, 百万: 1e6, 十亿: 1e9, 亿: 1e8, 万亿: 1e12 }
-  const quantityNumber = '[+-]?\\d+(?:,\\d{3})*(?:\\.\\d+)?'
-  const quantityUnit = '(?:[Bb]illion|[Mm]illion|[Tt]rillion|百万|十亿|万亿|亿|万|千|[BMTKk]\\b)'
+  const unitScale = { billion: 1e9, million: 1e6, trillion: 1e12, thousand: 1e3, B: 1e9, M: 1e6, T: 1e12, K: 1e3, k: 1e3, 千: 1e3, 万: 1e4, 百万: 1e6, 十亿: 1e9, 亿: 1e8, 万亿: 1e12 }
+  const quantityNumber = '[+-]?\\d+(?:,\\d{3}(?!\\d))*(?:\\.\\d+)?'
+  const quantityUnit = '(?:[Bb]illion|[Mm]illion|[Tt]rillion|[Tt]housand|百万|十亿|万亿|亿|万|千|[BMTKk]\\b)'
   const canonicalQuantity = (value, unit) => String(Number((Number(value.replace(/,/g, '')) * (unitScale[unit] || unitScale[unit.toLowerCase()])).toPrecision(15)))
   // Report compound modifiers bind a number to its scale: "1-million-token",
   // "2.8-trillion-parameter", and "15-trillion token". Match complete standalone compounds before
@@ -644,6 +709,12 @@ export function assertTranslationFidelity(source, translated) {
   // connectors cannot be reinterpreted as quantity separators.
   const compoundQuantity = new RegExp(`(?<![\\w.+\\-\\u2010-\\u2015\\u2212])(${quantityNumber})-([Bb]illion|[Mm]illion|[Tt]rillion)(?:-|\\s+)(?=(?:tokens?|parameters?)\\b)`, 'g')
   const numbers = (text) => {
+    // In the observed relationship prompt, paired [26 F] / [22 M]
+    // brackets denote ages and gender. M is not a million multiplier there.
+    // Requiring both forms keeps ordinary [32M] model sizes protected.
+    if (/\b(?:girl|boy|woman|man|relationship|girlfriend|boyfriend)\b/i.test(en) && /\[\s*\d{1,3}\s*F\s*\]/.test(en) && /\[\s*\d{1,3}\s*\??\s*M\s*\]/.test(en)) {
+      text = text.replace(/\[\s*(\d{1,3})\s*(\?)?\s*[MF]\s*\]/g, '[$1$2]')
+    }
     let normalized = normalizeNumbers(text.normalize('NFKC').replace(compoundQuantity, (_, value, unit) => `${canonicalQuantity(value, unit)} `))
     // Bibliography suffixes such as "Wang et al., 2024k" denote a year,
     // whereas "32k tokens" is a quantity. Never multiply a citation year.
@@ -651,7 +722,7 @@ export function assertTranslationFidelity(source, translated) {
     // A trailing unit applies to both ends of a quantity range (0.5 to 72 billion).
     normalized = normalized.replace(new RegExp(`(?<![\\w.])(${quantityNumber})\\s*(?:to|到|至|-)\\s*(${quantityNumber})\\s*(${quantityUnit})`, 'g'), (_, first, last, unit) => `${canonicalQuantity(first, unit)} to ${canonicalQuantity(last, unit)}`)
     normalized = normalized.replace(new RegExp(`(?<![\\w.])(${quantityNumber})\\s*(${quantityUnit})`, 'g'), (_, value, unit) => canonicalQuantity(value, unit))
-    return normalized.match(/(?<![\w.])[+-]?\d+(?:,\d{3})*(?:\.\d+)?(?:[eE][+-]?\d+)?\s*%?/g)?.map(value => value.replace(/[,\s]/g, '')) || []
+    return normalized.match(/(?<![\w.])[+-]?\d+(?:,\d{3}(?!\d))*(?:\.\d+)?(?:[eE][+-]?\d+)?\s*%?/g)?.map(value => value.replace(/[,\s]/g, '')) || []
   }
   let sourceNumericText = sourceCalendar.clean, targetNumericText = targetCalendar.clean
   // "3rd-party" is the lexical third-party relationship, not a count of

@@ -1,0 +1,760 @@
+{
+  "schemaVersion": 1,
+  "description": "Restore graphics and remove compiler artifacts from pinned official HTML using the same-version PDF or the original inline SVG. Preserve all block identities and anchors.",
+  "papers": [
+    {
+      "id": "alphazero",
+      "sourceHtmlSha256": "ad8e029888efcfc11b5dbbf0f6eb43baf17bae8411da15b687db142ea2805f24",
+      "version": "1712.01815v1",
+      "blocks": [
+        {
+          "sourceId": "S0.T2",
+          "id": "block-030",
+          "previousSha256": "e06ff895f882974d70891951f0046b7f21c53dc25dee148a07e2895faf29efe6"
+        }
+      ],
+      "crops": [
+        {
+          "target": "S0.T2",
+          "selector": "[id=\"S0.T2.2.2.1\"]",
+          "page": 6,
+          "bbox": [
+            79,
+            45.0,
+            148,
+            113.0
+          ],
+          "alt": "Chess opening position from Table 2, row 1, column 1",
+          "replaceContents": true,
+          "filename": "restored-S0-T2-1.png",
+          "resolution": 300
+        },
+        {
+          "target": "S0.T2",
+          "selector": "[id=\"S0.T2.2.2.3\"]",
+          "page": 6,
+          "bbox": [
+            307,
+            45.0,
+            375,
+            113.0
+          ],
+          "alt": "Chess opening position from Table 2, row 1, column 2",
+          "replaceContents": true,
+          "filename": "restored-S0-T2-2.png",
+          "resolution": 300
+        },
+        {
+          "target": "S0.T2",
+          "selector": "[id=\"S0.T2.2.5.1\"]",
+          "page": 6,
+          "bbox": [
+            79,
+            140.79,
+            148,
+            208.79
+          ],
+          "alt": "Chess opening position from Table 2, row 2, column 1",
+          "replaceContents": true,
+          "filename": "restored-S0-T2-3.png",
+          "resolution": 300
+        },
+        {
+          "target": "S0.T2",
+          "selector": "[id=\"S0.T2.2.5.3\"]",
+          "page": 6,
+          "bbox": [
+            307,
+            140.79,
+            375,
+            208.79
+          ],
+          "alt": "Chess opening position from Table 2, row 2, column 2",
+          "replaceContents": true,
+          "filename": "restored-S0-T2-4.png",
+          "resolution": 300
+        },
+        {
+          "target": "S0.T2",
+          "selector": "[id=\"S0.T2.2.8.1\"]",
+          "page": 6,
+          "bbox": [
+            79,
+            236.58,
+            148,
+            304.58
+          ],
+          "alt": "Chess opening position from Table 2, row 3, column 1",
+          "replaceContents": true,
+          "filename": "restored-S0-T2-5.png",
+          "resolution": 300
+        },
+        {
+          "target": "S0.T2",
+          "selector": "[id=\"S0.T2.2.8.3\"]",
+          "page": 6,
+          "bbox": [
+            307,
+            236.58,
+            375,
+            304.58
+          ],
+          "alt": "Chess opening position from Table 2, row 3, column 2",
+          "replaceContents": true,
+          "filename": "restored-S0-T2-6.png",
+          "resolution": 300
+        },
+        {
+          "target": "S0.T2",
+          "selector": "[id=\"S0.T2.2.11.1\"]",
+          "page": 6,
+          "bbox": [
+            79,
+            332.37,
+            148,
+            400.37
+          ],
+          "alt": "Chess opening position from Table 2, row 4, column 1",
+          "replaceContents": true,
+          "filename": "restored-S0-T2-7.png",
+          "resolution": 300
+        },
+        {
+          "target": "S0.T2",
+          "selector": "[id=\"S0.T2.2.11.3\"]",
+          "page": 6,
+          "bbox": [
+            307,
+            332.37,
+            375,
+            400.37
+          ],
+          "alt": "Chess opening position from Table 2, row 4, column 2",
+          "replaceContents": true,
+          "filename": "restored-S0-T2-8.png",
+          "resolution": 300
+        },
+        {
+          "target": "S0.T2",
+          "selector": "[id=\"S0.T2.2.14.1\"]",
+          "page": 6,
+          "bbox": [
+            79,
+            428.16,
+            148,
+            496.16
+          ],
+          "alt": "Chess opening position from Table 2, row 5, column 1",
+          "replaceContents": true,
+          "filename": "restored-S0-T2-9.png",
+          "resolution": 300
+        },
+        {
+          "target": "S0.T2",
+          "selector": "[id=\"S0.T2.2.14.3\"]",
+          "page": 6,
+          "bbox": [
+            307,
+            428.16,
+            375,
+            496.16
+          ],
+          "alt": "Chess opening position from Table 2, row 5, column 2",
+          "replaceContents": true,
+          "filename": "restored-S0-T2-10.png",
+          "resolution": 300
+        },
+        {
+          "target": "S0.T2",
+          "selector": "[id=\"S0.T2.2.17.1\"]",
+          "page": 6,
+          "bbox": [
+            79,
+            523.95,
+            148,
+            591.95
+          ],
+          "alt": "Chess opening position from Table 2, row 6, column 1",
+          "replaceContents": true,
+          "filename": "restored-S0-T2-11.png",
+          "resolution": 300
+        },
+        {
+          "target": "S0.T2",
+          "selector": "[id=\"S0.T2.2.17.3\"]",
+          "page": 6,
+          "bbox": [
+            307,
+            523.95,
+            375,
+            591.95
+          ],
+          "alt": "Chess opening position from Table 2, row 6, column 2",
+          "replaceContents": true,
+          "filename": "restored-S0-T2-12.png",
+          "resolution": 300
+        }
+      ],
+      "sourcePdfSha256": "26c43408551c22f4fdc98e47f9b4592ab2161fac1ba5df27c897f46d8b6cec7f",
+      "sourcePdfUrl": "https://arxiv.org/pdf/1712.01815v1"
+    },
+    {
+      "id": "muzero",
+      "sourceHtmlSha256": "86517a03ffc647885074cb7dd2a1bb884fd0ba9028615ef2994ae08401571bab",
+      "version": "1911.08265v2",
+      "blocks": [
+        {
+          "sourceId": "S4.F2",
+          "id": "block-024",
+          "previousSha256": "6ca822708e1189d673bb70dbc84463a1c935ff37d1e3bd9d2e9f93422dc57675"
+        }
+      ],
+      "crops": [
+        {
+          "target": "S4.F2",
+          "selector": "[id=\"S4.F2.2.2.1\"]",
+          "page": 5,
+          "bbox": [
+            83,
+            92,
+            184,
+            194
+          ],
+          "alt": "Chess starting position",
+          "replaceContents": true,
+          "filename": "restored-S4-F2-1.png",
+          "resolution": 300
+        },
+        {
+          "target": "S4.F2",
+          "selector": "[id=\"S4.F2.2.2.2\"]",
+          "page": 5,
+          "bbox": [
+            199,
+            92,
+            300,
+            194
+          ],
+          "alt": "Shogi starting position",
+          "replaceContents": true,
+          "filename": "restored-S4-F2-2.png",
+          "resolution": 300
+        },
+        {
+          "target": "S4.F2",
+          "selector": "[id=\"S4.F2.2.2.3\"]",
+          "page": 5,
+          "bbox": [
+            315,
+            92,
+            416,
+            194
+          ],
+          "alt": "Go starting board",
+          "replaceContents": true,
+          "filename": "restored-S4-F2-3.png",
+          "resolution": 300
+        },
+        {
+          "target": "S4.F2",
+          "selector": "[id=\"S4.F2.2.2.4\"]",
+          "page": 5,
+          "bbox": [
+            430,
+            92,
+            532,
+            194
+          ],
+          "alt": "Atari Ms. Pac-Man screen",
+          "replaceContents": true,
+          "filename": "restored-S4-F2-4.png",
+          "resolution": 300
+        }
+      ],
+      "sourcePdfSha256": "25588ee1d48690b33359a08a42fadfe86335aefefeee241d465b8bbd5eaa445c",
+      "sourcePdfUrl": "https://arxiv.org/pdf/1911.08265v2"
+    },
+    {
+      "id": "bcq",
+      "sourceHtmlSha256": "57cc697f55f4db18cd4951f0db6369302df038fcbbb91d6be825511bbd69348d",
+      "version": "1812.02900v3",
+      "blocks": [
+        {
+          "sourceId": "A3.F6",
+          "id": "block-228",
+          "previousSha256": "a8cd01db06becceba061a9f856a91097f7f509cd795a9d9bf0d16f3bdc0d0835"
+        }
+      ],
+      "crops": [
+        {
+          "target": "A3.F6",
+          "selector": ".ltx_inline-block",
+          "page": 17,
+          "bbox": [
+            168,
+            258,
+            430,
+            335
+          ],
+          "alt": "Two-state toy MDP with labeled actions and rewards",
+          "filename": "restored-A3-F6-1.png",
+          "resolution": 300
+        }
+      ],
+      "sourcePdfSha256": "3c0a3d01b7922b7d73d7bee0d8f0cf21b46df6ea99110378d89f7c1bd45b7011",
+      "sourcePdfUrl": "https://arxiv.org/pdf/1812.02900v3"
+    },
+    {
+      "id": "option-critic",
+      "sourceHtmlSha256": "97844b0478492f8496f888c86a87c9958910221a9a3de0982660d16137a5d84e",
+      "version": "1609.05140v2",
+      "blocks": [
+        {
+          "sourceId": "Sx5.F2",
+          "id": "block-055",
+          "previousSha256": "a344c35b5cda1d09fdd9634de0629638d082503dd8ea290ec53b34584ac12205"
+        },
+        {
+          "sourceId": "Sx5.F5",
+          "id": "block-063",
+          "previousSha256": "1e5ef790702f7ba748c8736a705e15f16089bbe53d4b06054bde5e01352544cc"
+        },
+        {
+          "sourceId": "Sx5.F6",
+          "id": "block-067",
+          "previousSha256": "82e2be2fcf58c4fef376fa48bb29a32c4dc7a8b57d922264caeb940ceafed1a6"
+        },
+        {
+          "sourceId": "Sx5.F7",
+          "id": "block-072",
+          "previousSha256": "1159ef55e31065918af14ba0393ef93a6f83e2f89c0bc74826b99829254dbf3c"
+        },
+        {
+          "sourceId": "Sx5.F8",
+          "id": "block-074",
+          "previousSha256": "63dc22f0808906ad27457a2e78ff6df06ce0eaf0d452905e0a5cbd9209aea13b"
+        },
+        {
+          "sourceId": "Sx5.F9",
+          "id": "block-076",
+          "previousSha256": "0bba3db8be78d27a9c0b55fe8a176876e15fba6024bdd6ac3918895154e4f52e"
+        }
+      ],
+      "crops": [
+        {
+          "target": "Sx5.F2",
+          "selector": "[id=\"Sx5.F2.pic1\"]",
+          "page": 4,
+          "bbox": [
+            319,
+            398,
+            552,
+            555
+          ],
+          "alt": "Four-rooms transfer learning curves",
+          "filename": "restored-Sx5-F2-1.png",
+          "resolution": 300
+        },
+        {
+          "target": "Sx5.F5",
+          "selector": "[id=\"Sx5.F5.pic1\"]",
+          "page": 5,
+          "bbox": [
+            319,
+            132,
+            553,
+            281
+          ],
+          "alt": "Pinball learning curves",
+          "filename": "restored-Sx5-F5-2.png",
+          "resolution": 300
+        },
+        {
+          "target": "Sx5.F6",
+          "selector": "[id=\"Sx5.F6.pic1\"]",
+          "page": 5,
+          "bbox": [
+            327,
+            572,
+            558,
+            632
+          ],
+          "alt": "Option-critic neural network architecture",
+          "filename": "restored-Sx5-F6-3.png",
+          "resolution": 300
+        },
+        {
+          "target": "Sx5.F7",
+          "selector": "[id=\"Sx5.F7.pic1\"]",
+          "page": 6,
+          "bbox": [
+            56,
+            357,
+            292,
+            548
+          ],
+          "alt": "Seaquest action distributions for learned options",
+          "filename": "restored-Sx5-F7-4.png",
+          "resolution": 300
+        },
+        {
+          "target": "Sx5.F8",
+          "selector": "[id=\"Sx5.F8.pic1\"]",
+          "page": 7,
+          "bbox": [
+            75,
+            52,
+            537,
+            148
+          ],
+          "alt": "Learning curves in four Atari games",
+          "filename": "restored-Sx5-F8-5.png",
+          "resolution": 300
+        },
+        {
+          "target": "Sx5.F9",
+          "selector": "[id=\"Sx5.F9.pic1\"]",
+          "page": 7,
+          "bbox": [
+            53,
+            188,
+            559,
+            307
+          ],
+          "alt": "Seaquest option timeline and consecutive game frames",
+          "filename": "restored-Sx5-F9-6.png",
+          "resolution": 300
+        }
+      ],
+      "sourcePdfSha256": "d8089c6012c607f3a9e8b560290dea629c91b174e246e18864ac6615467e208f",
+      "sourcePdfUrl": "https://arxiv.org/pdf/1609.05140v2",
+      "referenceCompilerArtifacts": [
+        {
+          "sourceId": "bib.bibx1",
+          "id": "block-114",
+          "previousSha256": "247fe4d1a1679bab70bd24c231ca69783b0c5c9a330f352a07a3e3c152e6684a"
+        },
+        {
+          "sourceId": "bib.bibx2",
+          "id": "block-115",
+          "previousSha256": "8a5a0565cb157e73e753389405db586e9189e79a73ecf2a51f811d2dbfbd4b20"
+        },
+        {
+          "sourceId": "bib.bibx3",
+          "id": "block-116",
+          "previousSha256": "de50693ad6a4e0cff990a6ec44d32d30fc7632cb9b1e5d93a7d21c09a16d9a00"
+        },
+        {
+          "sourceId": "bib.bibx4",
+          "id": "block-117",
+          "previousSha256": "e184a6687863823883ed629225872907aa6779682724aad9f6940b2bd6e643ab"
+        },
+        {
+          "sourceId": "bib.bibx5",
+          "id": "block-118",
+          "previousSha256": "98df1a9b64dec8c99cfcd3e154372abc0d4a553da0b8766f0eeced89c5dda085"
+        },
+        {
+          "sourceId": "bib.bibx6",
+          "id": "block-119",
+          "previousSha256": "1ece2f37bbf06c6eb12ec1e12f811ba408716caafb6a4a42f777f3e881e992a1"
+        },
+        {
+          "sourceId": "bib.bibx7",
+          "id": "block-120",
+          "previousSha256": "e5bd6c5a44cb70ca270f42b5e97778442f1094dd99c34cd6b73bb60e74ead49b"
+        },
+        {
+          "sourceId": "bib.bibx8",
+          "id": "block-121",
+          "previousSha256": "423742af7d1d4513294836894f2d895dc1f5dfe00bc175ab1ab61b2a73f829ca"
+        },
+        {
+          "sourceId": "bib.bibx9",
+          "id": "block-122",
+          "previousSha256": "b01c4588d31fcf79052c4709443563e713055ad5b428882e47e4b909ddfad78e"
+        },
+        {
+          "sourceId": "bib.bibx10",
+          "id": "block-123",
+          "previousSha256": "8ccf9a2c6d3968b54ee39f96813a71004a1ea962edb47c46543b2617492a89cf"
+        },
+        {
+          "sourceId": "bib.bibx11",
+          "id": "block-124",
+          "previousSha256": "ef32584cecb2fb11d5a5d47b88d15e70c608477ad1f2fda62dccb56c12d01b30"
+        },
+        {
+          "sourceId": "bib.bibx12",
+          "id": "block-125",
+          "previousSha256": "fb705e578fd09dd0df68d7599a9c1caf1526237c10ee435d6dd8086e04dce6b5"
+        },
+        {
+          "sourceId": "bib.bibx13",
+          "id": "block-126",
+          "previousSha256": "fc4b86c08daaf2d9050e2cc9350e3dc2ae18c7aa87d44bdafd620bbd1aba9c21"
+        },
+        {
+          "sourceId": "bib.bibx14",
+          "id": "block-127",
+          "previousSha256": "a069eebe00894a6fbf256f5ffe4ef616d0c7ebd8f363c2e3694c113d0bb577f0"
+        },
+        {
+          "sourceId": "bib.bibx15",
+          "id": "block-128",
+          "previousSha256": "4a9c587f51781700f174cb0ec6ee7285d161641c0b504c52e9db441c1969f02f"
+        },
+        {
+          "sourceId": "bib.bibx16",
+          "id": "block-129",
+          "previousSha256": "8f6faae36a5d0760708b47485cc2b824f6604f264463bb826d3435dd45565ddd"
+        },
+        {
+          "sourceId": "bib.bibx17",
+          "id": "block-130",
+          "previousSha256": "4dbd969ae36e7128f4c9dbaf2429992f6b062ff58c576e640cd6075b783caec5"
+        },
+        {
+          "sourceId": "bib.bibx18",
+          "id": "block-131",
+          "previousSha256": "b5e34259e592dcdb1ab700b02a28ef49820986ff3705d6d30a15a583e2478676"
+        },
+        {
+          "sourceId": "bib.bibx19",
+          "id": "block-132",
+          "previousSha256": "e115225b34ebf873864f46e8fd3faac8b556d57d0e24c535fd24d2927bd96fa1"
+        },
+        {
+          "sourceId": "bib.bibx20",
+          "id": "block-133",
+          "previousSha256": "9b85f656f0567e7c350c2a55e55ddd24683f81a6c7de38eec057a8fee638e137"
+        },
+        {
+          "sourceId": "bib.bibx21",
+          "id": "block-134",
+          "previousSha256": "64671dd576251222485e4e61fdcf6d373ee92ff0f5b168e15f12494ba299d26a"
+        },
+        {
+          "sourceId": "bib.bibx22",
+          "id": "block-135",
+          "previousSha256": "b1026410fb5a6eb712afc14084cb92503ca44a8304a8de17b17c12711d4c5d04"
+        },
+        {
+          "sourceId": "bib.bibx23",
+          "id": "block-136",
+          "previousSha256": "dd1ac82b3598c70d65947b9b445c11e327a242888159a498ab30c758b15aa888"
+        },
+        {
+          "sourceId": "bib.bibx24",
+          "id": "block-137",
+          "previousSha256": "43a6b81225afa39f8d8e4ffd11f1bee6e85310e4978ffef97f348440472c2aeb"
+        },
+        {
+          "sourceId": "bib.bibx25",
+          "id": "block-138",
+          "previousSha256": "51c0eb7bb423508fee4ae0273ae3f76b6187fb2e16d6c5ae91ab2940f0cd9b82"
+        },
+        {
+          "sourceId": "bib.bibx26",
+          "id": "block-139",
+          "previousSha256": "c1580831c52a29a25335b106e68cbfcce238845550816812f04ac8f7b25d10fe"
+        },
+        {
+          "sourceId": "bib.bibx27",
+          "id": "block-140",
+          "previousSha256": "f2845443dbb1ec8fccd04f0862b0347363a90be576631633f038f6a4e60f0116"
+        },
+        {
+          "sourceId": "bib.bibx28",
+          "id": "block-141",
+          "previousSha256": "be1d543844a0281048589feba212ee1cd7a3ebcc18689bafd567458d2d433f2a"
+        },
+        {
+          "sourceId": "bib.bibx29",
+          "id": "block-142",
+          "previousSha256": "c252faeda9e49cb1858331f5c697ac6c0ca5597dff8627976ce2e2a05cfe6464"
+        },
+        {
+          "sourceId": "bib.bibx30",
+          "id": "block-143",
+          "previousSha256": "288b8e9272355c451dac3024af9f21c9603058dfdcbc1b73e590e225b54b1e94"
+        }
+      ]
+    },
+    {
+      "id": "vdn",
+      "sourceHtmlSha256": "fa354de6a877ba578202a9b317234f0579d22b71bc0cb89d02ba48e34d214728",
+      "version": "1706.05296v1",
+      "blocks": [
+        {
+          "sourceId": "S4.T1",
+          "id": "block-053",
+          "previousSha256": "e0e93b6acc12cab8c18155428e3aa37344126f1b68a8b7a1d18f3e735d11a344"
+        }
+      ],
+      "crops": [],
+      "inlineSvg": [
+        {
+          "sourceId": "S4.T1.pic1",
+          "cellId": "S4.T1.1.3.2",
+          "sourceSha256": "b6009349efd9cbce8138e91036edb87c2f36f29ba4de73f5f0ebc91f6e781571",
+          "filename": "restored-S4-T1-pic1.svg"
+        },
+        {
+          "sourceId": "S4.T1.pic2",
+          "cellId": "S4.T1.1.4.2",
+          "sourceSha256": "8c990cd3bc5f082d0cd4be4e11a6ef00a0875e8cf578151434448719e082294c",
+          "filename": "restored-S4-T1-pic2.svg"
+        },
+        {
+          "sourceId": "S4.T1.pic3",
+          "cellId": "S4.T1.1.4.3",
+          "sourceSha256": "fce98e09ec72195970d8b17ec8a34eb596b320e154122ab7aa8a587c64876f85",
+          "filename": "restored-S4-T1-pic3.svg"
+        },
+        {
+          "sourceId": "S4.T1.pic4",
+          "cellId": "S4.T1.1.5.2",
+          "sourceSha256": "99e9b41d5c959ecbbb9b53b13600f55efce5ea771c0a2e65b1e867f2095d3478",
+          "filename": "restored-S4-T1-pic4.svg"
+        },
+        {
+          "sourceId": "S4.T1.pic5",
+          "cellId": "S4.T1.1.5.3",
+          "sourceSha256": "86e64dd2a2fad03024745d7e3ef35cd0290174c348ef1f774f6bb32fd34b0c45",
+          "filename": "restored-S4-T1-pic5.svg"
+        },
+        {
+          "sourceId": "S4.T1.pic6",
+          "cellId": "S4.T1.1.5.4",
+          "sourceSha256": "23e7cfcb301b67b7b6923a1f93c5070104e13ec1c61c28758454805dee0502bc",
+          "filename": "restored-S4-T1-pic6.svg"
+        },
+        {
+          "sourceId": "S4.T1.pic7",
+          "cellId": "S4.T1.1.6.2",
+          "sourceSha256": "19ac11ad15da57b3d0840436c676aa5557d8e13cd80ccb49e84d8fd6925b8ac6",
+          "filename": "restored-S4-T1-pic7.svg"
+        },
+        {
+          "sourceId": "S4.T1.pic8",
+          "cellId": "S4.T1.1.6.3",
+          "sourceSha256": "26a57c0c39969078531a7f989d8f559ee3428c5764247decb00e2ba4b0d7aa51",
+          "filename": "restored-S4-T1-pic8.svg"
+        },
+        {
+          "sourceId": "S4.T1.pic9",
+          "cellId": "S4.T1.1.6.4",
+          "sourceSha256": "9adfcd4632fe585c7b2fce4207dc35c68abc8febba9737117d64257ff4ed4572",
+          "filename": "restored-S4-T1-pic9.svg"
+        },
+        {
+          "sourceId": "S4.T1.pic10",
+          "cellId": "S4.T1.1.6.5",
+          "sourceSha256": "7c8489825f5b1f3a979ae36b96552e09c254d41db6dfc4c9eccd80d66b864c91",
+          "filename": "restored-S4-T1-pic10.svg"
+        },
+        {
+          "sourceId": "S4.T1.pic11",
+          "cellId": "S4.T1.1.7.2",
+          "sourceSha256": "3bf6145947aa5839554456f520dc1a0631ac8f6dedddb0c4e481558d46ab9fee",
+          "filename": "restored-S4-T1-pic11.svg"
+        },
+        {
+          "sourceId": "S4.T1.pic12",
+          "cellId": "S4.T1.1.7.3",
+          "sourceSha256": "6b1970d20b8d5fe3e5e0a25caad3b219641a629bf97d5592d441cbed21e49152",
+          "filename": "restored-S4-T1-pic12.svg"
+        },
+        {
+          "sourceId": "S4.T1.pic13",
+          "cellId": "S4.T1.1.7.4",
+          "sourceSha256": "9a920b282ffa66c9ce8533de3ad6d07b3054df5fe73136c99722868938b78c05",
+          "filename": "restored-S4-T1-pic13.svg"
+        },
+        {
+          "sourceId": "S4.T1.pic14",
+          "cellId": "S4.T1.1.7.6",
+          "sourceSha256": "d2338ec6de06bd7156a524d1c8b23bedc49e7c74ec7a1fe8a39ecfa1231aee55",
+          "filename": "restored-S4-T1-pic14.svg"
+        },
+        {
+          "sourceId": "S4.T1.pic15",
+          "cellId": "S4.T1.1.8.2",
+          "sourceSha256": "69e9b1f1602287c19e28241d65f1b2e0b34d57dde70a85c9e42b29744f74edba",
+          "filename": "restored-S4-T1-pic15.svg"
+        },
+        {
+          "sourceId": "S4.T1.pic16",
+          "cellId": "S4.T1.1.8.3",
+          "sourceSha256": "bf4823a2bd356bc0344b8a11473d756a2e9fa09b5bb6c71d14b11135b2c1d2ca",
+          "filename": "restored-S4-T1-pic16.svg"
+        },
+        {
+          "sourceId": "S4.T1.pic17",
+          "cellId": "S4.T1.1.8.4",
+          "sourceSha256": "f97f9013bc53ca98ea300827eb2028f82eecdc6ce6ce58866b2d8ebb66272ad4",
+          "filename": "restored-S4-T1-pic17.svg"
+        },
+        {
+          "sourceId": "S4.T1.pic18",
+          "cellId": "S4.T1.1.8.5",
+          "sourceSha256": "023539edbc8204f88002988e4812e64d6eee69f710b5b66087acaf4816c68e7e",
+          "filename": "restored-S4-T1-pic18.svg"
+        },
+        {
+          "sourceId": "S4.T1.pic19",
+          "cellId": "S4.T1.1.8.6",
+          "sourceSha256": "02f5ae71d8d0dc85a59b52f8e71bd65f9a45958a40105a01f07218ed8422b9b9",
+          "filename": "restored-S4-T1-pic19.svg"
+        },
+        {
+          "sourceId": "S4.T1.pic20",
+          "cellId": "S4.T1.1.9.2",
+          "sourceSha256": "6a2eb47b355cd51e3694cc5797c48104599b7f9adc8491018904652d22809cd4",
+          "filename": "restored-S4-T1-pic20.svg"
+        },
+        {
+          "sourceId": "S4.T1.pic21",
+          "cellId": "S4.T1.1.9.7",
+          "sourceSha256": "17ea56852a8e86df3c29e84871cb40dc69ce30c44d72142f4e2cf94332bfead4",
+          "filename": "restored-S4-T1-pic21.svg"
+        },
+        {
+          "sourceId": "S4.T1.pic22",
+          "cellId": "S4.T1.1.10.7",
+          "sourceSha256": "0b937cd85125bff1aefdd60d0ae9c9fa3bb877beaf6a11aec0cd69f4eee36f18",
+          "filename": "restored-S4-T1-pic22.svg"
+        }
+      ]
+    },
+    {
+      "id": "trpo",
+      "sourceHtmlSha256": "49d17a420506c730f69b82a51dc7b0f8fff924ef66b34aceebb924344f6de93a",
+      "version": "1502.05477v5",
+      "blocks": [
+        {
+          "sourceId": "alg1",
+          "id": "block-040",
+          "previousSha256": "ef2126291063f98c8deac0d430f3ec3ec7aea47c0bfed4b71f767fee65e8faf1"
+        }
+      ],
+      "crops": [],
+      "macroReviewSha256": "a498fc5cdde5f1a9754667c6d592e95acb0f67a3430e3911b522b8d3c1420178"
+    },
+    {
+      "id": "dreamerv3",
+      "sourceHtmlSha256": "7ce561853df3b35ccf0316476b3f7538b60117feb358bd562dc279f0d5067a26",
+      "version": "2301.04104v2",
+      "blocks": [
+        {
+          "sourceId": "p1.1",
+          "id": "block-001",
+          "previousSha256": "e248509b6b4f741bec90d49748f543537b4c6281b8c55bd9ab026810f5a4e07b"
+        }
+      ],
+      "crops": [],
+      "macroReviewSha256": "a498fc5cdde5f1a9754667c6d592e95acb0f67a3430e3911b522b8d3c1420178"
+    }
+  ]
+}

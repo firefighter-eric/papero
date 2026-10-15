@@ -1162,3 +1162,181 @@ test('letter-prefixed appendix section numbers are displayed once without changi
   assert.equal((normalized.match(/A\.2\.3/g) || []).length, 1)
   assertBlockTranslationFidelity(en, normalized)
 })
+
+test('fixed supplementary title defects retain the complete body and versioned identity receipt', () => {
+  const html = '<article class="ltx_document"><h1 class="ltx_title_document">Supplementary Material</h1><h2>1 Introduction</h2><p>Original main body.</p><h2>Appendix</h2><p>Original appendix.</p></article>'
+  const paper = parsePaper(html, { id: 'td3', arxivId: '1802.09477v3', htmlUrl: 'https://arxiv.org/html/1802.09477v3' })
+  assert.equal(paper.title, 'Addressing Function Approximation Error in Actor-Critic Methods')
+  assert.equal(paper.blocks.length, 4)
+  assert.equal(paper.source.repairs[0].originalTitle, 'Supplementary Material')
+  assert.equal(parsePaper(html, { id: 'other', arxivId: '1802.09477v2' }).title, 'Supplementary Material')
+})
+
+test('relative arXiv images resolve inside the pinned document version', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'papero-relative-asset-'))
+  const previousFetch = globalThis.fetch
+  const requested = []
+  globalThis.fetch = async url => {
+    requested.push(String(url))
+    if (String(url).endsWith('/html/2501.00001v2')) return new Response('<div id="watermark-tr">arXiv:2501.00001v2</div><article class="ltx_document"><h1 class="ltx_title_document">Example</h1><figure><img src="figures/image.png"><figcaption>Caption.</figcaption></figure></article>', { headers: { 'content-type': 'text/html' } })
+    assert.equal(String(url), 'https://arxiv.org/html/2501.00001v2/figures/image.png')
+    return new Response(new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]))
+  }
+  try {
+    const paper = await importArxiv({ arxivId: '2501.00001v2', id: 'relative-example', dataDir: directory })
+    assert.equal(paper.assets[0].sourceUrl, 'https://arxiv.org/html/2501.00001v2/figures/image.png')
+    assert.equal(requested.length, 2)
+  } finally { globalThis.fetch = previousFetch; await rm(directory, { recursive: true, force: true }) }
+})
+
+test('an empty fragment is isolated while valid peers remain reusable and never accepted as a completed translation', () => {
+  const records = [{id:'a',text:'The first method.'},{id:'b',text:'The second method.'}]
+  const response = '{"translations":{"a":"第一种方法。","b":""}}'
+  const checked = parseUnitResponse(response, records, {collectFailures:true})
+  assert.deepEqual(checked.results.map(x=>x.id), ['a'])
+  assert.deepEqual(checked.failures.map(x=>x.record.id), ['b'])
+  assert.throws(()=>parseUnitResponse(response,records), /Empty translation unit/)
+})
+
+test('a theorem author-year credit remains bibliographic while the proposition heading translates', () => {
+  assert.equal(isTechnicalLabelOnly('(Sobel, 1982)'), true)
+  assert.equal(isTechnicalLabelOnly('Proposition 1'), false)
+  assert.equal(isTechnicalLabelOnly('(An explanation of our model, 1982)'), false)
+})
+test('RL identifiers and citation-only heading fragments preserve proper labels while descriptive text still requires translation', () => {
+  for (const label of ['DreamerV2', 'dqn', 'SAC', 'Syed et\u00a0al. [29]']) assert.equal(isTechnicalLabelOnly(label), true)
+  for (const label of ['Quantile Regression', 'Double Q-learning', 'World Models']) assert.equal(isTechnicalLabelOnly(label), false)
+  assert.doesNotThrow(() => assertTranslationFidelity('This has the advantage of allowing us to train our C model.', '这样做的好处是可以训练我们的 C 模型。'))
+})
+
+test('relationship ages in paired bracketed gender labels are not million-scale model quantities', () => {
+  const source = 'The girl [26 F] I [22 M] have been seeing was with a friend [30? M].'
+  assert.doesNotThrow(() => assertTranslationFidelity(source, '女孩[26岁女性]、我[22岁男性]和一位朋友[30?岁男性]。'))
+  assert.throws(() => assertTranslationFidelity(source, '女孩[26岁女性]、我[23岁男性]和一位朋友[30?岁男性]。'), /Numeric value/)
+  assert.throws(() => assertTranslationFidelity('We use [32M] parameters.', '我们使用[32]个参数。'), /Numeric value/)
+  assert.throws(() => assertTranslationFidelity('We train [26 F] and [22 M] parameter models.', '我们训练[26 F]和[22]参数模型。'), /Numeric value/)
+})
+
+
+test('DPO retains observed degenerate model outputs verbatim while translating its table caption', () => {
+  const outputs = [{"id":"A3.T3.2.2.2.1.1","text":"girl when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when whenUB when when when when whenUB when when when whenUB"},{"id":"A3.T3.2.3.2.1.1","text":"when an old woman was tripping the when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when when"}]
+  const html = '<article class="ltx_document"><h1 class="ltx_title_document">Fixture</h1><figure class="ltx_table" id="A3.T3"><table><tbody>' + outputs.map(o => '<tr><td><span id="'+o.id+'">'+o.text+'</span></td></tr>').join('') + '</tbody></table><figcaption>Unlikelihood samples from prompts.</figcaption></figure></article>'
+  const p = parsePaper(html,{id:'dpo',arxivId:'2305.18290v3',htmlUrl:'https://arxiv.org/html/2305.18290v3'})
+  const $ = load(p.blocks[0].en,{},false)
+  assert.deepEqual($('code').map((_,e)=>$(e).text()).get(),outputs.map(o=>o.text))
+  assert.deepEqual(translationUnits(p.blocks[0].en,'table').units.map(u=>u.text),['Unlikelihood samples from prompts.'])
+  assert.equal(p.source.repairs[0].method,'preserve-observed-verbatim-model-outputs')
+  assert.throws(()=>parsePaper(html.replace('girl when','girl altered'),{id:'dpo',arxivId:'2305.18290v3',htmlUrl:'https://arxiv.org/html/2305.18290v3'}),/model-output source changed/)
+})
+
+test('DreamerV3 removes only the byte-identical duplicated source caption and retains its anchor once', () => {
+  const caption = "<figcaption class=\"ltx_caption\"><span class=\"ltx_tag ltx_tag_table\"><span class=\"ltx_text\" id=\"Ax1.SSx1.4.7.1.1\" style=\"font-size:90%;\">Table 1</span>: </span><span class=\"ltx_text\" id=\"Ax1.SSx1.4.8.2\" style=\"font-size:90%;\">PPO hyperparameters used across all benchmarks.\n</span></figcaption>"
+  const html = '<article class="ltx_document"><h1 class="ltx_title_document">Fixture</h1><figure class="ltx_table" id="Ax1.SSx1.4">'+caption+'<table><tr><td>Score</td></tr></table>'+caption+'</figure></article>'
+  const options = {id:'dreamerv3',arxivId:'2301.04104v2',htmlUrl:'https://arxiv.org/html/2301.04104v2'}
+  const p = parsePaper(html,options), $=load(p.blocks[0].en,{},false)
+  assert.equal($('figcaption').length,1)
+  assert.equal($('[id="Ax1.SSx1.4.7.1.1"]').length,1)
+  assert.equal($('td').text(),'Score')
+  assert.equal(p.source.repairs[0].removedCopies,1)
+  assert.throws(()=>parsePaper(html.replace('PPO hyperparameters','Different caption'),options),/duplicated DreamerV3 caption changed/)
+})
+
+test('thousand-step counts compare numeric values while preserving source publisher notices', () => {
+  assert.doesNotThrow(() => assertTranslationFidelity('300 thousand steps and 3 million steps', '30万步和300万步'))
+  assert.throws(() => assertTranslationFidelity('300 thousand steps', '300步'), /Numeric value/)
+  const notice = '0004-3702/99/$ – see front matter © 1999 Published by Elsevier Science B.V. All rights reserved. PII: S0004-3702(99)0 00 52 -1'
+  assert.equal(isTechnicalLabelOnly(notice), true)
+  assert.doesNotThrow(() => parseUnitResponse(JSON.stringify({translations:{notice}}), [{id:'notice',text:notice}]))
+  assert.throws(() => parseUnitResponse(JSON.stringify({translations:{prose:'This procedure learns a model and updates it using observations.'}}), [{id:'prose',text:'This procedure learns a model and updates it using observations.'}]), /No Chinese translation/)
+})
+
+test('table cell boundaries prevent label prefixes from multiplying scores and reject swapped scores', () => {
+  const en = '<table><tr><td>Breakout</td><td>742</td></tr><tr><td>Centipede</td><td>100</td></tr></table>'
+  const zh = '<table><tr><td>打砖块</td><td>742</td></tr><tr><td>千足虫</td><td>100</td></tr></table>'
+  assert.doesNotThrow(() => assertBlockTranslationFidelity(en, zh))
+  assert.throws(() => assertBlockTranslationFidelity(en, zh.replace('742', '101').replace('100', '742')), /Numeric value/)
+  assert.throws(() => assertBlockTranslationFidelity(en, zh.replace('742', '100').replace('100</td></tr></table>', '742</td></tr></table>')), /Numeric value/)
+})
+
+test('exact RL algorithm abbreviations are labels while descriptive learning headings remain translatable', () => {
+  for (const label of ['Double DQN', 'Dueling DQN', 'QR-DQN-0', 'IQN', 'ICM', 'RND', 'HER']) assert.equal(isTechnicalLabelOnly(label), true)
+  for (const prose of ['Double Q-learning', 'Double', 'The advantages of Double DQN']) assert.equal(isTechnicalLabelOnly(prose), false)
+})
+
+
+test('SimPLe is an exact algorithm label while its descriptive prose still requires translation', () => {
+  assert.ok(isTechnicalLabelOnly('SimPLe'))
+  assert.ok(isTechnicalLabelOnly('Transformers'))
+  assert.equal(isTechnicalLabelOnly('Transformer sequence models'), false)
+  assert.equal(isTechnicalLabelOnly('SimPLe model performance'), false)
+  assertTranslationFidelity('SimPLe', 'SimPLe', {kind: 'heading'})
+})
+
+
+test('verb to model accepts 建模 while model nouns and advantages remain required', () => {
+  assertTranslationFidelity('They can model long sequences. Their models have advantages.', '它们可以对长序列建模。它们的模型具有优势。')
+  assertTranslationFidelity('Besides their ability to model long sequences, transformers have other advantages.', '除了对长序列建模的能力，Transformer 还有其他优势。')
+  assert.throws(() => assertTranslationFidelity('Besides their ability to model long sequences, transformers have other advantages.', 'Transformer 还有其他优势。'), /Core concepts omitted/)
+  assert.throws(() => assertTranslationFidelity('These models have advantages.', '建模具有优势。'), /Core concepts omitted/)
+})
+
+
+test('prose cannot acquire source compiler commands and ECO opening identities remain fixed', () => {
+  assert.throws(() => parseUnitResponse(JSON.stringify({translations:{u:'新游戏 \\newgame'}}), [{id:'u',text:'A10: English Opening'}]), /LaTeX command/)
+  assertTranslationFidelity('A10: English Opening', 'A10：英国开局')
+  assert.throws(() => assertTranslationFidelity('A10: English Opening', 'D06：英国开局'), /identifier/)
+  assert.ok(isTechnicalLabelOnly('Bellemare et al. (2016)'))
+  assert.equal(isTechnicalLabelOnly('This method performs well (2016)'), false)
+  assert.ok(isTechnicalLabelOnly('Atari'))
+  assert.ok(isTechnicalLabelOnly('Decision Transformer'))
+})
+
+
+test('short descriptive fragments cannot be replaced with unrelated English labels', () => {
+  assert.throws(() => parseUnitResponse('{"translations":{"u":"Adam"}}', [{id:'u',text:'Learning rate'}]), /Untranslated English fragment/)
+  assert.deepEqual(parseUnitResponse('{"translations":{"u":"学习率"}}', [{id:'u',text:'Learning rate'}]), [{id:'u',text:'学习率'}])
+  assert.deepEqual(parseUnitResponse('{"translations":{"u":"CartPole"}}', [{id:'u',text:'Cartpole'}]), [{id:'u',text:'CartPole'}])
+})
+
+
+test('fragment validation rejects extreme omission and copied neighboring sentences', () => {
+  const source = 'We compare the policies of the agents and explain why learning from their observations can recover the information needed for training complex communication behaviour in simulation.'
+  assert.throws(() => parseUnitResponse('{"translations":{"u":"章节"}}', [{id:'u',text:source}]), /severely shortened/)
+  assert.throws(() => parseUnitResponse(JSON.stringify({translations:{u:'相邻的模型性能描述。'.repeat(20)}}), [{id:'u',text:'using the standard constant'}]), /context expanded/)
+  assert.throws(() => parseUnitResponse(JSON.stringify({translations:{u:'强化比较。}} -> 修正为：{'}}), [{id:'u',text:'Reinforcement comparison.'}]), /instruction leaked/)
+})
+
+
+test('numbered agent followed by modal may retains its ID without inventing a May date', () => {
+  assertTranslationFidelity('Then agent 1 may store additional information.', '随后智能体1可以存储额外信息。')
+  assert.throws(() => assertTranslationFidelity('Then agent 1 may store additional information.', '随后智能体2可以存储额外信息。'), /Numeric value/)
+  assertTranslationFidelity('We met on 1 May.', '我们在5月1日见面。')
+  assert.throws(() => assertTranslationFidelity('We met on 1 May.', '我们在5月2日见面。'), /Calendar date/)
+})
+
+
+test('RL algorithm and benchmark labels retain their identities in short fragments', () => {
+  assert.throws(() => parseUnitResponse('{"translations":{"u":"IMPALA"}}', [{id:'u',text:'Rainbow'}]), /label changed/)
+  assert.deepEqual(parseUnitResponse('{"translations":{"u":"MuJoCo"}}', [{id:'u',text:'MuJoCo',kind:'heading'}]), [{id:'u',text:'MuJoCo'}])
+  assert.equal(isTechnicalLabelOnly('2 DreamerV2'), true)
+  assert.equal(isTechnicalLabelOnly('2 Learning the model'), false)
+})
+
+test('adjacent citation years remain separate after full-width comma normalization', () => {
+  assertTranslationFidelity('in expected value (Williams, 1988, 1992).', '在期望值中（Williams，1988，1992）。')
+  assert.throws(() => assertTranslationFidelity('(Williams, 1988, 1992)', '（Williams，1989，1992）'), /Numeric value/)
+  assertTranslationFidelity('A score of 1,234,567.', '得分为1,234,567。')
+  assert.throws(() => assertTranslationFidelity('A score of 1,234,567.', '得分为1,234,568。'), /Numeric value/)
+})
+
+
+test('RL fragment terminology distinguishes expectiles, off-policy, offline and non-expansion', () => {
+  const check = (text, zh) => parseUnitResponse(JSON.stringify({translations:{u:zh}}), [{id:'u',text}])
+  assert.throws(() => check('expectile regression objective', '分位数回归目标'), /Expectile confused/)
+  assert.doesNotThrow(() => check('expectile regression objective', '期望分位数（expectile）回归目标'))
+  assert.throws(() => check('off-policy methods', '离线方法'), /Off-policy confused/)
+  assert.doesNotThrow(() => check('off-policy methods', '离策略方法'))
+  assert.throws(() => check('offline learning', '离策略学习'), /Offline learning/)
+  assert.throws(() => check('not a non-expansion', '不是压缩映射'), /Non-expansion confused/)
+  assert.doesNotThrow(() => check('not a non-expansion', '不是非扩张映射'))
+})

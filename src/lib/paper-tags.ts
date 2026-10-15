@@ -7,8 +7,11 @@ export const PAPER_FAMILIES = [
   'FineWeb', 'DCLM', 'DoReMi', 'Scaling Laws', 'μP', 'Dolma', 'Switch Transformer',
   'Adam', 'AdamW', 'Muon', 'Shampoo', 'SOAP', 'Adafactor', 'Lion', 'Dion',
   'AlexNet', 'ResNet', 'Word2Vec', 'Seq2Seq', 'Attention', 'VAE', 'GAN', 'DDPM', 'ViT', 'DQN', 'AlphaGo', 'InstructGPT',
+  'TD learning', 'Q-learning', 'REINFORCE', 'Dyna', 'Options', 'Policy Gradient Theorem', 'Apprenticeship IRL', 'Maximum Entropy IRL', 'Deep RL from Human Preferences', 'Double DQN', 'Dueling DQN', 'Prioritized Experience Replay', 'Rainbow', 'C51', 'QR-DQN', 'IQN',
+  'DPG', 'TRPO', 'GAE', 'PPO', 'A3C', 'DDPG', 'TD3', 'SAC', 'AlphaZero', 'MuZero', 'World Models', 'PETS', 'MBPO', 'Dreamer', 'DreamerV2', 'DreamerV3',
+  'BCQ', 'CQL', 'IQL', 'Decision Transformer', 'ICM', 'RND', 'HER', 'Option-Critic', 'MADDPG', 'VDN', 'QMIX', 'GAIL', 'DPO',
 ] as const
-export const RESEARCH_TAGS = ['预训练', '后训练', '模型架构', '监督训练', '缩放定律', '预训练数据', '数据混合', '训练优化', '优化器', '矩阵优化', '显存优化', '分布式训练', '经典论文', '计算机视觉', '自然语言处理', '生成模型', '强化学习'] as const
+export const RESEARCH_TAGS = ['预训练', '后训练', '模型架构', '监督训练', '缩放定律', '预训练数据', '数据混合', '训练优化', '优化器', '矩阵优化', '显存优化', '分布式训练', '经典论文', '计算机视觉', '自然语言处理', '生成模型', '强化学习', '强化学习基础', '价值学习', '回报分布', '策略梯度', '连续控制', '世界模型', '规划', '离线强化学习', '探索', '稀疏奖励', '层次强化学习', '多智能体', '模仿学习', '逆强化学习', '偏好优化', 'RLHF'] as const
 
 export function tagLabel(tag: string): string {
   return tag === 'Qwen' ? 'Qwen / 千问' : tag

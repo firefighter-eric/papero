@@ -29,11 +29,19 @@ const fragmentCorrectionKeys = ['id', 'blockId', 'sourceId', 'method', 'assistin
 /** Reused responses may span model contexts; bind each unit to its actual run. */
 export function assertLocalResponseReplay(paper, block) {
   const metadata = block.translation, replay = metadata?.responseReplay
+  const correction = metadata?.assistedCorrection
+  const corrected = correction?.method === 'codex-subagent-fragment-correction'
+  const original = metadata?.originalTranslationMetadata
+  if (corrected && (!original || !same(original.responseReplay, replay)
+    || (original.translatedSha256 !== undefined && original.translatedSha256 !== correction.previousChineseSha256)
+    || correction.correctedChineseSha256 !== sha256(block.zh))) {
+    throw new Error(`Invalid corrected local response replay chain: ${paper.id}/${block.id}.`)
+  }
   const units = translationUnits(block.en, block.kind).units
   const fail = () => { throw new Error(`Invalid local response replay provenance: ${paper.id}/${block.id}.`) }
   if (metadata?.provider !== 'LM Studio local API' || replay?.method !== 'validated-local-response-replay'
     || replay.sourcePaperSha256 !== paper.source.sha256 || replay.sourceBlockSha256 !== sha256(block.en)
-    || replay.translatedBlockSha256 !== sha256(block.zh) || !timestamp(replay.assembledAt)
+    || replay.translatedBlockSha256 !== (corrected ? correction.previousChineseSha256 : sha256(block.zh)) || !timestamp(replay.assembledAt)
     || replay.assembledAt !== metadata.translatedAt || Date.parse(replay.assembledAt) > Date.parse(paper.translation.updatedAt)
     || !Array.isArray(replay.units) || replay.units.length !== units.length || !units.length) fail()
   replay.units.forEach((receipt, index) => {
@@ -66,6 +74,14 @@ export function historicalBlockCounts(paper) {
 }
 
 function assertAssistedCorrections(paper) {
+  const title = paper.translation.titleAssistedCorrection
+  if (title && (title.method !== 'codex-subagent-title-correction' || title.model !== 'gpt-6-luna' || title.provider !== 'Codex subagent'
+    || !same(title.parameters, { reasoning_effort: 'low' }) || title.primaryModel !== paper.translation.model
+    || title.sourceTitleSha256 !== sha256(paper.title) || title.correctedChineseSha256 !== sha256(paper.titleZh)
+    || !fingerprint(title.previousChineseSha256) || !fingerprint(title.draftSha256) || !fingerprint(title.reviewSha256)
+    || !timestamp(title.appliedAt) || Date.parse(title.appliedAt) > Date.parse(paper.translation.updatedAt))) {
+    throw new Error(`Invalid assisted title correction: ${paper.id}.`)
+  }
   const ledger = paper.translation.assistedCorrections
   const assisted = paper.blocks.filter(block => block.translation?.assistedCorrection !== undefined)
   if (ledger === undefined && !assisted.length) return

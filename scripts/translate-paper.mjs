@@ -2,15 +2,15 @@ import { readFile, writeFile, rename } from 'node:fs/promises'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { load } from 'cheerio'
-import { translationUnits, normalizeHeadingNumber, assertTranslationFidelity, assertBlockTranslationFidelity, technicalIdentifiers, isTechnicalLabelOnly, safeId, sha256, translatedAbstractText } from './paper-lib.mjs'
+import { translationUnits, normalizeHeadingNumber, assertTranslationFidelity, assertBlockTranslationFidelity, technicalIdentifiers, isTechnicalLabelOnly, isRlVerbatimLabel, safeId, sha256, translatedAbstractText } from './paper-lib.mjs'
 import { updateCatalog } from './import-paper.mjs'
 import { withExclusivePaperLock } from './catalog-lock.mjs'
-import { createRequestGate, runBoundedTasks, createSerialWriter, validateConcurrency, extractCompletionText, translationRequestBudget, protectSourceDelimiters, sourceNumericTokens } from './translation-workers.mjs'
+import { createRequestGate, runBoundedTasks, createSerialWriter, validateConcurrency, extractCompletionText, translationRequestBudget, protectSourceDelimiters, normalizeProseRequestWhitespace, sourceNumericTokens } from './translation-workers.mjs'
 import { assertModelContinuation, beginModelRun, recordModelUsage } from './translation-provenance.mjs'
 
 const BASE_SYSTEM_PROMPT = `你是严谨的人工智能论文译者。把提供的英文文本片段完整翻译为简体中文。相同 block 的片段来自同一段 HTML，按顺序连接；有些片段被公式、引文或链接分开。context 中 ⟦id⟧ 与 ⟦/id⟧ 标出了每个片段的精确边界，⟪FORMULA⟫ 是保留的原公式。根据 context 理解句意，但只翻译当前片段的 text，绝不能把相邻片段或公式内容补到当前译文。片段不是完整句子时，也只输出对应的句子片段。例如 text="Even with" 必须译为"即使"，不能补出"即使可分离卷积..."；text="where" 译为"其中"，不能补出后面的变量解释。text="and discuss its advantages over models such as" 必须译为"并讨论其相比以下模型的优势，例如"，不得将“优势/模型”后置到引用之后或省略。每个 id 必须对应一条译文，不能遗漏、合并或新增 id。严格保留 text 内每一个阿拉伯数字、正负号、小数、百分号、技术符号、姓名、模型型号、英文基准名称、缩写和链接；不得从 context 复制本片段没有的数字。参数数量的 million/billion/trillion 使用 M/B/T 原样单位，不换算成中文数位：0.5 billion parameters 译为 0.5B 参数，72 billion parameters 译为 72B 参数，范围 0.5 to 72 billion 译为 0.5B 到 72B，禁止译为 0.5亿或72亿。技术标识符 Qwen2.5-72B、GPT-4o、GSM8K 等逐字保留。完整翻译原片段每个概念：advantages 译为优势，models 译为模型，不得漏掉。译文不能加入解释、总结或审稿意见。Transformer 译为 Transformer，attention 译为注意力，self-attention 译为自注意力，multi-head attention 译为多头注意力，position-wise 译为逐位置，scaled dot-product attention 译为缩放点积注意力，sequence transduction 译为序列转换。输出只能是 JSON 对象，格式 {"translations":{"原id":"中文片段", "另一个id":"中文片段"}}。必须逐条输出所有 id，每个 id 只出现一次。不要输出 Markdown 围栏。/no_think`
 
-const LITERAL_TRANSPORT_INSTRUCTION = ' Literal source model delimiters are represented by opaque ⟪PAPERO_LITERAL_...⟫ tokens. Preserve every token exactly, including its multiplicity, in its original translation unit. Never expand these tokens to model control tags or move them to another unit. Protocol role labels user and assistant after a source delimiter are immutable syntax; preserve them exactly.'
+const LITERAL_TRANSPORT_INSTRUCTION = ' For every source fragment ending in Section, the Chinese fragment must end in 章节 or 第 immediately before the preserved section-number link. For example, We evaluate each method following the three experiments defined in Section becomes 我们按照三个实验评估每种方法，其定义详见章节 . Do not move the experiment count or evaluation statement across the link. For every record with kind=heading, translate descriptive words into Chinese even when the heading is an algorithm name. For example, Double Q-learning becomes 双重 Q 学习, Dueling Network becomes 竞争网络. Preserve required identifiers and abbreviations exactly; add a Chinese rendering of the existing descriptive words when needed. Never leave a descriptive heading entirely in English. Literal source model delimiters are represented by opaque ⟪PAPERO_LITERAL_...⟫ tokens. Preserve every token exactly, including its multiplicity, in its original translation unit. Never expand these tokens to model control tags or move them to another unit. Protocol role labels user and assistant after a source delimiter are immutable syntax; preserve them exactly.'
 const SYSTEM_PROMPT = BASE_SYSTEM_PROMPT + ` 当前片段中单独出现的英文月份名称或缩写译为汉字月份（一月、二月、十二月），或保留原英文，不得额外添加阿拉伯数字；例如单独 Feb 译为二月，不能译为2月。当前片段中包含完整年份或日期的英文日期可以按同一日期译为中文数字年月日，例如 November 2023 译为2023年11月，不得丢失年份或月份。May 在日期中译为五月，在其他语境中按原意翻译。每个 record 的 mustPreserveValues 只列出当前 text 中的数字原词，须保留数值与次数，并在当前片段中完整表达数值关联的概念，不能移至邻居。每个 record 的 mustPreserve 列出了本片段内必须逐字出现的技术标识符。先检查全部标识符已保留，再输出。即使中文语序自然需要后置，也必须把完整概念和型号放在当前片段，不可移到下一片段。例如 text="Qwen2-72B outperforms Llama-3-70B in general " 必须译为"Qwen2-72B 在通用领域的表现优于 Llama-3-70B，包括 "；不能译为"Qwen2-72B 在通用 "，因为这漏掉了比较关系和 Llama-3-70B。` + LITERAL_TRANSPORT_INSTRUCTION
 
 const ISOLATED_PROMPT = `Translate each exact English fragment into Simplified Chinese. Preserve the complete subject, predicate, object and numeric score within this fragment before its trailing preposition. For example, 'Model achieves a 3.75 human evaluation score on ' must include the achieved 3.75 score in this fragment, such as 'Model 获得 3.75 分的人工评估得分，任务为 ' ; never truncate it to 'Model 在'. Every mustPreserveValues item was extracted only from this exact text; preserve its value and occurrence count within this fragment. This is a correction of an omitted value or identifier. Translate all meaning in this fragment, even if it is an incomplete sentence. Preserve every mustPreserve identifier, Arabic number, sign, decimal and percentage exactly. Do not copy neighboring text, infer additional facts, or add commentary. Preserve parameter quantities using M/B/T (million/billion/trillion) and context quantities using K. When automated alignment strategies synthesize artificially annotated data, translate artificially annotated as 机器标注 or 自动标注, never 人工标注. Translate are reported in Section as 详见章节 before its following immutable section link; do not end a fragment at 在第. Return only JSON: {"translations":{"original_id":"Chinese fragment"}}. /no_think` + LITERAL_TRANSPORT_INSTRUCTION
@@ -137,6 +137,12 @@ async function translateUnlocked({ id, dataDir, endpoint = process.env.LM_STUDIO
     let results
     try {
       const requestUnits = async (requestRecords, requestContexts, prompt, attempt) => {
+        // Most papers contain no model-control delimiters. Do not introduce
+        // opaque-token examples into those requests, which can be echoed into
+        // otherwise ordinary citations by the local model.
+        if (!requestRecords.some(record => /<\/?think>|<\|im_(?:start|end)\|>/.test(record.text))) {
+          prompt = prompt.replace(/Literal source model delimiters are represented[\s\S]*$/, '')
+        }
         const responseFormat = {
           type: 'json_schema', json_schema: { name: 'paper_translation', strict: true, schema: {
             type: 'object', properties: { translations: {
@@ -146,6 +152,7 @@ async function translateUnlocked({ id, dataDir, endpoint = process.env.LM_STUDIO
           } },
         }
         const transport = protectSourceDelimiters(requestRecords, requestContexts)
+        transport.records = normalizeProseRequestWhitespace(transport.records)
         const output = await completionGate(async () => {
           const response = await fetch(`${apiBase}/chat/completions`, {
             method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: AbortSignal.timeout(600000),
@@ -154,7 +161,7 @@ async function translateUnlocked({ id, dataDir, endpoint = process.env.LM_STUDIO
           if (!response.ok) throw new Error(`LM Studio completion failed (${response.status}): ${(await response.text()).slice(0, 600)}`)
           return response.json()
         })
-        const { content, responseChannel } = extractCompletionText(output, { expectedModel: model, expectedIds: requestRecords.map(record => record.id) })
+        const { content, responseChannel } = extractCompletionText(output, { expectedModel: model, expectedIds: requestRecords.map(record => record.id), allowEmptyTranslations: true })
         // Per-request names cannot be overwritten by concurrent batch workers.
         const responseFile = `translation-response-${runToken}-${++requestSequence}.json`
         await writeFile(path.join(path.dirname(filename), responseFile), JSON.stringify({ model, modelIdentity, parameters: { ...parameters, seed: parameters.seed + attempt - 1 }, records: requestRecords, transportRecords: transport.records, content, responseChannel, usage: output.usage, promptSha256: sha256(prompt) }, null, 2) + '\n')
@@ -173,7 +180,7 @@ async function translateUnlocked({ id, dataDir, endpoint = process.env.LM_STUDIO
         for (const failure of checked.failures) {
           try {
             const [corrected] = await translateWithSplitting([failure.record], async (isolatedRecords, correctionAttempt) => {
-              const isolated = await requestUnits(isolatedRecords, [], ISOLATED_PROMPT, correctionAttempt)
+              const isolated = await requestUnits(isolatedRecords.map(record => ({ ...record, validationFailure: failure.error })), [], ISOLATED_PROMPT, correctionAttempt)
               return parseUnitResponse(isolated.content, isolatedRecords, { restoreValue: isolated.restore }).map(result => ({ ...result, responseChannel: isolated.responseChannel }))
             }, { maximumRecords: requestBudget.maximumRecords, maximumCharacters: requestBudget.maximumCharacters, maximumUnitCharacters: requestBudget.maximumUnitCharacters, onRetry: (error, retry) => console.error(`[${id}] Unit ${failure.record.id}, correction ${retry}: ${error.message}`) })
             acceptedCache.set(corrected.id, corrected)
@@ -327,7 +334,7 @@ export function parseUnitResponse(content, records, { collectFailures = false, r
   if (translations.length !== records.length) throw new Error(`Model returned ${translations.length} units; expected ${records.length}`)
   const map = new Map()
   for (const item of translations) {
-    if (map.has(item.id) || typeof item.text !== 'string' || !item.text.trim()) throw new Error(`Duplicate or empty translation unit ${item.id}`)
+    if (map.has(item.id) || typeof item.text !== 'string') throw new Error(`Duplicate or empty translation unit ${item.id}`)
     map.set(item.id, item)
   }
   const results = [], failures = []
@@ -335,7 +342,16 @@ export function parseUnitResponse(content, records, { collectFailures = false, r
     const raw = map.get(record.id)
     if (!raw) throw new Error(`Missing translation unit ${record.id}`)
     try {
+      if (!raw.text.trim()) throw new Error(`Empty translation unit ${record.id}`)
       const result = { ...raw, text: restoreValue(record.id, raw.text) }
+      if (!/validationFailure|mustPreserve|retryAttempt|对应中文片段|修正为/.test(record.text)
+        && /validationFailure|mustPreserve|retryAttempt|对应中文片段|\}\}\s*(?:->|→)\s*修正为/.test(result.text)) {
+        throw new Error(`Translation instruction leaked into prose: ${record.id}`)
+      }
+      if (isRlVerbatimLabel(record.text)) {
+        const identity = text => text.normalize('NFKC').replace(/[^\p{L}\p{N}]/gu, '').toLowerCase()
+        if (identity(record.text) !== identity(result.text)) throw new Error(`RL algorithm or benchmark label changed: ${record.id}`)
+      }
       const heading = record.kind === 'heading' && !isTechnicalLabelOnly(record.text)
         && !/^(?:Dropout|LSUN|Vision Transformer\s*\(ViT\))$/i.test(record.text.trim())
       if (heading && !/[\u3400-\u9fff]/.test(result.text)) throw new Error(`No Chinese heading translation for ${record.id}`)
@@ -347,6 +363,25 @@ export function parseUnitResponse(content, records, { collectFailures = false, r
       if ((record.text.length > 70 || narrative) && !/[\u3400-\u9fff]/.test(result.text)) {
         const sameLabels = text => text.normalize('NFKC').replace(/[\s、,;:()。]/g, '').toLowerCase()
         if (!isTechnicalLabelOnly(record.text) || sameLabels(record.text) !== sameLabels(result.text)) throw new Error(`No Chinese translation for ${record.id}`)
+      }
+      if (!/[\u3400-\u9fff]/.test(result.text) && /[A-Za-z]{2}/.test(record.text) && /[A-Za-z]{2}/.test(result.text)
+        && !isTechnicalLabelOnly(record.text)
+        && record.text.normalize('NFKC').replace(/\b(?:the|a|an)\b/gi, '').replace(/[^\p{L}\p{N}]/gu, '').toLowerCase() !== result.text.normalize('NFKC').replace(/\b(?:the|a|an)\b/gi, '').replace(/[^\p{L}\p{N}]/gu, '').toLowerCase()) {
+        throw new Error(`Untranslated English fragment substituted: ${record.id}`)
+      }
+      const sourceLength = record.text.replace(/\s+/g, ' ').trim().length
+      const translatedLength = result.text.replace(/\s+/g, ' ').trim().length
+      if (narrative && sourceLength > 120 && translatedLength < sourceLength * 0.15) throw new Error(`Narrative fragment severely shortened: ${record.id}`)
+      if (translatedLength > Math.max(120, sourceLength * 1.5)) throw new Error(`Unrelated context expanded into fragment: ${record.id}`)
+      if (/\bexpectiles?\b/i.test(record.text) && !/expectile|期望分位数|期望位数/i.test(result.text)) throw new Error(`Expectile confused with quantile: ${record.id}`)
+      if (/\boff[-\u2010-\u2015]\s*policy\b/i.test(record.text) && !/离策略|异策略|off[-\u2010-\u2015]\s*policy/i.test(result.text)) throw new Error(`Off-policy confused with offline: ${record.id}`)
+      if (/\boffline\b/i.test(record.text) && !/离线|offline/i.test(result.text)) throw new Error(`Offline learning concept omitted: ${record.id}`)
+      if (/\bnon[- ]?expansion\b/i.test(record.text) && !/非扩张|非膨胀|non[- ]?expansion/i.test(result.text)) throw new Error(`Non-expansion confused with contraction: ${record.id}`)
+      const sourceCommands = [...(record.text.match(/\\[A-Za-z]+/g) || [])]
+      for (const command of result.text.match(/\\[A-Za-z]+/g) || []) {
+        const index = sourceCommands.indexOf(command)
+        if (index < 0) throw new Error(`LaTeX command added to prose translation: ${command}`)
+        sourceCommands.splice(index, 1)
       }
       assertTranslationFidelity(record.text, result.text)
       results.push(result)

@@ -17,6 +17,14 @@ export function validateConcurrency(value) {
 const literalPrefix = '⟪PAPERO_LITERAL_'
 const sourceDelimiters = ['<think>', '</think>', '<|im_start|>', '<|im_end|>']
 const delimiterNames = ['THINK_OPEN', 'THINK_CLOSE', 'IM_START', 'IM_END']
+
+// arXiv bibliography nodes can contain thousands of layout-only newlines.
+// Normalize only the request copy, keeping the exact original text in receipts.
+// Code, equations and source HTML remain outside this prose transport step.
+export function normalizeProseRequestWhitespace(records) {
+  return records.map(record => ({ ...record, text: record.text.replace(/[\s\u0000-\u001f\u007f]+/g, ' ').trim() }))
+}
+
 export function protectSourceDelimiters(records, contexts = []) {
   if ([...records.map(record => record.text), ...contexts.map(context => context.context)].some(text => text.includes(literalPrefix))) throw new Error('Source collides with reserved literal transport placeholder')
   const specs = new Map()
@@ -72,7 +80,7 @@ export function translationRequestBudget(contextLength, batchCharacters = 6000) 
 
 // A known LM Studio MLX routing bug can place a schema-constrained final JSON
 // document in reasoning_content. Never promote free-form reasoning to an answer.
-export function extractCompletionText(output, { expectedModel, expectedIds } = {}) {
+export function extractCompletionText(output, { expectedModel, expectedIds, allowEmptyTranslations = false } = {}) {
   if (output?.model !== expectedModel) throw new Error(`Completion model mismatch: expected ${expectedModel}, received ${output?.model || 'unknown'}`)
   const choice = output.choices?.[0]
   if (choice?.finish_reason === 'length') throw new Error('Model output was truncated; reduce TRANSLATION_BATCH_CHARACTERS')
@@ -106,7 +114,7 @@ export function extractCompletionText(output, { expectedModel, expectedIds } = {
   if (!translations || Array.isArray(translations) || typeof translations !== 'object') throw new Error('Reasoning channel translations must be a plain object')
   const actualIds = Object.keys(translations)
   if (actualIds.length !== expectedIds.length || actualIds.some(id => !expectedIds.includes(id)) || expectedIds.some(id => !Object.hasOwn(translations, id))) throw new Error('Reasoning channel translation IDs do not match the requested IDs')
-  if (actualIds.some(id => typeof translations[id] !== 'string' || !translations[id].trim())) throw new Error('Reasoning channel contains an empty or non-string translation')
+  if (actualIds.some(id => typeof translations[id] !== 'string' || (!allowEmptyTranslations && !translations[id].trim()))) throw new Error('Reasoning channel contains an empty or non-string translation')
   return { content: reasoning, responseChannel: 'reasoning_content' }
 }
 

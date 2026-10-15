@@ -1,0 +1,1074 @@
+{
+  "title": "Deterministic Policy Gradient Algorithms",
+  "expectedPdfSha256": "fb5313826c35ced2d9326ebc4d9e1610da69d38eb0860104c4051c87d266edef",
+  "mathMode": "original-pdf-vectors",
+  "mathFontPattern": "(?:CMMI|CMSY|CMEX|CMR|MSAM|MSBM)\\d+$",
+  "explicitHeaderRegions": true,
+  "requireMathFontForDisplay": true,
+  "geometricSuperscripts": true,
+  "mathGlyphPattern": "ˆ",
+  "indentParagraphs": true,
+  "anchorTargets": {
+    "Doc-Start": {
+      "pdfPage": 1,
+      "sourceId": "pdf-p1-block-001",
+      "semanticProof": "Start of retained page body",
+      "textPrefix": "David Silver DAVID@DEEPMIND.COM DeepMind Technologies, London, UK Guy Lever GUY.LEVER@UCL.AC.UK Univ"
+    },
+    "Hfootnote.1": {
+      "pdfPage": 2,
+      "sourceId": "pdf-p2-block-022",
+      "semanticProof": "Source footnote 1",
+      "textPrefix": "1To simplify notation, we frequently drop the random variable in the conditional density and write  "
+    },
+    "Hfootnote.2": {
+      "pdfPage": 2,
+      "sourceId": "pdf-p2-block-023",
+      "semanticProof": "Source footnote 2",
+      "textPrefix": "2The results in this paper may be extended to an average reward performance objective by choosing  t"
+    },
+    "Hfootnote.3": {
+      "pdfPage": 8,
+      "sourceId": "pdf-p8-block-110",
+      "semanticProof": "Source footnote 3",
+      "textPrefix": "3Recall that the compatibility criteria apply to any differentiable baseline, including non-linear s"
+    },
+    "Hfootnote.4": {
+      "pdfPage": 8,
+      "sourceId": "pdf-p8-block-111",
+      "semanticProof": "Source footnote 4",
+      "textPrefix": "4http://www0.cs.ucl.ac.uk/staff/D.Silver/ web/Applications.html"
+    },
+    "Item.1": {
+      "pdfPage": 5,
+      "sourceId": "pdf-p5-block-077",
+      "semanticProof": "Numbered compatibility condition 1",
+      "textPrefix": "1.  and"
+    },
+    "Item.2": {
+      "pdfPage": 5,
+      "sourceId": "pdf-p5-block-078",
+      "semanticProof": "Numbered compatibility condition 2",
+      "textPrefix": "2.  minimises the mean-squared error,"
+    },
+    "cite.bagnell:covariant": {
+      "pdfPage": 9,
+      "sourceId": "pdf-p9-block-113",
+      "semanticProof": "Reference author/title identity: Bagnell,",
+      "textPrefix": "Bagnell, J. A. D. and Schneider, J. (2003). Covariant policy search. In Proceeding of the Internatio"
+    },
+    "cite.degris:comparison": {
+      "pdfPage": 9,
+      "sourceId": "pdf-p9-block-115",
+      "semanticProof": "Reference author/title identity: Degris, T., Pilarski",
+      "textPrefix": "Degris, T., Pilarski, P. M., and Sutton, R. S. (2012a). Model-free reinforcement learning with conti"
+    },
+    "cite.degris:offpac": {
+      "pdfPage": 9,
+      "sourceId": "pdf-p9-block-116",
+      "semanticProof": "Reference author/title identity: Degris, T., White",
+      "textPrefix": "Degris, T., White, M., and Sutton, R. S. (2012b). Linear off-policy actor-critic. In 29th Internatio"
+    },
+    "cite.engel:octopus": {
+      "pdfPage": 9,
+      "sourceId": "pdf-p9-block-117",
+      "semanticProof": "Reference author/title identity: Engel,",
+      "textPrefix": "Engel, Y., Szabó, P., and Volkinshtein, D. (2005). Learning to control an octopus arm with gaussian "
+    },
+    "cite.heess:energy-based-policies": {
+      "pdfPage": 9,
+      "sourceId": "pdf-p9-block-119",
+      "semanticProof": "Reference author/title identity: Heess,",
+      "textPrefix": "Heess, N., Silver, D., and Teh, Y. (2012). Actor-critic reinforcement learning with energy-based pol"
+    },
+    "cite.kakade:natural": {
+      "pdfPage": 9,
+      "sourceId": "pdf-p9-block-120",
+      "semanticProof": "Reference author/title identity: Kakade,",
+      "textPrefix": "Kakade, S. (2001). A natural policy gradient. In Neural Information Processing Systems 14, pages 153"
+    },
+    "cite.lagoudakis:lspi": {
+      "pdfPage": 9,
+      "sourceId": "pdf-p9-block-121",
+      "semanticProof": "Reference author/title identity: Lagoudakis,",
+      "textPrefix": "Lagoudakis, M. G. and Parr, R. (2003). Least-squares policy iteration. Journal of Machine Learning R"
+    },
+    "cite.maei:gq": {
+      "pdfPage": 9,
+      "sourceId": "pdf-p9-block-122",
+      "semanticProof": "Reference author/title identity: Maei,",
+      "textPrefix": "Maei, H. R., Szepesvári, C., Bhatnagar, S., and Sutton, R. S. (2010). Toward off-policy learning con"
+    },
+    "cite.maei:gtd": {
+      "pdfPage": 9,
+      "sourceId": "pdf-p9-block-126",
+      "semanticProof": "Reference author/title identity: Sutton, R. S., Maei",
+      "textPrefix": "Sutton, R. S., Maei, H. R., Precup, D., Bhatnagar, S., Silver, D., Szepesvári, C., and Wiewiora, E. "
+    },
+    "cite.peters:enac": {
+      "pdfPage": 9,
+      "sourceId": "pdf-p9-block-124",
+      "semanticProof": "Reference author/title identity: Peters, J., Vijayakumar",
+      "textPrefix": "Peters, J., Vijayakumar, S., and Schaal, S. (2005). Natural actor-critic. In 16th European Conferenc"
+    },
+    "cite.peters:scholarpedia": {
+      "pdfPage": 9,
+      "sourceId": "pdf-p9-block-123",
+      "semanticProof": "Reference author/title identity: Peters, J. (2010)",
+      "textPrefix": "Peters, J. (2010). Policy gradient methods. Scholarpedia, 5(11):3698."
+    },
+    "cite.riedmiller:nfqca": {
+      "pdfPage": 9,
+      "sourceId": "pdf-p9-block-118",
+      "semanticProof": "Reference author/title identity: Hafner,",
+      "textPrefix": "Hafner, R. and Riedmiller, M. (2011). Reinforcement learning in feedback control. Machine Learning, "
+    },
+    "cite.sutton:book": {
+      "pdfPage": 9,
+      "sourceId": "pdf-p9-block-125",
+      "semanticProof": "Reference author/title identity: Sutton, R. and Barto",
+      "textPrefix": "Sutton, R. and Barto, A. (1998). Reinforcement Learning: an Introduction. MIT Press."
+    },
+    "cite.sutton:incnat": {
+      "pdfPage": 9,
+      "sourceId": "pdf-p9-block-114",
+      "semanticProof": "Reference author/title identity: Bhatnagar,",
+      "textPrefix": "Bhatnagar, S., Sutton, R. S., Ghavamzadeh, M., and Lee, M. (2007). Incremental natural actor-critic "
+    },
+    "cite.sutton:policy-gradient": {
+      "pdfPage": 9,
+      "sourceId": "pdf-p9-block-127",
+      "semanticProof": "Reference author/title identity: Sutton, R. S., McAllester",
+      "textPrefix": "Sutton, R. S., McAllester, D. A., Singh, S. P., and Mansour, Y. (1999). Policy gradient methods for "
+    },
+    "cite.sutton:policy-gradient-unpub": {
+      "pdfPage": 9,
+      "sourceId": "pdf-p9-block-128",
+      "semanticProof": "Reference author/title identity: Sutton, R. S., Singh",
+      "textPrefix": "Sutton, R. S., Singh, S. P., and McAllester, D. A. (2000). Comparing policy-gradient algorithms. htt"
+    },
+    "cite.toussaint:tutorial": {
+      "pdfPage": 9,
+      "sourceId": "pdf-p9-block-129",
+      "semanticProof": "Reference author/title identity: Toussaint,",
+      "textPrefix": "Toussaint, M. (2012). Some notes on gradient descent. http://ipvs.informatik.uni-stuttgart. de/mlr/m"
+    },
+    "cite.watkins:q-learning": {
+      "pdfPage": 9,
+      "sourceId": "pdf-p9-block-130",
+      "semanticProof": "Reference author/title identity: Watkins,",
+      "textPrefix": "Watkins, C. and Dayan, P. (1992). Q-learning. Machine Learning, 8(3):279–292."
+    },
+    "cite.werbos:menu": {
+      "pdfPage": 9,
+      "sourceId": "pdf-p9-block-131",
+      "semanticProof": "Reference author/title identity: Werbos,",
+      "textPrefix": "Werbos, P. J. (1990). A menu of designs for reinforcement learning over time. In Neural networks for"
+    },
+    "cite.williams:reinforce": {
+      "pdfPage": 9,
+      "sourceId": "pdf-p9-block-132",
+      "semanticProof": "Reference author/title identity: Williams,",
+      "textPrefix": "Williams, R. J. (1992). Simple statistical gradientfollowing algorithms for connectionist reinforcem"
+    },
+    "cite.zhao:pg-analysis": {
+      "pdfPage": 9,
+      "sourceId": "pdf-p9-block-133",
+      "semanticProof": "Reference author/title identity: Zhao,",
+      "textPrefix": "Zhao, T., Hachiya, H., Niu, G., and Sugiyama, M. (2012). Analysis and improvement of policy gradient"
+    },
+    "equation.2.1": {
+      "pdfPage": 2,
+      "sourceId": "pdf-p2-block-011",
+      "semanticProof": "Source equation number 1 lies inside the preserved original glyph outline",
+      "imageSrc": "assets/math-p02-0038.svg"
+    },
+    "equation.2.2": {
+      "pdfPage": 2,
+      "sourceId": "pdf-p2-block-016",
+      "semanticProof": "Source equation number 2 lies inside the preserved original glyph outline",
+      "imageSrc": "assets/math-p02-0047.svg"
+    },
+    "equation.2.3": {
+      "pdfPage": 2,
+      "sourceId": "pdf-p2-block-020",
+      "semanticProof": "Source equation number 3 lies inside the preserved original glyph outline",
+      "imageSrc": "assets/math-p02-0063.svg"
+    },
+    "equation.2.4": {
+      "pdfPage": 3,
+      "sourceId": "pdf-p3-block-030",
+      "semanticProof": "Source equation number 4 lies inside the preserved original glyph outline",
+      "imageSrc": "assets/math-p03-0074.svg"
+    },
+    "equation.2.5": {
+      "pdfPage": 3,
+      "sourceId": "pdf-p3-block-031",
+      "semanticProof": "Original source equation 5; semantic formula rows immediately precede its retained number in the same column",
+      "textPrefix": "(5)"
+    },
+    "equation.3.10": {
+      "pdfPage": 4,
+      "sourceId": "pdf-p4-block-054",
+      "semanticProof": "Source equation number 10 lies inside the preserved original glyph outline",
+      "imageSrc": "assets/math-p04-0123.svg"
+    },
+    "equation.3.6": {
+      "pdfPage": 3,
+      "sourceId": "pdf-p3-block-039",
+      "semanticProof": "Source equation number 6 lies inside the preserved original glyph outline",
+      "imageSrc": "assets/math-p03-0095.svg"
+    },
+    "equation.3.7": {
+      "pdfPage": 3,
+      "sourceId": "pdf-p3-block-041",
+      "semanticProof": "Original source equation 7; semantic formula rows immediately precede its retained number in the same column",
+      "imageSrc": "assets/math-p03-0096.svg"
+    },
+    "equation.3.8": {
+      "pdfPage": 4,
+      "sourceId": "pdf-p4-block-046",
+      "semanticProof": "Source equation number 8 lies inside the preserved original glyph outline",
+      "imageSrc": "assets/math-p04-0108.svg"
+    },
+    "equation.3.9": {
+      "pdfPage": 4,
+      "sourceId": "pdf-p4-block-050",
+      "semanticProof": "Source equation number 9 lies inside the preserved original glyph outline",
+      "imageSrc": "assets/math-p04-0112.svg"
+    },
+    "equation.4.11": {
+      "pdfPage": 4,
+      "sourceId": "pdf-p4-block-061",
+      "semanticProof": "Source equation number 11 lies inside the preserved original glyph outline",
+      "imageSrc": "assets/math-p04-0129.svg"
+    },
+    "equation.4.12": {
+      "pdfPage": 4,
+      "sourceId": "pdf-p4-block-061",
+      "semanticProof": "Source equation number 12 lies inside the preserved original glyph outline",
+      "imageSrc": "assets/math-p04-0129.svg"
+    },
+    "equation.4.13": {
+      "pdfPage": 4,
+      "sourceId": "pdf-p4-block-061",
+      "semanticProof": "Source equation number 13 lies inside the preserved original glyph outline",
+      "imageSrc": "assets/math-p04-0129.svg"
+    },
+    "equation.4.14": {
+      "pdfPage": 4,
+      "sourceId": "pdf-p4-block-064",
+      "semanticProof": "Original source equation 14; semantic formula rows immediately precede its retained number in the same column",
+      "imageSrc": "assets/math-p04-0132.svg"
+    },
+    "equation.4.15": {
+      "pdfPage": 5,
+      "sourceId": "pdf-p5-block-067",
+      "semanticProof": "Original source equation 15; semantic formula rows immediately precede its retained number in the same column",
+      "imageSrc": "assets/math-p05-0134.svg"
+    },
+    "equation.4.16": {
+      "pdfPage": 5,
+      "sourceId": "pdf-p5-block-071",
+      "semanticProof": "Source equation number 16 lies inside the preserved original glyph outline",
+      "imageSrc": "assets/math-p05-0141.svg"
+    },
+    "equation.4.17": {
+      "pdfPage": 5,
+      "sourceId": "pdf-p5-block-071",
+      "semanticProof": "Source equation number 17 lies inside the preserved original glyph outline",
+      "imageSrc": "assets/math-p05-0141.svg"
+    },
+    "equation.4.18": {
+      "pdfPage": 5,
+      "sourceId": "pdf-p5-block-071",
+      "semanticProof": "Source equation number 18 lies inside the preserved original glyph outline",
+      "imageSrc": "assets/math-p05-0141.svg"
+    },
+    "equation.4.19": {
+      "pdfPage": 6,
+      "sourceId": "pdf-p6-block-086",
+      "semanticProof": "Source equation number 19 lies inside the preserved original glyph outline",
+      "imageSrc": "assets/math-p06-0206.svg"
+    },
+    "equation.4.20": {
+      "pdfPage": 6,
+      "sourceId": "pdf-p6-block-086",
+      "semanticProof": "Source equation number 20 lies inside the preserved original glyph outline",
+      "imageSrc": "assets/math-p06-0206.svg"
+    },
+    "equation.4.21": {
+      "pdfPage": 6,
+      "sourceId": "pdf-p6-block-086",
+      "semanticProof": "Source equation number 21 lies inside the preserved original glyph outline",
+      "imageSrc": "assets/math-p06-0206.svg"
+    },
+    "equation.4.22": {
+      "pdfPage": 6,
+      "sourceId": "pdf-p6-block-086",
+      "semanticProof": "Source equation number 22 lies inside the preserved original glyph outline",
+      "imageSrc": "assets/math-p06-0206.svg"
+    },
+    "equation.4.23": {
+      "pdfPage": 6,
+      "sourceId": "pdf-p6-block-088",
+      "semanticProof": "Source equation number 23 lies inside the preserved original glyph outline",
+      "imageSrc": "assets/math-p06-0208.svg"
+    },
+    "equation.4.24": {
+      "pdfPage": 6,
+      "sourceId": "pdf-p6-block-088",
+      "semanticProof": "Source equation number 24 lies inside the preserved original glyph outline",
+      "imageSrc": "assets/math-p06-0208.svg"
+    },
+    "equation.4.25": {
+      "pdfPage": 6,
+      "sourceId": "pdf-p6-block-088",
+      "semanticProof": "Source equation number 25 lies inside the preserved original glyph outline",
+      "imageSrc": "assets/math-p06-0208.svg"
+    },
+    "equation.4.26": {
+      "pdfPage": 6,
+      "sourceId": "pdf-p6-block-088",
+      "semanticProof": "Source equation number 26 lies inside the preserved original glyph outline",
+      "imageSrc": "assets/math-p06-0208.svg"
+    },
+    "equation.4.27": {
+      "pdfPage": 6,
+      "sourceId": "pdf-p6-block-088",
+      "semanticProof": "Source equation number 27 lies inside the preserved original glyph outline",
+      "imageSrc": "assets/math-p06-0208.svg"
+    },
+    "figure.1": {
+      "pdfPage": 7,
+      "sourceId": "pdf-p7-block-094",
+      "semanticProof": "Source figure 1",
+      "textPrefix": "Figure 1. Comparison of stochastic actor-critic (SAC-B) and deterministic actor-critic (COPDAC-B) on"
+    },
+    "figure.2": {
+      "pdfPage": 7,
+      "sourceId": "pdf-p7-block-095",
+      "semanticProof": "Source figure 2",
+      "textPrefix": "Figure 2. Comparison of stochastic on-policy actor-critic (SAC), stochastic off-policy actor-critic "
+    },
+    "figure.3": {
+      "pdfPage": 8,
+      "sourceId": "pdf-p8-block-101",
+      "semanticProof": "Source figure 3",
+      "textPrefix": "Figure 3. Ten runs of COPDAC on a 6-segment octopus arm with 20 action dimensions and 50 state dimen"
+    },
+    "page.1": {
+      "pdfPage": 1,
+      "sourceId": "pdf-p1-block-001",
+      "semanticProof": "Start of retained page body",
+      "textPrefix": "David Silver DAVID@DEEPMIND.COM DeepMind Technologies, London, UK Guy Lever GUY.LEVER@UCL.AC.UK Univ"
+    },
+    "page.2": {
+      "pdfPage": 2,
+      "sourceId": "pdf-p2-block-008",
+      "semanticProof": "Start of retained page body",
+      "textPrefix": "2. Background"
+    },
+    "page.3": {
+      "pdfPage": 3,
+      "sourceId": "pdf-p3-block-024",
+      "semanticProof": "Start of retained page body",
+      "textPrefix": "both i) and ii) are satisfied then the overall algorithm is equivalent to not using a critic at all "
+    },
+    "page.4": {
+      "pdfPage": 4,
+      "sourceId": "pdf-p4-block-044",
+      "semanticProof": "Start of retained page body",
+      "textPrefix": "3.2. Deterministic Policy Gradient Theorem"
+    },
+    "page.5": {
+      "pdfPage": 5,
+      "sourceId": "pdf-p5-block-067",
+      "semanticProof": "Start of retained page body",
+      "imageSrc": "assets/math-p05-0134.svg"
+    },
+    "page.6": {
+      "pdfPage": 6,
+      "sourceId": "pdf-p6-block-085",
+      "semanticProof": "Start of retained page body",
+      "textPrefix": "proximately (for smooth function approximators) satisfy  To summarise, a compatible off-policy deter"
+    },
+    "page.7": {
+      "pdfPage": 7,
+      "sourceId": "pdf-p7-block-094",
+      "semanticProof": "Start of retained page body",
+      "textPrefix": "Figure 1. Comparison of stochastic actor-critic (SAC-B) and deterministic actor-critic (COPDAC-B) on"
+    },
+    "page.8": {
+      "pdfPage": 8,
+      "sourceId": "pdf-p8-block-101",
+      "semanticProof": "Start of retained page body",
+      "textPrefix": "Figure 3. Ten runs of COPDAC on a 6-segment octopus arm with 20 action dimensions and 50 state dimen"
+    },
+    "page.9": {
+      "pdfPage": 9,
+      "sourceId": "pdf-p9-block-112",
+      "semanticProof": "Start of retained page body",
+      "textPrefix": "References"
+    },
+    "section*.1": {
+      "pdfPage": 8,
+      "sourceId": "pdf-p8-block-108",
+      "semanticProof": "Heading Acknowledgements",
+      "textPrefix": "Acknowledgements"
+    },
+    "section*.2": {
+      "pdfPage": 9,
+      "sourceId": "pdf-p9-block-112",
+      "semanticProof": "Heading References",
+      "textPrefix": "References"
+    },
+    "section.1": {
+      "pdfPage": 1,
+      "sourceId": "pdf-p1-block-004",
+      "semanticProof": "Numbered heading 1. Introduction",
+      "textPrefix": "1. Introduction"
+    },
+    "section.2": {
+      "pdfPage": 2,
+      "sourceId": "pdf-p2-block-008",
+      "semanticProof": "Numbered heading 2. Background",
+      "textPrefix": "2. Background"
+    },
+    "section.3": {
+      "pdfPage": 3,
+      "sourceId": "pdf-p3-block-033",
+      "semanticProof": "Numbered heading 3. Gradients of Deterministic Policies",
+      "textPrefix": "3. Gradients of Deterministic Policies"
+    },
+    "section.4": {
+      "pdfPage": 4,
+      "sourceId": "pdf-p4-block-057",
+      "semanticProof": "Numbered heading 4. Deterministic Actor-Critic Algorithms",
+      "textPrefix": "4. Deterministic Actor-Critic Algorithms"
+    },
+    "section.5": {
+      "pdfPage": 6,
+      "sourceId": "pdf-p6-block-091",
+      "semanticProof": "Numbered heading 5. Experiments",
+      "textPrefix": "5. Experiments"
+    },
+    "section.6": {
+      "pdfPage": 8,
+      "sourceId": "pdf-p8-block-103",
+      "semanticProof": "Numbered heading 6. Discussion and Related Work",
+      "textPrefix": "6. Discussion and Related Work"
+    },
+    "section.7": {
+      "pdfPage": 8,
+      "sourceId": "pdf-p8-block-106",
+      "semanticProof": "Numbered heading 7. Conclusion",
+      "textPrefix": "7. Conclusion"
+    },
+    "subfigure.2.1": {
+      "pdfPage": 7,
+      "sourceId": "pdf-p7-block-095",
+      "semanticProof": "Source figure 2",
+      "textPrefix": "Figure 2. Comparison of stochastic on-policy actor-critic (SAC), stochastic off-policy actor-critic "
+    },
+    "subfigure.2.2": {
+      "pdfPage": 7,
+      "sourceId": "pdf-p7-block-095",
+      "semanticProof": "Source figure 2",
+      "textPrefix": "Figure 2. Comparison of stochastic on-policy actor-critic (SAC), stochastic off-policy actor-critic "
+    },
+    "subfigure.2.3": {
+      "pdfPage": 7,
+      "sourceId": "pdf-p7-block-095",
+      "semanticProof": "Source figure 2",
+      "textPrefix": "Figure 2. Comparison of stochastic on-policy actor-critic (SAC), stochastic off-policy actor-critic "
+    },
+    "subsection.2.1": {
+      "pdfPage": 2,
+      "sourceId": "pdf-p2-block-009",
+      "semanticProof": "Numbered heading 2.1. Preliminaries",
+      "textPrefix": "2.1. Preliminaries"
+    },
+    "subsection.2.2": {
+      "pdfPage": 2,
+      "sourceId": "pdf-p2-block-013",
+      "semanticProof": "Numbered heading 2.2. Stochastic Policy Gradient Theorem",
+      "textPrefix": "2.2. Stochastic Policy Gradient Theorem"
+    },
+    "subsection.2.3": {
+      "pdfPage": 2,
+      "sourceId": "pdf-p2-block-018",
+      "semanticProof": "Numbered heading 2.3. Stochastic Actor-Critic Algorithms",
+      "textPrefix": "2.3. Stochastic Actor-Critic Algorithms"
+    },
+    "subsection.2.4": {
+      "pdfPage": 3,
+      "sourceId": "pdf-p3-block-025",
+      "semanticProof": "Numbered heading 2.4. Off-Policy Actor-Critic",
+      "textPrefix": "2.4. Off-Policy Actor-Critic"
+    },
+    "subsection.3.1": {
+      "pdfPage": 3,
+      "sourceId": "pdf-p3-block-036",
+      "semanticProof": "Numbered heading 3.1. Action-Value Gradients",
+      "textPrefix": "3.1. Action-Value Gradients"
+    },
+    "subsection.3.2": {
+      "pdfPage": 4,
+      "sourceId": "pdf-p4-block-044",
+      "semanticProof": "Numbered heading 3.2. Deterministic Policy Gradient Theorem",
+      "textPrefix": "3.2. Deterministic Policy Gradient Theorem"
+    },
+    "subsection.3.3": {
+      "pdfPage": 4,
+      "sourceId": "pdf-p4-block-051",
+      "semanticProof": "Numbered heading 3.3. Limit of the Stochastic Policy Gradient",
+      "textPrefix": "3.3. Limit of the Stochastic Policy Gradient"
+    },
+    "subsection.4.1": {
+      "pdfPage": 4,
+      "sourceId": "pdf-p4-block-059",
+      "semanticProof": "Numbered heading 4.1. On-Policy Deterministic Actor-Critic",
+      "textPrefix": "4.1. On-Policy Deterministic Actor-Critic"
+    },
+    "subsection.4.2": {
+      "pdfPage": 4,
+      "sourceId": "pdf-p4-block-062",
+      "semanticProof": "Numbered heading 4.2. Off-Policy Deterministic Actor-Critic",
+      "textPrefix": "4.2. Off-Policy Deterministic Actor-Critic"
+    },
+    "subsection.4.3": {
+      "pdfPage": 5,
+      "sourceId": "pdf-p5-block-073",
+      "semanticProof": "Numbered heading 4.3. Compatible Function Approximation",
+      "textPrefix": "4.3. Compatible Function Approximation"
+    },
+    "subsection.5.1": {
+      "pdfPage": 6,
+      "sourceId": "pdf-p6-block-092",
+      "semanticProof": "Numbered heading 5.1. Continuous Bandit",
+      "textPrefix": "5.1. Continuous Bandit"
+    },
+    "subsection.5.2": {
+      "pdfPage": 7,
+      "sourceId": "pdf-p7-block-096",
+      "semanticProof": "Numbered heading 5.2. Continuous Reinforcement Learning",
+      "textPrefix": "5.2. Continuous Reinforcement Learning"
+    },
+    "subsection.5.3": {
+      "pdfPage": 7,
+      "sourceId": "pdf-p7-block-099",
+      "semanticProof": "Numbered heading 5.3. Octopus Arm",
+      "textPrefix": "5.3. Octopus Arm"
+    },
+    "theorem.1": {
+      "pdfPage": 4,
+      "sourceId": "pdf-p4-block-048",
+      "semanticProof": "Theorem 1",
+      "textPrefix": "Theorem 1 (Deterministic Policy Gradient Theorem). Suppose that the MDP satisfies conditions A.1 (se"
+    },
+    "theorem.2": {
+      "pdfPage": 4,
+      "sourceId": "pdf-p4-block-053",
+      "semanticProof": "Theorem 2",
+      "textPrefix": "Theorem 2. Consider a stochastic policy  such that , where  is a parameter controlling the variance "
+    },
+    "theorem.3": {
+      "pdfPage": 5,
+      "sourceId": "pdf-p5-block-075",
+      "semanticProof": "Theorem 3",
+      "textPrefix": "Theorem 3. A function approximator  is compatible with a deterministic policy ,"
+    }
+  },
+  "pages": [
+    {
+      "page": 1,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            130
+          ],
+          "reason": "Document title retained in h1"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            45,
+            130,
+            550,
+            210
+          ],
+          "headings": false
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            45,
+            210,
+            298,
+            674
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            300,
+            210,
+            550,
+            738
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            45,
+            674,
+            298,
+            738
+          ],
+          "headings": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            738,
+            612,
+            792
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 2,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            65
+          ],
+          "reason": "Repeated paper title in running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            45,
+            65,
+            298,
+            640
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            300,
+            65,
+            550,
+            738
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            45,
+            640,
+            298,
+            738
+          ],
+          "headings": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            738,
+            612,
+            792
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 3,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            65
+          ],
+          "reason": "Repeated paper title in running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            45,
+            65,
+            298,
+            738
+          ],
+          "references": false
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            300,
+            65,
+            550,
+            738
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            738,
+            612,
+            792
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 4,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            65
+          ],
+          "reason": "Repeated paper title in running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            45,
+            65,
+            298,
+            738
+          ],
+          "references": false
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            300,
+            65,
+            550,
+            738
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            738,
+            612,
+            792
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 5,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            65
+          ],
+          "reason": "Repeated paper title in running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            45,
+            65,
+            298,
+            738
+          ],
+          "references": false
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            300,
+            65,
+            550,
+            738
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            738,
+            612,
+            792
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 6,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            65
+          ],
+          "reason": "Repeated paper title in running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            45,
+            65,
+            298,
+            738
+          ],
+          "references": false
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            300,
+            65,
+            550,
+            738
+          ],
+          "references": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            738,
+            612,
+            792
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 7,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            65
+          ],
+          "reason": "Repeated paper title in running header"
+        },
+        {
+          "kind": "figure",
+          "number": 1,
+          "bounds": [
+            50,
+            65,
+            545,
+            191
+          ],
+          "caption": [
+            45,
+            192,
+            550,
+            211
+          ]
+        },
+        {
+          "kind": "figure",
+          "number": 2,
+          "bounds": [
+            50,
+            211,
+            545,
+            345
+          ],
+          "caption": [
+            45,
+            345,
+            550,
+            374
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            45,
+            374,
+            298,
+            738
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            300,
+            374,
+            550,
+            738
+          ]
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            738,
+            612,
+            792
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 8,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            65
+          ],
+          "reason": "Repeated paper title in running header"
+        },
+        {
+          "kind": "figure",
+          "number": 3,
+          "bounds": [
+            50,
+            65,
+            295,
+            201
+          ],
+          "caption": [
+            45,
+            201,
+            298,
+            250
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            45,
+            250,
+            298,
+            670
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            300,
+            65,
+            550,
+            738
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            45,
+            670,
+            298,
+            738
+          ],
+          "headings": false
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            738,
+            612,
+            792
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    },
+    {
+      "page": 9,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            65
+          ],
+          "reason": "Repeated paper title in running header"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            45,
+            65,
+            298,
+            738
+          ],
+          "references": true
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            300,
+            65,
+            550,
+            738
+          ],
+          "references": true
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            738,
+            612,
+            792
+          ],
+          "reason": "Page margin"
+        }
+      ]
+    }
+  ],
+  "review": {
+    "method": "machine-assisted page rendering and complete source character coverage",
+    "humanReviewed": false
+  }
+}

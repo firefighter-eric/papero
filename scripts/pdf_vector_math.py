@@ -13,7 +13,7 @@ import subprocess
 import xml.etree.ElementTree as ET
 
 SVG = 'http://www.w3.org/2000/svg'
-VERSION = '1.1.0'
+VERSION = '1.2.0'
 XLINK = 'http://www.w3.org/1999/xlink'
 ET.register_namespace('', SVG)
 ET.register_namespace('xlink', XLINK)
@@ -113,13 +113,21 @@ class PdfMathVectors:
             candidates = sorted([u for u in nearby(data['grid'],x,y) if abs(u['x']-x) < 2 and abs(u['y']-y) < 2],
                                 key=lambda u:(u['x']-x)**2+(u['y']-y)**2)
         if not candidates or (len(candidates)>1 and abs((candidates[1]['x']-x)**2+(candidates[1]['y']-y)**2-((candidates[0]['x']-x)**2+(candidates[0]['y']-y)**2)) < .02):
+            if getattr(self, 'allow_raster_fallback', False):
+                raster = {'bounds': (char['x0'], char['top'], char['x1'], char['bottom']), 'raster': True}
+                data['cache'][key] = raster
+                return raster
             raise ValueError(f'PDF mathematical glyph has no unique vector counterpart: page {page_number}, {char["text"]}, {x}, {y}')
         data['cache'][key] = candidates[0]
         return candidates[0]
 
     def image(self, page_number, chars):
-        glyphs = [self.glyph(page_number, c) for c in chars]
-        if not glyphs: return ''
+        if not chars: return ''
+        try: glyphs = [self.glyph(page_number, c) for c in chars]
+        except ValueError:
+            if not getattr(self, 'allow_raster_fallback', False): raise
+            return self.raster_image(page_number, chars)
+        if any(g.get('raster') for g in glyphs): return self.raster_image(page_number, chars)
         x0, y0, x1, y1 = union([g['bounds'] for g in glyphs])
         x0-=.3; y0-=.3; x1+=.3; y1+=.3
         data = self.pages[page_number]
@@ -143,6 +151,25 @@ class PdfMathVectors:
             'sha256': hashlib.sha256(content).hexdigest(), 'bytes': len(content), 'method': 'original-pdf-math-vectors',
             'glyphCount': len(chars), 'glyphSourceIndices': [c['_source'][1] for c in chars]})
         return f'<img class="pdf-math pdf-math-h{height}" src="assets/{filename}" alt="Mathematical expression from PDF page {page_number}" width="{(x1-x0)/base*18:.2f}" height="{(y1-y0)/base*18:.2f}">'
+
+    def raster_image(self, page_number, chars):
+        # Type 3 mathematical fonts may be painted as bitmap masks by Cairo.
+        # Preserve that exact source region instead of inventing vector glyphs.
+        page = self.pdf.pages[page_number-1]
+        x0 = max(0, min(c['x0'] for c in chars)-.6)
+        x1 = min(page.width, max(c['x1'] for c in chars)+.6)
+        y0 = max(0, min(c['top'] for c in chars)-.6)
+        y1 = min(page.height, max(c['bottom'] for c in chars)+.6)
+        self.counter += 1
+        filename = f'math-p{page_number:02}-{self.counter:04}.png'
+        page.crop((x0,y0,x1,y1)).to_image(resolution=240).save(self.output / 'assets' / filename)
+        content = (self.output / 'assets' / filename).read_bytes()
+        base = max(c['size'] for c in chars)
+        height = max(3, min(300, round((y1-y0)/base*10)))
+        self.assets.append({'filename': filename, 'pdfPage': page_number, 'pdfBounds': [x0,y0,x1,y1],
+            'sha256': hashlib.sha256(content).hexdigest(), 'bytes': len(content), 'method': 'original-pdf-math-raster',
+            'resolution': 240, 'glyphCount': len(chars), 'glyphSourceIndices': [c['_source'][1] for c in chars]})
+        return f'<img class="pdf-math pdf-math-h{height}" src="assets/{filename}" alt="Original mathematical expression from PDF page {page_number}" width="{(x1-x0)/base*18:.2f}" height="{(y1-y0)/base*18:.2f}">'
 
 def vector_math_css():
     return '.pdf-math{display:inline-block;vertical-align:middle;width:auto;max-width:none;margin:0 .03em}' + ''.join(f'.pdf-math.pdf-math-h{i}{{height:{i/10:.1f}em}}' for i in range(3,301))
