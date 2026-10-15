@@ -61,9 +61,6 @@ export function usePaperLibrary(active = true) {
 
   const selectPaper = useCallback((id: string) => {
     setSelectedId(id)
-    const url = new URL(window.location.href)
-    url.hash = ''
-    history.replaceState(null, '', url)
   }, [])
 
   return {

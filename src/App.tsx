@@ -1,4 +1,4 @@
-import { ArrowUpRight, Library, ListTree } from 'lucide-react'
+import { ArrowUpRight, Home, Library, ListTree } from 'lucide-react'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 import { Sidebar } from './components/Sidebar'
@@ -20,10 +20,14 @@ import { paperSourceLink } from './lib/paper-source'
 import { resolvePaperDataUrl } from './lib/paper-data'
 import { useResearchLibrary } from './hooks/useResearchLibrary'
 import { ResearchReader } from './components/ResearchReader'
+import { LibraryHome } from './components/LibraryHome'
+import { AppLink } from './components/AppLink'
+import { browseHref, PAPER_CATEGORIES } from './lib/paper-categories'
 
 export default function App() {
-  const [view, setView] = useState<'papers' | 'research'>(() => new URL(window.location.href).searchParams.has('research') ? 'research' : 'papers')
-  const [researchId, setResearchId] = useState<string | null>(() => new URL(window.location.href).searchParams.get('research') || null)
+  const [location, setLocation] = useState(() => new URL(window.location.href))
+  const view = location.searchParams.has('research') ? 'research' : location.searchParams.has('paper') ? 'papers' : 'home'
+  const researchId = location.searchParams.get('research') || null
   const library = usePaperLibrary(view === 'papers')
   const research = useResearchLibrary(view === 'research', researchId)
   const researchReader = useRef<{ navigate: (id: string) => void }>(null)
@@ -31,7 +35,8 @@ export default function App() {
   const mobile = useMediaQuery('(max-width: 760px)')
   const [libraryCollapsed, setLibraryCollapsed] = useLibraryPanel()
   const shell = useRef<HTMLDivElement>(null)
-  const widths = useSidebarWidths(shell, libraryCollapsed)
+  const widths = useSidebarWidths(shell, libraryCollapsed, view !== 'home')
+  const homePositions = useRef(new Map<string, number>())
   const [drawer, setDrawer] = useState<'library' | 'toc' | null>(null)
   const closeDrawer = useCallback(() => setDrawer(null), [])
   const [position, setPosition] = useState<ReadingPosition>({ progress: 0, sectionId: null, headerCollapseProgress: 0 })
@@ -40,36 +45,48 @@ export default function App() {
   const sourceLink = library.selected ? paperSourceLink(library.selected, paper) : null
   const remoteData = /^https?:\/\//i.test(getPaperDataBaseUrl())
   const onPosition = useCallback((next: ReadingPosition) => setPosition(next), [])
-  const showResearch = useCallback((id: string | null) => {
-    setResearchId(id); setView('research')
-    const url = new URL(window.location.href); url.searchParams.delete('paper'); url.searchParams.set('research', id ?? ''); url.hash = ''
-    history.replaceState(null, '', url)
+  const navigate = useCallback((href: string, replace = false) => {
+    const next = new URL(href, window.location.href)
+    if (next.href !== window.location.href) {
+      if (replace) history.replaceState(null, '', next)
+      else history.pushState(null, '', next)
+    }
+    setLocation(next)
+    setDrawer(null)
   }, [])
+  const showHome = useCallback(() => { homePositions.current.set('', 0); navigate('/') }, [navigate])
+  const showResearch = useCallback((id: string | null, replace = false) => {
+    navigate(`/?research=${encodeURIComponent(id ?? '')}`, replace)
+  }, [navigate])
   const showPaper = useCallback((id?: string) => {
-    setView('papers')
-    const url = new URL(window.location.href); url.searchParams.delete('research'); url.hash = ''; history.replaceState(null, '', url)
-    if (id) library.selectPaper(id)
-  }, [library.selectPaper])
+    const selectedId = id ?? library.selected?.id
+    if (!selectedId) { showHome(); return }
+    const url = new URL(window.location.href)
+    url.searchParams.delete('research'); url.searchParams.set('paper', selectedId); url.hash = ''
+    navigate(url.href)
+    library.selectPaper(selectedId)
+  }, [library.selectPaper, library.selected?.id, navigate, showHome])
   useEffect(() => {
-    if (view === 'research' && !researchId && research.selected) showResearch(research.selected.id)
+    if (view === 'research' && !researchId && research.selected) showResearch(research.selected.id, true)
   }, [view, researchId, research.selected, showResearch])
   useEffect(() => {
-    const restore = () => {
-      const url = new URL(window.location.href)
-      setView(url.searchParams.has('research') ? 'research' : 'papers'); setResearchId(url.searchParams.get('research') || null)
-      const paperId = url.searchParams.get('paper'); if (paperId) library.selectPaper(paperId)
-    }
+    const restore = () => { setLocation(new URL(window.location.href)); setDrawer(null) }
     window.addEventListener('popstate', restore); return () => window.removeEventListener('popstate', restore)
-  }, [library.selectPaper])
+  }, [])
+  useLayoutEffect(() => {
+    const paperId = location.searchParams.get('paper')
+    if (view === 'papers' && paperId) library.selectPaper(paperId)
+  }, [location, view, library.selectPaper])
 
   useEffect(() => {
     setPosition({ progress: 0, sectionId: null, headerCollapseProgress: 0 })
   }, [library.selected?.id, research.selected?.id, view])
 
   useEffect(() => {
-    document.title = view === 'research' ? `${research.selected?.title ?? '研究产出'} · Papero`
+    const category = PAPER_CATEGORIES.find(item => item.id === location.searchParams.get('category'))
+    document.title = view === 'home' ? `${category?.title ?? '按类别探索 AI 论文'} · Papero` : view === 'research' ? `${research.selected?.title ?? '研究产出'} · Papero`
       : library.selected ? `${library.selected.title} · Papero` : 'Papero · 中英论文阅读器'
-  }, [library.selected, research.selected, view])
+  }, [library.selected, research.selected, view, location])
 
   useEffect(() => {
     if (!mobile) setDrawer(null)
@@ -92,6 +109,13 @@ export default function App() {
     })) ?? []
   }, [paper])
 
+  if (view === 'home') return <LibraryHome papers={library.catalog.value?.papers ?? []} reports={research.reports}
+    params={location.searchParams} theme={preferences.theme} onTheme={theme => setPreferences(current => ({ ...current, theme }))}
+    onNavigate={navigate} onPaper={showPaper} scrollPositions={homePositions.current}>
+    {library.catalog.status === 'loading' ? <ReaderState kind="loading" />
+      : library.catalog.status === 'error' ? <ReaderState kind="error" error={library.catalog.error} missing={library.isMissing} onRetry={library.reloadCatalog} /> : undefined}
+  </LibraryHome>
+
   return <div ref={shell} className={`app-shell${libraryCollapsed ? ' is-library-collapsed' : ''}`}
     style={{ '--library-width': `${widths.library}px`, '--toc-width': `${widths.toc}px` } as CSSProperties}>
     <Sidebar papers={library.catalog.value?.papers ?? []} selectedId={library.selected?.id}
@@ -100,6 +124,7 @@ export default function App() {
       reports={research.reports} view={view} selectedResearchId={view === 'research' ? research.selected?.id : undefined}
       researchLoading={research.catalogLoading} onView={next => next === 'research' ? showResearch(researchId) : showPaper()}
       onResearchSelect={showResearch}
+      onHome={showHome}
       onToggle={() => setLibraryCollapsed(!libraryCollapsed)} />
     {!mobile && !libraryCollapsed && <SidebarResizeHandle label="调节论文检索栏宽度" controls="paper-sidebar"
       value={widths.library} min={SIDEBAR_WIDTH_LIMITS.library.min} max={widths.libraryMax} defaultValue={SIDEBAR_WIDTH_DEFAULTS.library}
@@ -116,6 +141,7 @@ export default function App() {
     <main className="main-area" inert={mobile && drawer !== null ? true : undefined}>
       <div className="topbar">
         <div className="breadcrumb">
+          <AppLink className="icon-button reader-home" href={browseHref(location.searchParams, {})} onNavigate={navigate} aria-label="返回论文分类" title="返回论文分类"><Home size={18} aria-hidden="true" /></AppLink>
           <button className="icon-button menu-button" onClick={() => setDrawer('library')} aria-label="打开论文检索"
             aria-expanded={drawer === 'library'} aria-controls="paper-sidebar"><Library size={20} aria-hidden="true" /></button>
           <button className="icon-button menu-button toc-menu-button" onClick={() => setDrawer('toc')} aria-label="打开本文目录"

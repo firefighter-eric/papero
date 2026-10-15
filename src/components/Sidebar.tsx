@@ -6,6 +6,7 @@ import { matchesPaperFilters, PAPER_FAMILIES, RESEARCH_TAGS, tagLabel } from '..
 import { useNavigationDrawer } from '../hooks/useNavigationDrawer'
 import { shortPaperAuthors } from '../lib/paper-bibliography'
 import { paperSourceName } from '../lib/paper-source'
+import { AppLink } from './AppLink'
 
 interface Props {
   papers: CatalogPaper[]
@@ -24,10 +25,11 @@ interface Props {
   researchLoading?: boolean
   onView?: (view: 'papers' | 'research') => void
   onResearchSelect?: (id: string) => void
+  onHome?: () => void
 }
 
 export function Sidebar({ papers, selectedId, mobile, open, collapsed, remoteData, loading, onClose, onSelect, onToggle,
-  reports = [], view = 'papers', selectedResearchId, researchLoading = false, onView, onResearchSelect }: Props) {
+  reports = [], view = 'papers', selectedResearchId, researchLoading = false, onView, onResearchSelect, onHome }: Props) {
   const [query, setQuery] = useState('')
   const [family, setFamily] = useState('')
   const [research, setResearch] = useState('')
@@ -56,7 +58,7 @@ export function Sidebar({ papers, selectedId, mobile, open, collapsed, remoteDat
       aria-label="论文检索" aria-hidden={mobile && !open ? true : undefined} inert={mobile && !open}
       role={mobile ? 'dialog' : undefined} aria-modal={mobile && open ? true : undefined} onKeyDown={drawer.onKeyDown}>
       <div className="brand-row">
-        <div className="brand" hidden={!mobile && collapsed}><span className="brand-mark" aria-hidden="true" /><span className="brand-wordmark">papero</span></div>
+        <AppLink href="/" onNavigate={onHome ? () => { onHome(); if (mobile) onClose() } : undefined} className="brand" aria-label="Papero 分类主页" hidden={!mobile && collapsed}><span className="brand-mark" aria-hidden="true" /><span className="brand-wordmark">papero</span></AppLink>
         {mobile ? <button className="icon-button drawer-close" onClick={onClose} aria-label="关闭论文库"><X size={21} /></button>
           : <button className="icon-button library-toggle" onClick={onToggle} aria-label={collapsed ? '展开论文检索栏' : '折叠论文检索栏'}
             title={collapsed ? '展开论文检索栏' : '折叠论文检索栏'} aria-expanded={!collapsed} aria-controls="paper-library-content">
