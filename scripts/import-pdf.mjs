@@ -65,6 +65,7 @@ export async function importConvertedPdf({ convertedDir, pdfFile, recipeFile, me
       const original = await readFile(path.join(convertedDir, 'assets', asset.filename))
       if (asset.sha256 !== sha256(original) || asset.bytes !== original.length) throw new Error('Converted PDF figure fingerprint mismatch')
       const vector = asset.filename.endsWith('.svg')
+      const rasterMath = asset.method === 'original-pdf-math-raster'
       if (vector && (conversion.mathMode !== 'original-pdf-vectors' || asset.method !== 'original-pdf-math-vectors'
         || !Number.isSafeInteger(asset.glyphCount) || asset.glyphCount < 1 || !Array.isArray(asset.glyphSourceIndices) || asset.glyphSourceIndices.length !== asset.glyphCount
         || asset.glyphSourceIndices.some(index => !Number.isSafeInteger(index) || index < 0) || new Set(asset.glyphSourceIndices).size !== asset.glyphCount
@@ -74,29 +75,36 @@ export async function importConvertedPdf({ convertedDir, pdfFile, recipeFile, me
       const bytes = vector ? Buffer.from(sanitizeSvg(original.toString('utf8'))) : original
       assets.push({ filename: asset.filename, sourceUrl: `${metadata.pdfUrl}#page=${asset.pdfPage}`, sha256: sha256(bytes), bytes: bytes.length,
         sourceSha256: vector ? sha256(original) : sha256(pdf), ...(vector ? { sanitized: true } : {}), conversion: { pdfPage: asset.pdfPage, pdfBounds: asset.pdfBounds,
-          ...(vector ? { method: asset.method, sourcePdfSha256: sha256(pdf), glyphCount: asset.glyphCount, glyphSourceIndices: asset.glyphSourceIndices } : { resolution: 180, method: 'reviewed-figure-crop' }) } })
+          ...(vector || rasterMath ? { method: asset.method, ...(rasterMath ? { resolution: asset.resolution } : {}), sourcePdfSha256: sha256(pdf), glyphCount: asset.glyphCount, glyphSourceIndices: asset.glyphSourceIndices } : { resolution: asset.resolution || 180, method: asset.method || 'reviewed-figure-crop', ...(asset.method === 'reviewed-source-formula-crop' ? { sourcePdfSha256: sha256(pdf) } : {}) }) } })
     }
     const abstractHeading = blocks.findIndex(block => block.kind === 'heading' && load(block.en, {}, false).text() === 'Abstract')
     const abstract = abstractHeading >= 0 ? load(blocks[abstractHeading + 1].en, {}, false).text().replace(/\s+/g, ' ').trim() : ''
-    const scriptFingerprint = sha256(await readFile(new URL('./convert-pdf.py', import.meta.url)))
+    const ocrConverter = conversion.converterScript?.name === 'papero/convert-reviewed-ocr.py' ? conversion.converterScript : null
+    if (ocrConverter && (ocrConverter.name !== 'papero/convert-reviewed-ocr.py' || conversion.ocr?.scope !== 'full-pages'
+      || ocrConverter.sha256 !== sha256(await readFile(new URL('./convert-reviewed-ocr.py', import.meta.url))))) throw new Error('Invalid reviewed OCR converter identity')
+    const scriptFingerprint = sha256(await readFile(new URL(ocrConverter ? './convert-reviewed-ocr.py' : './convert-pdf.py', import.meta.url)))
+    if (conversion.converterScript && (conversion.converterScript.name !== (ocrConverter ? 'papero/convert-reviewed-ocr.py' : 'papero/convert-pdf.py') || conversion.converterScript.sha256 !== scriptFingerprint)) throw new Error('PDF converter script fingerprint changed after conversion')
     const sourceSha256 = sha256(source)
     const paper = { schemaVersion: 1, id: metadata.id, arxivId: arxiv ? metadata.arxivId : null, title: metadata.title, titleZh: null,
       authors: metadata.authors, authorCredits: metadata.authors, year: metadata.year, tags: mergePaperTags(metadata.id), abstract, abstractZh: null,
       source: { kind: arxiv ? 'arxiv' : 'official-paper', format: 'pdf', url: metadata.sourceUrl, htmlUrl: arxiv ? metadata.htmlUrl : metadata.sourceUrl,
-        fetchedAt: metadata.fetchedAt, ...(arxiv ? {} : { publishedAt: metadata.publishedAt }), sha256: sourceSha256, license: null, licenseUrl: null,
-        pdf: { url: metadata.pdfUrl, sha256: sha256(pdf), bytes: pdf.length, pageCount: coverage.pageCount, version: metadata.version },
+        fetchedAt: metadata.fetchedAt, ...(arxiv ? {} : { publishedAt: metadata.publishedAt, ...(metadata.publishedAtPrecision ? { publishedAtPrecision: metadata.publishedAtPrecision } : {}) }), sha256: sourceSha256, license: null, licenseUrl: null,
+        pdf: { url: metadata.pdfUrl, ...(metadata.retrievalUrl ? { retrievalUrl: metadata.retrievalUrl } : {}), sha256: sha256(pdf), bytes: pdf.length, pageCount: coverage.pageCount, version: metadata.version, ...(recipe.sourceCopy ? { sourceCopy: recipe.sourceCopy } : {}) },
         conversion: { method: 'pdf-layout-to-semantic-html', englishHtmlSha256: sourceSha256,
-          tools: [{ name: 'papero/convert-pdf.py', version: conversion.version, parameters: { sha256: scriptFingerprint, recipeSha256: sha256(recipeBytes) } },
-            { name: 'pdfplumber', version: conversion.pdfplumber, parameters: { textSource: 'positioned-characters', chartResolutionDpi: 180 } },
+          tools: [{ name: ocrConverter?.name || 'papero/convert-pdf.py', version: conversion.version, parameters: { sha256: scriptFingerprint, recipeSha256: sha256(recipeBytes) } },
+            { name: 'pdfplumber', version: conversion.pdfplumber, parameters: { textSource: ocrConverter ? 'native-layer-coverage-only; reviewed-OCR-supplies-prose' : 'positioned-characters', chartResolutionDpi: ocrConverter ? 'per-asset receipt' : 180 } },
             { name: 'pypdf', version: conversion.pypdf, parameters: { namedDestinations: 'reviewed-semantic-targets', sourcePageCount: coverage.pageCount } }],
           parameters: { recipeSha256: sha256(recipeBytes), sourceCharacters: coverage.sourceCharacters, excludedSourceCharacters: coverage.excludedSourceCharacters, excludedReason: coverage.excludedReason, missingCharacters: 0, duplicateCharacters: 0,
             tableCount: blocks.filter(block => block.kind === 'table').length, figureCount: assets.length, resolvedDestinations: Object.keys(conversion.resolvedDestinations).length,
             columnOrder: 'reviewed-left-then-right-with-page-footnotes-after-body', ocr: conversion.ocr || false, humanReviewed: false },
           reviewedPdfPages: Array.from({ length: coverage.pageCount }, (_, index) => index + 1),
-          notes: [conversion.ocr
+          notes: [conversion.ocr?.scope === 'full-pages'
+            ? 'Scanned source pages were transcribed to complete semantic English HTML with page-mapped blocks. Source text layers, OCR responses and hash-bound independent review records were retained in the private work directory. Equations were reviewed as structured MathML or exact local source crops. No whole-page image substitute was used.'
+            : conversion.ocr
             ? 'Native PDF text supplies the prose; OCR is limited to table regions without a usable text layer. Recovered table cells were compared against rendered source regions. No whole-page image substitute was used.'
             : 'Text-bearing PDF; no OCR or whole-page image substitute was used. Semantic layout, formula structure, all table grids, chart bounds and source page mappings were checked against rendered PDF pages.',
             'Named PDF destinations use FitH without a column coordinate; citation targets were resolved using source author, year and title, then bound to reviewed semantic blocks.',
+            ...(recipe.sourceNotes || []),
             ...(metadata.id === 'gpt-2-technical-report' ? ['Equation (1) preserves the published s_n terms and product index i exactly, including the source notation inconsistency.'] : []),
             'This is machine-assisted conversion with bounded visual and structural checks; no human review is claimed.'] } },
       translation: { status: 'pending', model: null, coverage: { complete: 0, total: blocks.length }, humanReviewed: false },
@@ -107,7 +115,7 @@ export async function importConvertedPdf({ convertedDir, pdfFile, recipeFile, me
       paper.source.conversion.parameters.figureCount = assets.filter(asset => asset.conversion.method === 'reviewed-figure-crop').length
       paper.source.conversion.tools.push({ name: 'pdftocairo', version: conversion.pdftocairo, parameters: { output: 'svg', scope: 'mathematical-glyph-outlines-and-rules' } },
         { name: 'papero/pdf_vector_math.py', version: conversion.vectorMathVersion || '1.0.0', parameters: { sha256: conversion.vectorMathModuleSha256 } })
-      paper.source.conversion.notes.push('Formula glyph mappings or positioned mathematical layouts were unsafe to reconstruct as MathML. Where a reviewed MathML transcription is unavailable, mathematical expressions retain their original PDF vector outlines; surrounding prose, algorithms, references and page mappings remain semantic HTML.')
+      paper.source.conversion.notes.push('Formula glyph mappings or positioned mathematical layouts were unsafe to reconstruct as MathML. Where a reviewed MathML transcription is unavailable, mathematical expressions retain their original PDF vector outlines, or tightly bounded source raster crops when Type3 glyphs cannot be mapped to SVG; surrounding prose, algorithms, references and page mappings remain semantic HTML.')
     }
     assertPdfProvenance(paper)
     const ids = new Set(), links = new Set()
@@ -120,6 +128,16 @@ export async function importConvertedPdf({ convertedDir, pdfFile, recipeFile, me
     try {
       const existing = JSON.parse(await readFile(path.join(directory, 'paper.json'), 'utf8'))
       if (existing.source.sha256 !== paper.source.sha256 || existing.source.pdf?.sha256 !== paper.source.pdf.sha256) throw new Error('This paper id already contains another converted source; existing data was preserved')
+      if (existing.assets.length !== assets.length || existing.assets.some(asset => !assets.some(next => next.filename === asset.filename && next.sha256 === asset.sha256))) throw new Error('Reconversion changed source assets; existing translations were preserved for separate review')
+      // A fresh conversion may produce exactly the same English body/assets
+      // with updated tool receipts. Keep all accepted translations while binding
+      // the latest verified conversion, rather than claiming an old tool ran.
+      existing.source = paper.source
+      existing.assets = assets
+      for (const name of ['conversion.json', 'layout-recipe.json']) {
+        await writeFile(path.join(directory, name), name === 'conversion.json' ? JSON.stringify(conversion, null, 2) + '\n' : recipeBytes)
+      }
+      await writeFile(path.join(directory, 'paper.json'), JSON.stringify(existing, null, 2) + '\n')
       await updateCatalog(dataDir, existing)
       return existing
     } catch (error) { if (error.code !== 'ENOENT') throw error }

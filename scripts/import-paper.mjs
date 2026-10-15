@@ -77,7 +77,8 @@ async function importUnlocked({ arxivId, id, dataDir, force = false }) {
   const imageRecords = images.map(image => {
     const src = $(image).attr('src')
     if (!src) return { image, src: null }
-    const url = new URL(src, htmlUrl)
+    // Relative LaTeXML image paths belong to this fixed version directory.
+    const url = new URL(src, src.startsWith(`${arxivId}/`) ? htmlUrl : `${htmlUrl}/`)
     if (url.hostname !== 'arxiv.org' || !/^\.(png|jpg|jpeg|gif|webp|svg)$/i.test(path.extname(url.pathname))) throw new Error(`Unsupported paper asset: ${url.pathname}`)
     return { image, url, basename: path.basename(url.pathname) }
   })

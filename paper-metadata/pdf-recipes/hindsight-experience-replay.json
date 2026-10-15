@@ -1,0 +1,779 @@
+{
+  "title": "Hindsight Experience Replay",
+  "expectedPdfSha256": "89db330bb254d9c8818c61f2749cbe8f0535e8b487333409c5dc8cd8b3c89a04",
+  "mathMode": "original-pdf-vectors",
+  "mathFontPattern": "(?:CMMI|CMSY|CMEX|CMR|MSAM|MSBM)\\d+$",
+  "explicitHeaderRegions": true,
+  "requireMathFontForDisplay": true,
+  "geometricSuperscripts": true,
+  "mathGlyphPattern": "ˆ",
+  "indentParagraphs": true,
+  "anchorTargets": {
+    "Doc-Start": {
+      "pdfPage": 1,
+      "sourceId": "pdf-p1-block-001",
+      "textPrefix": "Marcin Andrychowicz, Filip Wolski, Alex Ray, Jonas Schneider, Rachel Fong, Peter Welinder, Bob McGre"
+    },
+    "page.1": {
+      "pdfPage": 1,
+      "sourceId": "pdf-p1-block-001",
+      "textPrefix": "Marcin Andrychowicz, Filip Wolski, Alex Ray, Jonas Schneider, Rachel Fong, Peter Welinder, Bob McGre"
+    },
+    "page.10": {
+      "pdfPage": 10,
+      "sourceId": "pdf-p10-block-103",
+      "textPrefix": "Figure 7: The pick-and-place policy deployed on the physical robot."
+    },
+    "page.11": {
+      "pdfPage": 11,
+      "sourceId": "pdf-p11-block-114",
+      "textPrefix": "6 Conclusions"
+    },
+    "page.12": {
+      "pdfPage": 12,
+      "sourceId": "pdf-p12-block-135",
+      "textPrefix": "Kingma, D. and Ba, J. (2014). Adam: A method for stochastic optimization. arXiv preprint arXiv:1412."
+    },
+    "page.13": {
+      "pdfPage": 13,
+      "sourceId": "pdf-p13-block-158",
+      "textPrefix": "Strehl, A. L. and Littman, M. L. (2005). A theoretical analysis of model-based interval estimation. "
+    },
+    "page.14": {
+      "pdfPage": 14,
+      "sourceId": "pdf-p14-block-166",
+      "textPrefix": "A Experiment details"
+    },
+    "page.15": {
+      "pdfPage": 15,
+      "sourceId": "pdf-p15-block-175",
+      "textPrefix": "Training time: Training for  epochs took us approximately 2.5h for pushing and the pick-andplace tas"
+    },
+    "page.2": {
+      "pdfPage": 2,
+      "sourceId": "pdf-p2-block-010",
+      "textPrefix": "be that the performed sequence of actions does not lead to a successful shot, and little (if anythin"
+    },
+    "page.3": {
+      "pdfPage": 3,
+      "sourceId": "pdf-p3-block-024",
+      "textPrefix": "is to periodically set the weights of the target network to the current weights of the main network "
+    },
+    "page.4": {
+      "pdfPage": 4,
+      "sourceId": "pdf-p4-block-038",
+      "textPrefix": "a state sequence  and a goal  which implies that the agent received a reward of  at every timestep. "
+    },
+    "page.5": {
+      "pdfPage": 5,
+      "sourceId": "pdf-p5-block-049",
+      "textPrefix": "Algorithm 1 Hindsight Experience Replay (HER)Given: an off-policy RL algorithm ,  e.g. DQN, DDPG, NA"
+    },
+    "page.6": {
+      "pdfPage": 6,
+      "sourceId": "pdf-p6-block-056",
+      "textPrefix": "Figure 2: Different tasks: pushing (top row), sliding (middle row) and pick-and-place (bottom row)."
+    },
+    "page.7": {
+      "pdfPage": 7,
+      "sourceId": "pdf-p7-block-071",
+      "textPrefix": "Observations: In this paragraph relative means relative to the current gripper position. The policy "
+    },
+    "page.8": {
+      "pdfPage": 8,
+      "sourceId": "pdf-p8-block-081",
+      "textPrefix": "Figure 4: Learning curves for the single-goal case."
+    },
+    "page.9": {
+      "pdfPage": 9,
+      "sourceId": "pdf-p9-block-093",
+      "textPrefix": "Figure 5: Learning curves for the shaped reward object (it performed best among the shaped rewards w"
+    }
+  },
+  "pages": [
+    {
+      "page": 1,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            146
+          ],
+          "reason": "Document title retained in h1"
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            146,
+            80,
+            736
+          ],
+          "reason": "Rotated arXiv version watermark"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            95,
+            146,
+            515,
+            736
+          ]
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            736,
+            612,
+            792
+          ],
+          "reason": "Page number"
+        }
+      ]
+    },
+    {
+      "page": 2,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            65
+          ],
+          "reason": "Page margin"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            95,
+            65,
+            515,
+            736
+          ]
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            736,
+            612,
+            792
+          ],
+          "reason": "Page number"
+        }
+      ]
+    },
+    {
+      "page": 3,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            65
+          ],
+          "reason": "Page margin"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            95,
+            65,
+            515,
+            426
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            95,
+            426,
+            390,
+            600
+          ]
+        },
+        {
+          "kind": "figure",
+          "number": 1,
+          "bounds": [
+            390,
+            426,
+            510,
+            533
+          ],
+          "caption": [
+            390,
+            533,
+            515,
+            600
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            95,
+            600,
+            515,
+            736
+          ]
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            736,
+            612,
+            792
+          ],
+          "reason": "Page number"
+        }
+      ]
+    },
+    {
+      "page": 4,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            65
+          ],
+          "reason": "Page margin"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            95,
+            65,
+            515,
+            736
+          ]
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            736,
+            612,
+            792
+          ],
+          "reason": "Page number"
+        }
+      ]
+    },
+    {
+      "page": 5,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            65
+          ],
+          "reason": "Page margin"
+        },
+        {
+          "kind": "algorithm",
+          "caption": [
+            95,
+            65,
+            515,
+            88
+          ],
+          "bounds": [
+            95,
+            88,
+            515,
+            421
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            95,
+            421,
+            515,
+            736
+          ]
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            736,
+            612,
+            792
+          ],
+          "reason": "Page number"
+        }
+      ]
+    },
+    {
+      "page": 6,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            65
+          ],
+          "reason": "Page margin"
+        },
+        {
+          "kind": "figure",
+          "number": 2,
+          "bounds": [
+            103,
+            65,
+            510,
+            228
+          ],
+          "caption": [
+            95,
+            228,
+            515,
+            254
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            95,
+            254,
+            515,
+            736
+          ]
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            736,
+            612,
+            792
+          ],
+          "reason": "Page number"
+        }
+      ]
+    },
+    {
+      "page": 7,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            65
+          ],
+          "reason": "Page margin"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            95,
+            65,
+            515,
+            365
+          ]
+        },
+        {
+          "kind": "figure",
+          "number": 3,
+          "bounds": [
+            103,
+            365,
+            510,
+            493
+          ],
+          "caption": [
+            95,
+            493,
+            515,
+            570
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            95,
+            570,
+            515,
+            736
+          ]
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            736,
+            612,
+            792
+          ],
+          "reason": "Page number"
+        }
+      ]
+    },
+    {
+      "page": 8,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            65
+          ],
+          "reason": "Page margin"
+        },
+        {
+          "kind": "figure",
+          "number": 4,
+          "bounds": [
+            103,
+            65,
+            510,
+            204
+          ],
+          "caption": [
+            95,
+            204,
+            515,
+            226
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            95,
+            226,
+            515,
+            736
+          ]
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            736,
+            612,
+            792
+          ],
+          "reason": "Page number"
+        }
+      ]
+    },
+    {
+      "page": 9,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            65
+          ],
+          "reason": "Page margin"
+        },
+        {
+          "kind": "figure",
+          "number": 5,
+          "bounds": [
+            103,
+            65,
+            510,
+            201
+          ],
+          "caption": [
+            95,
+            201,
+            515,
+            259
+          ]
+        },
+        {
+          "kind": "figure",
+          "number": 6,
+          "bounds": [
+            103,
+            259,
+            510,
+            476
+          ],
+          "caption": [
+            95,
+            476,
+            515,
+            561
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            95,
+            561,
+            515,
+            736
+          ]
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            736,
+            612,
+            792
+          ],
+          "reason": "Page number"
+        }
+      ]
+    },
+    {
+      "page": 10,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            65
+          ],
+          "reason": "Page margin"
+        },
+        {
+          "kind": "figure",
+          "number": 7,
+          "bounds": [
+            103,
+            65,
+            510,
+            134
+          ],
+          "caption": [
+            95,
+            134,
+            515,
+            162
+          ]
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            95,
+            162,
+            515,
+            736
+          ]
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            736,
+            612,
+            792
+          ],
+          "reason": "Page number"
+        }
+      ]
+    },
+    {
+      "page": 11,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            65
+          ],
+          "reason": "Page margin"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            95,
+            65,
+            515,
+            736
+          ]
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            736,
+            612,
+            792
+          ],
+          "reason": "Page number"
+        }
+      ]
+    },
+    {
+      "page": 12,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            65
+          ],
+          "reason": "Page margin"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            95,
+            65,
+            515,
+            736
+          ],
+          "references": true
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            736,
+            612,
+            792
+          ],
+          "reason": "Page number"
+        }
+      ]
+    },
+    {
+      "page": 13,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            65
+          ],
+          "reason": "Page margin"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            95,
+            65,
+            515,
+            736
+          ],
+          "references": true
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            736,
+            612,
+            792
+          ],
+          "reason": "Page number"
+        }
+      ]
+    },
+    {
+      "page": 14,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            65
+          ],
+          "reason": "Page margin"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            95,
+            65,
+            515,
+            736
+          ]
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            736,
+            612,
+            792
+          ],
+          "reason": "Page number"
+        }
+      ]
+    },
+    {
+      "page": 15,
+      "items": [
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            0,
+            612,
+            65
+          ],
+          "reason": "Page margin"
+        },
+        {
+          "kind": "text",
+          "bounds": [
+            95,
+            65,
+            515,
+            736
+          ]
+        },
+        {
+          "kind": "skip",
+          "bounds": [
+            0,
+            736,
+            612,
+            792
+          ],
+          "reason": "Page number"
+        }
+      ]
+    }
+  ],
+  "review": {
+    "method": "machine-assisted page rendering and complete source character coverage",
+    "humanReviewed": false
+  },
+  "headingTitles": [
+    "A Experiment details",
+    "B Deployment on the physical robot"
+  ]
+}

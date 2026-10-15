@@ -47,6 +47,31 @@ def converter_for(chars, bounds):
     return converter
 
 
+class MathRunTests(unittest.TestCase):
+    def test_caption_prose_is_not_absorbed_by_same_size_inline_math(self):
+        chars=[glyph(0,'x',10,40,font='PDF+CMMI8',size=8),glyph(1,'c',15,40,font='PDF+CMR8',size=8),glyph(2,'a',19.4,40,font='PDF+CMR8',size=8),glyph(3,'p',23.8,40,font='PDF+CMR8',size=8)]
+        convert_pdf.expand_math_runs(chars, convert_pdf.re.compile(r'CMMI'))
+        self.assertTrue(chars[0]['_math_run_member'])
+        self.assertTrue(all(not c['_math_run_member'] for c in chars[1:]))
+
+    def test_script_word_letters_join_but_not_a_following_separate_word(self):
+        chars=[glyph(0,'x',10,40,font='PDF+CMMI10'),glyph(1,'o',15.5,44,font='PDF+CMR7',size=7),glyph(2,'l',19.35,44,font='PDF+CMR7',size=7),glyph(3,'d',23.2,44,font='PDF+CMR7',size=7),glyph(4,'next',30,44,font='PDF+CMR7',size=7)]
+        convert_pdf.expand_math_runs(chars, convert_pdf.re.compile(r'CMMI'))
+        self.assertTrue(all(c['_math_run_member'] for c in chars[:4]))
+        self.assertFalse(chars[4]['_math_run_member'])
+
+    def test_decimal_neighbors_are_joined_despite_nonadjacent_pdf_font_drawing_order(self):
+        chars=[glyph(0,'0',10,40,font='PDF+CMR10'),glyph(1,'2',21,40,font='PDF+CMR10'),glyph(2,'words',60,40,font='PDF+CMR10'),glyph(3,'.',16,40,font='PDF+CMMI10')]
+        convert_pdf.expand_math_runs(chars, convert_pdf.re.compile(r'CMMI'))
+        self.assertTrue(all(chars[i]['_math_run_member'] for i in [0,1,3]))
+        self.assertFalse(chars[2]['_math_run_member'])
+
+    def test_small_roman_scripts_join_math_without_absorbing_descriptive_words(self):
+        chars=[glyph(0,'theta',10,40,font='PDF+CMMI10'),glyph(1,'old',37.5,44,font='PDF+CMR7',size=7),glyph(2,'model',50,40,font='PDF+CMR10')]
+        convert_pdf.expand_math_runs(chars, convert_pdf.re.compile(r'CMMI'))
+        self.assertTrue(chars[1]['_math_run_member'])
+        self.assertFalse(chars[2]['_math_run_member'])
+
 class GeometryTests(unittest.TestCase):
     def test_cairo_font_family_split_uses_unique_geometric_match_and_rejects_ambiguity(self):
         char = glyph(0, 'b', 10, 40, 'PDF+MinionPro-It', size=9.3)

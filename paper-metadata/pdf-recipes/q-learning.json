@@ -1,0 +1,366 @@
+{
+  "title": "Q-learning",
+  "expectedPdfSha256": "3f1938a6001991f3171e13a93196fc8fc27978f18c87445321bb25058f35776f",
+  "sourceBlocksSha256": "2e00c0eae4587188dde8b04038fb99611e548be3a8fa379c2f3917aad2e80d86",
+  "reviewSha256": "a4e83e1da35cdc499ad00b0cdbfb3c17937a61d1a8a452ac1b745551e0c7d900",
+  "ocr": {
+    "scope": "full-pages",
+    "method": "scanned PDF text-layer extraction; full-page gpt-6 transcription correction; independent gpt-6-luna review and crop rechecks",
+    "primaryModel": "gpt-6",
+    "parameters": {
+      "reasoning_effort": "not exposed in session"
+    },
+    "reviewerModel": "gpt-6-luna",
+    "reviewerParameters": {
+      "reasoning_effort": "low"
+    },
+    "reviewedPdfPages": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14
+    ],
+    "humanReviewed": false,
+    "reviewedEnglishHtmlSha256": "c4bf2bfbbf5c77ddaf355c59767963d060e10ab252ca59e7663efd2183fadc4c",
+    "originalReviewedBlocksSha256": "a83b86a17c9d664258a98dafe595614ce642c2927c8f0b0ad67025ec5dd55302",
+    "correctionNotesSha256": "5dba9367948faf2434f69cbeedcc417e25f6ff0d5d177ebdb8fbc252cf7bd25e",
+    "priorFullPageReviewSha256": "45ee3eab2c4de48a3a084a4623134d6b80cb5ce50ef6c0a180e96858e9fa9464",
+    "normalization": "Extracts each reviewed body element by its verified source id; omits the three empty running-header markers; title shown once by document h1."
+  },
+  "imageReceipts": {
+    "assets/formula-p04-01.png": {
+      "sha256": "ddf12ecf2e0af646a9b175d07c2f84f254e3b1a834b3f39cabaf00a8c941c870",
+      "pdfPage": 4,
+      "pdfBounds": [
+        244.8,
+        601.2,
+        396,
+        631.8
+      ],
+      "resolution": 200,
+      "filename": "formula-p04-01.png"
+    },
+    "assets/formula-p06-01.png": {
+      "sha256": "ef677203a3b0df423d09e60d35716c20f265df41c00de5e8b5ad784409ccc47a",
+      "pdfPage": 6,
+      "pdfBounds": [
+        252,
+        518.4,
+        417.6,
+        554.4
+      ],
+      "resolution": 200,
+      "filename": "formula-p06-01.png"
+    },
+    "assets/formula-p06-02.png": {
+      "sha256": "0122d8774a5cc930f04e68223ec6840427d9eb21ed66b31a81fff10fb0b4af1a",
+      "pdfPage": 6,
+      "pdfBounds": [
+        154.8,
+        586.8,
+        478.8,
+        630
+      ],
+      "resolution": 200,
+      "filename": "formula-p06-02.png"
+    },
+    "assets/formula-p07-01.png": {
+      "sha256": "af004b13ee3c669233d1058ba4899ecfe70ec30da46eb68e05d155601e526451",
+      "pdfPage": 7,
+      "pdfBounds": [
+        108,
+        126,
+        540,
+        154.8
+      ],
+      "resolution": 200,
+      "filename": "formula-p07-01.png"
+    },
+    "assets/formula-p07-02.png": {
+      "sha256": "3831f1e181c166c034e267edad7850206668a21ebe77de0bb68583d69f9a7c22",
+      "pdfPage": 7,
+      "pdfBounds": [
+        108,
+        239.4,
+        540,
+        293.4
+      ],
+      "resolution": 200,
+      "filename": "formula-p07-02.png"
+    },
+    "assets/formula-p07-03.png": {
+      "sha256": "ced5f229319cfab938998459d1916f95a81d27b52d2d2db74c3e81c48d9e2497",
+      "pdfPage": 7,
+      "pdfBounds": [
+        126,
+        403.2,
+        399.6,
+        433.8
+      ],
+      "resolution": 200,
+      "filename": "formula-p07-03.png"
+    },
+    "assets/formula-p08-01.png": {
+      "sha256": "1fb234b893faba1328f66695643499d6dec46ef58157a0fad97475cd2734eba4",
+      "pdfPage": 8,
+      "pdfBounds": [
+        172.8,
+        158.4,
+        468,
+        221.4
+      ],
+      "resolution": 200,
+      "filename": "formula-p08-01.png"
+    },
+    "assets/formula-p09-01.png": {
+      "sha256": "a88e77658557136e39c7e5c2f7237d30e0909c7338545c38243ec32be2c86ecc",
+      "pdfPage": 9,
+      "pdfBounds": [
+        136.8,
+        370.8,
+        482.4,
+        423
+      ],
+      "resolution": 200,
+      "filename": "formula-p09-01.png"
+    },
+    "assets/formula-p09-02.png": {
+      "sha256": "1eb8a015e003d7752bc02cf71de5843bcaad042e63b80b0962d2bb2a8f0b85c8",
+      "pdfPage": 9,
+      "pdfBounds": [
+        136.8,
+        457.2,
+        460.8,
+        576
+      ],
+      "resolution": 200,
+      "filename": "formula-p09-02.png"
+    },
+    "assets/formula-p10-01.png": {
+      "sha256": "7ab233d01426692f3dfbdae10b146ee408219944c84d50bec32ecd1e255f4856",
+      "pdfPage": 10,
+      "pdfBounds": [
+        180,
+        169.2,
+        460.8,
+        199.8
+      ],
+      "resolution": 200,
+      "filename": "formula-p10-01.png"
+    },
+    "assets/formula-p10-02.png": {
+      "sha256": "7fad8ad970bf072c727e8edcaca028fd7fd17bbe0d0e09f31e5cc7946d567afd",
+      "pdfPage": 10,
+      "pdfBounds": [
+        234,
+        255.6,
+        478.8,
+        291.6
+      ],
+      "resolution": 200,
+      "filename": "formula-p10-02.png"
+    },
+    "assets/formula-p10-03.png": {
+      "sha256": "32f4dabeb545bd06bf5a939ec8e8631fa8cb03a83507d309a05aace2018538bf",
+      "pdfPage": 10,
+      "pdfBounds": [
+        180,
+        329.4,
+        460.8,
+        352.8
+      ],
+      "resolution": 200,
+      "filename": "formula-p10-03.png"
+    },
+    "assets/formula-p10-04.png": {
+      "sha256": "58a188dc4331995414edf814f6d273d4230cc2bcfbce4114713caf438f482c48",
+      "pdfPage": 10,
+      "pdfBounds": [
+        180,
+        392.4,
+        468,
+        421.2
+      ],
+      "resolution": 200,
+      "filename": "formula-p10-04.png"
+    },
+    "assets/formula-p10-05.png": {
+      "sha256": "53a14bebb638cdbfa1c3562550e2f409bbc19929cac71da2dc662a7b7ae17016",
+      "pdfPage": 10,
+      "pdfBounds": [
+        136.8,
+        457.2,
+        514.8,
+        479.52
+      ],
+      "resolution": 200,
+      "filename": "formula-p10-05.png"
+    },
+    "assets/formula-p10-06.png": {
+      "sha256": "3ff9ed2e6847de59feb9220a5ad8c6a9869242698ce4522e6a9da52a1aba988f",
+      "pdfPage": 10,
+      "pdfBounds": [
+        115.2,
+        559.8,
+        529.2,
+        622.8
+      ],
+      "resolution": 200,
+      "filename": "formula-p10-06.png"
+    },
+    "assets/formula-p11-01.png": {
+      "sha256": "e69c7e4aab8448c67c3ea943f01da1c602993d3365ac604395d1a36f3f5c809b",
+      "pdfPage": 11,
+      "pdfBounds": [
+        223.2,
+        277.2,
+        424.8,
+        313.2
+      ],
+      "resolution": 200,
+      "filename": "formula-p11-01.png"
+    },
+    "assets/formula-p11-02.png": {
+      "sha256": "aaabda66c4d21f50996f6af8d171d9fb2792e7e1cd9fdb89453e0be86bbd1ba0",
+      "pdfPage": 11,
+      "pdfBounds": [
+        223.2,
+        342,
+        424.8,
+        378
+      ],
+      "resolution": 200,
+      "filename": "formula-p11-02.png"
+    },
+    "assets/formula-p11-03.png": {
+      "sha256": "418f715b5cd17c20a3057e4c88a73e6e697131f1c977e4d6d06fc00049dc6e0a",
+      "pdfPage": 11,
+      "pdfBounds": [
+        115.2,
+        527.4,
+        518.4,
+        570.6
+      ],
+      "resolution": 200,
+      "filename": "formula-p11-03.png"
+    },
+    "assets/formula-p12-01.png": {
+      "sha256": "84da9ea659892f9e51abdd9c25bf0bfd1ccf46f44c54dec2ad98803507d33689",
+      "pdfPage": 12,
+      "pdfBounds": [
+        226.8,
+        248.4,
+        471.6,
+        282.6
+      ],
+      "resolution": 200,
+      "filename": "formula-p12-01.png"
+    },
+    "assets/formula-p12-02.png": {
+      "sha256": "dc79f6b850978e597970170b8281553ef6b722e99d950c12deef31d313a4fc1b",
+      "pdfPage": 12,
+      "pdfBounds": [
+        212.4,
+        309.6,
+        464.4,
+        343.8
+      ],
+      "resolution": 200,
+      "filename": "formula-p12-02.png"
+    },
+    "assets/formula-p12-03.png": {
+      "sha256": "77152c67897c3ccbb73321ff31571feeff605bb2f81469a6a1e3f0544269d6b8",
+      "pdfPage": 12,
+      "pdfBounds": [
+        165.6,
+        372.6,
+        471.6,
+        396
+      ],
+      "resolution": 200,
+      "filename": "formula-p12-03.png"
+    },
+    "assets/formula-p12-04.png": {
+      "sha256": "2805d6c12d8e7d7c3fe58bebdb1eac628d905d8b2598621c6bae8139740dd09a",
+      "pdfPage": 12,
+      "pdfBounds": [
+        216,
+        468,
+        450,
+        516.6
+      ],
+      "resolution": 200,
+      "filename": "formula-p12-04.png"
+    },
+    "assets/formula-p12-05.png": {
+      "sha256": "77fa4c6719571a39522e71d31f455c157008e362abe7ce6adb193c96a8277b5d",
+      "pdfPage": 12,
+      "pdfBounds": [
+        126,
+        558,
+        504,
+        592.2
+      ],
+      "resolution": 200,
+      "filename": "formula-p12-05.png"
+    },
+    "assets/formula-p13-01.png": {
+      "sha256": "687ede35ca6cc81f9291bc0d178853909b5b254c3386d251be88d97e4ca98a44",
+      "pdfPage": 13,
+      "pdfBounds": [
+        187.2,
+        288,
+        453.6,
+        327.6
+      ],
+      "resolution": 200,
+      "filename": "formula-p13-01.png"
+    },
+    "assets/formula-p13-02.png": {
+      "sha256": "b4a6e51b20b8e6ba6a466ad735d1062237c4fffb9645152d1e289025be6333a9",
+      "pdfPage": 13,
+      "pdfBounds": [
+        183.6,
+        360,
+        457.2,
+        399.6
+      ],
+      "resolution": 200,
+      "filename": "formula-p13-02.png"
+    },
+    "assets/formula-p13-03.png": {
+      "sha256": "ee4ea1ab3dd3576ea93db58f202f0a69f5cdbe2d7dbb8c9b37ed296a848e55e9",
+      "pdfPage": 13,
+      "pdfBounds": [
+        115.2,
+        433.8,
+        529.2,
+        559.8
+      ],
+      "resolution": 200,
+      "filename": "formula-p13-03.png"
+    },
+    "assets/formula-p13-04.png": {
+      "sha256": "d51470aa333b8afe0dbcf69dc00f3e844d7b6bf4d429bf9413f9c33dd14ae781",
+      "pdfPage": 13,
+      "pdfBounds": [
+        154.8,
+        583.2,
+        478.8,
+        628.2
+      ],
+      "resolution": 200,
+      "filename": "formula-p13-04.png"
+    }
+  }
+}

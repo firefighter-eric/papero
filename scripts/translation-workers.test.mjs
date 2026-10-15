@@ -4,11 +4,21 @@ import { mkdtemp, mkdir, writeFile, readFile, readdir, rm } from 'node:fs/promis
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { createServer } from 'node:http'
-import { createRequestGate, runBoundedTasks, createSerialWriter, extractCompletionText, translationRequestBudget, protectSourceDelimiters, sourceNumericTokens } from './translation-workers.mjs'
+import { createRequestGate, runBoundedTasks, createSerialWriter, extractCompletionText, translationRequestBudget, protectSourceDelimiters, normalizeProseRequestWhitespace, sourceNumericTokens } from './translation-workers.mjs'
 import { parsePaper, sha256, technicalIdentifiers, assertTranslationFidelity } from './paper-lib.mjs'
 import { translatePaper, assertCompletionResponse, translateWithSplitting, compactRequestContexts, parseUnitResponse } from './translate-paper.mjs'
 
 const pause = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds))
+
+test('prose request copies collapse bibliography layout whitespace without mutating source receipts or literal tokens', () => {
+  const records = [{id:'reference:1',text:'\n'.repeat(5000)+'Deep Kalman\nFilters.\u000b',mustPreserve:['Kalman']}, {id:'example:0',text:'Use <think>\n then </think>.'}]
+  const before = structuredClone(records), transport = protectSourceDelimiters(records)
+  const normalized = normalizeProseRequestWhitespace(transport.records)
+  assert.equal(normalized[0].text, 'Deep Kalman Filters.')
+  assert.deepEqual(records, before)
+  assert.deepEqual(normalized[0].mustPreserve, ['Kalman'])
+  assert.equal(transport.restore('example:0', normalized[1].text), 'Use <think> then </think>.')
+})
 
 test('numeric transport keeps scores and signs separate from immutable model versions', () => {
   const source = 'Phi-3 and GPT-3 score -3.5% and +10% on 9 tasks, with 15.6T tokens.'
@@ -379,4 +389,14 @@ test('an oversized-block terminal chunk stops the global gate before a held chun
   assert.equal(stopped, true)
   releaseSibling()
   await assert.rejects(running, /terminal chunk failure/)
+})
+
+test('known-ID empty strings may route only to the downstream fragment validator when explicitly requested', () => {
+  const content = '{"translations":{"a":"已译","b":""}}'
+  const response = {model:'qwen3.6-35b-a3b',choices:[{finish_reason:'stop',message:{content:'',reasoning_content:content}}]}
+  const options = {expectedModel:'qwen3.6-35b-a3b',expectedIds:['a','b']}
+  assert.throws(()=>extractCompletionText(response,options), /empty/)
+  assert.equal(extractCompletionText(response,{...options,allowEmptyTranslations:true}).content,content)
+  response.choices[0].message.reasoning_content='{"translations":{"a":"已译","b":null}}'
+  assert.throws(()=>extractCompletionText(response,{...options,allowEmptyTranslations:true}), /non-string/)
 })
