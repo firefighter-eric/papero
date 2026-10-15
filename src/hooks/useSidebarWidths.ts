@@ -41,11 +41,12 @@ export function fitSidebarWidths(preferred: SidebarWidths, containerWidth: numbe
   }
 }
 
-export function useSidebarWidths(container: RefObject<HTMLDivElement | null>, collapsed: boolean) {
+export function useSidebarWidths(container: RefObject<HTMLDivElement | null>, collapsed: boolean, active = true) {
   const [preferred, setPreferred] = useState(initialWidths)
   const [containerWidth, setContainerWidth] = useState(() => Math.min(2200, window.innerWidth) - 2)
 
   useLayoutEffect(() => {
+    if (!active) return
     const element = container.current
     if (!element) return
     const measure = () => {
@@ -57,7 +58,7 @@ export function useSidebarWidths(container: RefObject<HTMLDivElement | null>, co
     observer?.observe(element)
     window.addEventListener('resize', measure)
     return () => { observer?.disconnect(); window.removeEventListener('resize', measure) }
-  }, [container])
+  }, [container, active])
 
   useEffect(() => {
     try { localStorage.setItem(KEY, JSON.stringify(preferred)) } catch { /* Resizing also works without storage. */ }

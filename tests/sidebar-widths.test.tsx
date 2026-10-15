@@ -34,9 +34,10 @@ afterEach(async () => {
   vi.unstubAllGlobals()
 })
 
-function Layout({ collapsed = false, mobile = false }: { collapsed?: boolean; mobile?: boolean }) {
+function Layout({ collapsed = false, mobile = false, active = true }: { collapsed?: boolean; mobile?: boolean; active?: boolean }) {
   const shell = useRef<HTMLDivElement>(null)
-  const widths = useSidebarWidths(shell, collapsed)
+  const widths = useSidebarWidths(shell, collapsed, active)
+  if (!active) return <p>分类主页</p>
   return <div ref={shell}>
     <output data-library={widths.library} data-toc={widths.toc} />
     {(['library', 'toc'] as const).map(panel => mobile || (panel === 'library' && collapsed) ? null
@@ -80,6 +81,21 @@ async function resize(width: number) {
 }
 
 describe('independent sidebar widths', () => {
+  it('starts observing a reader mounted after the home and remeasures on every return', async () => {
+    await act(() => root.render(<Layout active={false} />))
+    expect(observers.size).toBe(0)
+    containerWidth = 761
+    await act(() => root.render(<Layout />))
+    expect(observers.size).toBe(1)
+    expect(761 - widths().library - widths().toc).toBeGreaterThanOrEqual(320)
+    await act(() => root.render(<Layout active={false} />))
+    expect(observers.size).toBe(0)
+    containerWidth = 1600
+    await act(() => root.render(<Layout />))
+    expect(observers.size).toBe(1)
+    expect(widths()).toEqual(SIDEBAR_WIDTH_DEFAULTS)
+  })
+
   it.each(['mouse', 'touch'])('drags either boundary independently using %s pointer capture and stops on release', async pointerType => {
     await act(() => root.render(<Layout />))
     await pointer('library', 'pointerdown', 300, pointerType)

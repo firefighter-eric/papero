@@ -167,6 +167,7 @@ a { color: var(--green); text-underline-offset: 3px; }
 .toc-paper-info > span { font-size: 11px; color: var(--muted); }
 .brand-row { display: flex; align-items: center; justify-content: space-between; }
 .brand { display: flex; align-items: center; gap: 12px; color: var(--green); }
+.brand { text-decoration: none; }
 .brand-mark { display: block; width: 34px; height: 34px; flex: 0 0 34px; background-color: currentColor; -webkit-mask: url('/brand/papero-mark.png') center / contain no-repeat; mask: url('/brand/papero-mark.png') center / contain no-repeat; }
 .brand-wordmark { color: var(--text); font-size: 26px; font-weight: 680; letter-spacing: -1.2px; }
 .brand-caption { margin: 5px 0 27px 46px; font-size: 12px; color: var(--muted); white-space: nowrap; }
@@ -629,4 +630,117 @@ a { color: var(--green); text-underline-offset: 3px; }
   .research-download { font-size: 11px; }
   .research-font-controls { display: none; }
   .research-prose h1 { font-size: 1.5em; }
+}
+
+/* Category home is a browsing surface; paper reading keeps its independent columns. */
+.library-home { height: 100svh; overflow-y: auto; overflow-x: hidden; background: var(--paper-bg); scrollbar-color: var(--scrollbar) transparent; scroll-padding-top: 90px; }
+.home-header { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 36px; min-height: 82px; padding: 16px max(28px, calc((100% - 1200px) / 2)); border-bottom: 1px solid var(--border); background: var(--paper-bg); }
+.home-header nav { display: flex; gap: 26px; margin-left: auto; }
+.home-header nav a { font-size: 13px; color: var(--secondary-text); text-decoration: none; white-space: nowrap; }
+.home-header nav a:hover { text-decoration: underline; }
+.home-header nav span { margin-left: 5px; color: var(--muted); font-size: 11px; }
+.home-main { max-width: 1256px; margin: auto; padding: 0 28px; }
+.home-intro { padding: 66px 0 44px; }
+.home-eyebrow { color: var(--muted); font-size: 12px; letter-spacing: .06em; margin: 0 0 18px; }
+.home-intro h1 { font: 600 clamp(30px, 4vw, 48px)/1.3 var(--serif); letter-spacing: -1px; color: var(--title-text); margin: 0 0 14px; }
+.home-intro > p:not(.home-eyebrow) { color: var(--secondary-text); font-size: 14px; line-height: 1.8; margin: 0; }
+.home-search { display: flex; align-items: center; gap: 13px; max-width: 640px; margin-top: 28px; padding: 0 18px; min-height: 54px; border: 1px solid var(--control-border); border-radius: 7px; color: var(--muted); background: var(--surface-bg); }
+.home-search:focus-within { border-color: var(--green); box-shadow: 0 0 0 2px var(--focus-wash); }
+.home-search input { min-width: 0; flex: 1; font-size: 14px; background: transparent; color: var(--text); border: 0; outline: 0; min-height: 52px; }
+.home-search input:focus-visible { outline: 0; }
+.home-search button { border: 0; background: transparent; font-size: 12px; color: var(--secondary-text); min-height: 40px; }
+.home-section-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+.home-section-heading h2 { font-size: 19px; font-weight: 600; margin: 0; }
+.home-section-heading > span, .home-section-heading h2 > span { color: var(--muted); font-size: 12px; font-weight: 400; }
+.home-section-heading h2 > span { margin-left: 10px; }
+.category-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+.category-card { display: block; padding: 20px 16px; border: 1px solid var(--border); border-radius: 7px; text-decoration: none; color: var(--text); background: var(--paper-bg); transition: border-color .15s, background .15s; }
+.category-card:hover, .category-card.is-active { border-color: var(--control-hover-border); background: var(--surface-bg); }
+.category-card > div { display: flex; flex-direction: column; gap: 13px; }
+.category-card h3 { font-size: 15px; margin: 0; font-weight: 600; line-height: 1.5; }
+.category-card span { display: flex; align-items: center; justify-content: space-between; color: var(--muted); font-size: 12px; }
+.category-card p { margin: 12px 0 0; font-size: 12px; line-height: 1.8; color: var(--secondary-text); }
+.home-papers { margin-top: 48px; scroll-margin-top: 12px; }
+.home-filters { display: flex; align-items: end; flex-wrap: wrap; gap: 14px; margin-bottom: 22px; }
+.home-filters label { display: flex; flex-direction: column; gap: 7px; color: var(--muted); font-size: 11px; }
+.home-filters select { width: 190px; max-width: 100%; min-height: 38px; padding: 0 10px; color: var(--text); border: 1px solid var(--control-border); border-radius: 5px; background: var(--paper-bg); cursor: pointer; font-size: 12px; }
+.home-filters p { color: var(--muted); font-size: 12px; margin: 0 0 10px auto; }
+.home-paper-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.home-paper-card { display: flex; flex-direction: column; position: relative; min-width: 0; padding: 24px; border: 1px solid var(--border); border-radius: 7px; background: var(--paper-bg); transition: border-color .15s, background .15s; }
+.home-paper-card:hover { border-color: var(--control-hover-border); background: var(--surface-bg); }
+.home-paper-card:focus-within { outline: 2px solid var(--green); outline-offset: 3px; }
+.home-paper-meta { display: flex; justify-content: space-between; gap: 12px; color: var(--muted); font-size: 11px; margin-bottom: 17px; }
+.home-paper-card h3 { font-family: var(--serif); font-size: 21px; font-weight: 600; line-height: 1.5; margin: 0; overflow-wrap: anywhere; }
+.home-paper-card h3 a { text-decoration: none; color: var(--title-text); }
+.home-paper-card h3 a::after { content: ''; position: absolute; inset: 0; border-radius: 7px; }
+.home-paper-card h3 a:focus-visible { outline: none; }
+.home-paper-original { font-size: 12px; line-height: 1.7; color: var(--secondary-text); margin: 10px 0 0; overflow-wrap: anywhere; }
+.home-paper-authors { font-size: 11px; line-height: 1.8; color: var(--muted); margin: 12px 0 17px; overflow-wrap: anywhere; }
+.home-paper-card .paper-tags { margin-top: auto; justify-content: flex-start; }
+.home-read-hint { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--secondary-text); margin-top: 22px; }
+.home-read-hint svg:last-child { margin-left: auto; }
+.home-reset { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; text-decoration: none; min-height: 30px; }
+.home-reset:hover { text-decoration: underline; }
+.home-no-results { text-align: center; padding: 50px 12px; border: 1px dashed var(--control-border); border-radius: 7px; }
+.home-no-results h3 { font-size: 17px; }
+.home-no-results p, .home-no-results a { font-size: 13px; color: var(--secondary-text); }
+.home-research { margin-top: 56px; scroll-margin-top: 12px; }
+.home-report { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 26px; border: 1px solid var(--border); border-radius: 7px; text-decoration: none; }
+.home-report:hover { background: var(--surface-bg); border-color: var(--control-hover-border); }
+.home-report h3 { margin: 0; font-size: 17px; }
+.home-report p { margin: 10px 0 14px; color: var(--secondary-text); font-size: 13px; line-height: 1.8; }
+.home-report span { color: var(--muted); font-size: 11px; }
+.home-report > svg { flex-shrink: 0; }
+.home-footer { margin-top: 60px; padding: 25px 0; border-top: 1px solid var(--border); color: var(--muted); font-size: 11px; line-height: 1.8; }
+.category-switcher { display: flex; flex-wrap: wrap; gap: 8px; }
+.category-switcher a { display: flex; gap: 8px; align-items: center; padding: 9px 13px; min-height: 38px; border: 1px solid var(--control-border); border-radius: 5px; font-size: 12px; text-decoration: none; }
+.category-switcher a:hover { background: var(--surface-bg); }
+.category-switcher a[aria-current='page'] { background: var(--green); border-color: var(--green); color: var(--on-accent); }
+.category-switcher span { font-size: 10px; opacity: .8; }
+.is-category .home-intro { padding-bottom: 30px; }
+.is-category .home-papers { margin-top: 30px; }
+.reader-home { text-decoration: none; flex-shrink: 0; }
+@media (max-width: 1150px) {
+  .category-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .home-paper-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 760px) {
+  .home-header { padding: 14px 20px; min-height: 70px; gap: 16px; flex-wrap: wrap; }
+  .home-header .brand-mark { width: 28px; height: 28px; flex-basis: 28px; }
+  .home-header .brand-wordmark { font-size: 24px; }
+  .home-header nav { gap: 13px; margin-left: auto; }
+  .home-header nav a { font-size: 11px; }
+  .home-header nav span { margin-left: 3px; }
+  .home-header .theme-control { margin-left: auto; }
+  .home-main { padding: 0 20px; }
+  .home-intro { padding: 38px 0 30px; }
+  .home-intro h1 { font-size: 32px; }
+  .home-intro > p:not(.home-eyebrow) { font-size: 13px; }
+  .home-search { margin-top: 23px; padding: 0 13px; gap: 9px; }
+  .home-search input { font-size: 13px; }
+  .category-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .category-card { padding: 17px 14px; }
+  .category-card h3 { font-size: 14px; }
+  .category-card p { font-size: 11px; }
+  .home-section-heading > span { font-size: 10px; }
+  .home-filters label { flex: 1; min-width: 0; }
+  .home-filters select { width: 100%; min-height: 42px; }
+  .home-filters p { display: none; }
+  .home-paper-grid { grid-template-columns: minmax(0, 1fr); }
+  .home-paper-card { padding: 22px; }
+  .home-report { padding: 21px; gap: 16px; }
+  .home-report h3 { font-size: 16px; line-height: 1.6; }
+  .home-report p { font-size: 12px; }
+  .home-footer { margin-top: 40px; }
+  .category-switcher { gap: 7px; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: thin; padding: 3px 2px 8px; }
+  .category-switcher a { padding: 8px 11px; min-height: 40px; font-size: 11px; flex-shrink: 0; }
+}
+@media (max-width: 480px) {
+  .library-home { scroll-padding-top: 105px; }
+  .home-header { display: grid; grid-template-columns: 1fr auto; gap: 8px 16px; padding-block: 12px; }
+  .home-header .theme-control { grid-column: 2; grid-row: 1; }
+  .home-header nav { grid-column: 1 / -1; grid-row: 2; margin-left: 0; gap: 24px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .category-card, .home-paper-card { transition: none; }
 }
