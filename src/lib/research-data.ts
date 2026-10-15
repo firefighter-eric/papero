@@ -2,6 +2,9 @@ import { getPaperDataBaseUrl, PaperDataError, resolvePaperDataUrl, sanitizePaper
 import type { PaperDataOptions } from './paper-data'
 import type { ResearchEntry } from '../types'
 import { validateResearchCatalog, validateResearchDocument } from './research-schema.mjs'
+import { createResearchVisualRuntime } from './research-visuals.mjs'
+
+const visualKinds = new Set(createResearchVisualRuntime().kinds)
 
 async function fetchText(path: string, options: PaperDataOptions, optional = false) {
   const controller = new AbortController()
@@ -46,6 +49,10 @@ export async function loadResearchDocument(entry: ResearchEntry, options: PaperD
     || metadata.sources.some(s => !ids.includes(`ref-${s.id}`))) throw new Error('研究正文缺少章节或引用锚点。')
   for (const link of article.querySelectorAll('a[href^="#"]')) {
     if (!ids.includes(link.getAttribute('href')!.slice(1))) throw new Error('研究正文存在断开的内部引用。')
+  }
+  for (const visual of article.querySelectorAll('[data-research-visual]')) {
+    if (visual.tagName !== 'FIGURE' || !visual.id || !visualKinds.has(visual.getAttribute('data-research-visual')!)
+      || visual.querySelectorAll(':scope > [data-visual-mount]').length !== 1) throw new Error('研究交互图示标记无效。')
   }
   return { ...metadata, html: sanitizePaperHtml(article.innerHTML, entry.dataPath, options.baseUrl) }
 }

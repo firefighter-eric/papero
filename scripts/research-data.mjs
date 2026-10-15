@@ -3,6 +3,9 @@ import { createHash } from 'node:crypto'
 import path from 'node:path'
 import { load } from 'cheerio'
 import { validateResearchCatalog, validateResearchDocument } from '../src/lib/research-schema.mjs'
+import { createResearchVisualRuntime } from '../src/lib/research-visuals.mjs'
+
+const visualKinds = new Set(createResearchVisualRuntime().kinds)
 
 const digest = bytes => createHash('sha256').update(bytes).digest('hex')
 export async function inspectResearchData(root) {
@@ -30,6 +33,10 @@ export async function inspectResearchData(root) {
     if (article.length !== 1 || article.attr('data-research-id') !== report.id || $('html').attr('lang') !== 'zh-CN') throw new Error(`Research HTML identity mismatch: ${entry.id}`)
     if (article.find('script,style,iframe,object,embed,form,input,button,textarea,select,img,video,audio').length
       || article.find('*').toArray().some(n => Object.keys(n.attribs ?? {}).some(k => /^on/i.test(k)))) throw new Error(`Unsafe research content: ${entry.id}`)
+    for (const visual of article.find('[data-research-visual]').toArray()) {
+      if (visual.tagName !== 'figure' || !$(visual).attr('id') || !visualKinds.has($(visual).attr('data-research-visual'))
+        || $(visual).children('[data-visual-mount]').length !== 1) throw new Error(`Invalid research visual: ${entry.id}`)
+    }
     const ids = article.find('[id]').map((_, n) => $(n).attr('id')).get()
     if (new Set(ids).size !== ids.length) throw new Error(`Duplicate research anchors: ${entry.id}`)
     const headings = article.find('h2[id]').map((_, n) => $(n).attr('id')).get()
