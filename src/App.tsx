@@ -17,9 +17,9 @@ import { useLibraryPanel } from './hooks/useLibraryPanel'
 import { SIDEBAR_WIDTH_DEFAULTS, SIDEBAR_WIDTH_LIMITS, useSidebarWidths } from './hooks/useSidebarWidths'
 import { getPaperDataBaseUrl } from './lib/paper-data'
 import { paperSourceLink } from './lib/paper-source'
-import { resolvePaperDataUrl } from './lib/paper-data'
 import { useResearchLibrary } from './hooks/useResearchLibrary'
 import { ResearchReader } from './components/ResearchReader'
+import { ResearchDownload } from './components/ResearchDownload'
 import { LibraryHome } from './components/LibraryHome'
 import { AppLink } from './components/AppLink'
 import { browseHref, PAPER_CATEGORIES } from './lib/paper-categories'
@@ -157,7 +157,7 @@ export default function App() {
           <ReaderToolbar preferences={preferences} onChange={(patch) => setPreferences((current) => ({ ...current, ...patch }))} />}
         <div className="topbar-actions">
           <ThemeControl theme={preferences.theme} onChange={(theme) => setPreferences((current) => ({ ...current, theme }))} />
-          {view === 'research' && research.document && <a className="source-link research-download" href={resolvePaperDataUrl(research.document.dataPath.replace(/report\.json$/, 'zh.html'))} download={`${research.document.id}-zh.html`}>下载 HTML</a>}
+          {view === 'research' && research.document && <ResearchDownload report={research.document} />}
           {view === 'papers' && library.selected && sourceLink && <a className="source-link" href={sourceLink.url} target="_blank" rel="noopener noreferrer"
             title={sourceLink.title}>
             {library.selected.arxivId === null ? '原文' : 'arXiv'} <ArrowUpRight size={16} aria-hidden="true" /></a>}

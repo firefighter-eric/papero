@@ -10,7 +10,7 @@ import { inspectResearchData } from '../scripts/research-data.mjs'
 
 const root = path.resolve('paper-data')
 const catalog = JSON.parse(await readFile(path.join(root, 'research/catalog.json'), 'utf8'))
-const entry = catalog.reports[0]
+const entry = catalog.reports.find(report => report.id === 'vision-pretraining-survey')
 const metadata = JSON.parse(await readFile(path.join(root, entry.dataPath), 'utf8'))
 const html = await readFile(path.join(root, entry.dataPath.replace('report.json', 'zh.html')), 'utf8')
 function fixture(body = html) {
@@ -56,6 +56,18 @@ describe('separate research publications', () => {
     expect((await loadResearchCatalog({ fetcher: vi.fn(async () => new Response('', { status: 404 })) })).reports).toEqual([])
     await expect(loadResearchCatalog({ fetcher: vi.fn(async () => new Response('{"schemaVersion":1,"reports":[{}]}')) })).rejects.toThrow('研究数据无效')
   })
+  it('keeps registered declarative figures while rejecting unknown or malformed visual markers', async () => {
+    vi.stubGlobal('crypto', webcrypto)
+    const figure = '<figure id="demo-visual" data-research-visual="layer-trust"><figcaption>逐层步长演示</figcaption><div data-visual-mount><p>默认值</p></div></figure>'
+    const { fetcher } = fixture(html.replace('</article>', `${figure}</article>`))
+    const report = await loadResearchDocument(entry, { fetcher })
+    expect(report.html).toContain('data-research-visual="layer-trust"')
+    expect(report.html).not.toContain('<script')
+    for (const bad of [figure.replace('layer-trust', 'arbitrary-script'), figure.replace('data-visual-mount', 'data-invalid')]) {
+      await expect(loadResearchDocument(entry, { fetcher: fixture(html.replace('</article>', `${bad}</article>`)).fetcher })).rejects.toThrow('图示标记')
+    }
+    vi.unstubAllGlobals()
+  })
   it('limits research URLs to the published catalog, metadata and Chinese body', () => {
     expect(resolvePaperDataUrl(entry.dataPath, 'https://papers.example/data')).toContain('/research/')
     for (const p of ['research/../catalog.json', 'research/%2e%2e/catalog.json', 'research/vision-pretraining-survey/source.html', 'research/vision-pretraining-survey/zh.html?token=x']) {
@@ -69,7 +81,7 @@ describe('separate research publications', () => {
       const reportDir = path.join(data, 'research', entry.id)
       await mkdir(reportDir, { recursive: true })
       await writeFile(path.join(data, 'catalog.json'), '{"schemaVersion":1,"papers":[]}')
-      await writeFile(path.join(data, 'research/catalog.json'), JSON.stringify(catalog))
+      await writeFile(path.join(data, 'research/catalog.json'), JSON.stringify({ ...catalog, reports: [entry] }))
       await writeFile(path.join(reportDir, 'report.json'), JSON.stringify(metadata))
       await writeFile(path.join(reportDir, 'zh.html'), html)
       await writeFile(path.join(reportDir, 'source.html'), 'private snapshot')

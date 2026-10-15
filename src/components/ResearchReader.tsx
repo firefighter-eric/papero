@@ -1,6 +1,10 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef } from 'react'
 import type { ReadingPosition } from './PaperReader'
 import type { ResearchDocument } from '../types'
+import { createResearchVisualRuntime } from '../lib/research-visuals.mjs'
+import '../lib/research-visuals.css'
+
+const visuals = createResearchVisualRuntime()
 
 export const ResearchReader = forwardRef<{ navigate: (id: string) => void }, {
   report: ResearchDocument & { html: string }
@@ -8,6 +12,10 @@ export const ResearchReader = forwardRef<{ navigate: (id: string) => void }, {
   onPosition: (position: ReadingPosition) => void
 }>(({ report, fontSize, onPosition }, ref) => {
   const pane = useRef<HTMLDivElement>(null)
+  const article = useRef<HTMLElement>(null)
+  useEffect(() => {
+    if (article.current) return visuals.mount(article.current)
+  }, [report.html])
   const storageKey = `papero:research-position:${report.id}:r${report.revision}:v1`
   const navigate = useCallback((id: string) => {
     const node = pane.current?.querySelector<HTMLElement>(`[id="${CSS.escape(id)}"]`)
@@ -42,7 +50,7 @@ export const ResearchReader = forwardRef<{ navigate: (id: string) => void }, {
   }, [navigate, storageKey, update])
   useEffect(update, [fontSize, update])
   return <div className="research-reader" ref={pane} onScroll={update} aria-label="中文研究报告正文" tabIndex={0}>
-    <article className="research-prose paper-block" lang="zh-CN" style={{ fontSize }}
+    <article ref={article} className="research-prose paper-block" lang="zh-CN" style={{ fontSize }}
       onClick={event => {
         const link = (event.target as Element).closest('a[href^="#"]')
         if (link) { event.preventDefault(); navigate(link.getAttribute('href')!.slice(1)) }
