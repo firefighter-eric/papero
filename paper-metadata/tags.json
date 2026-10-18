@@ -11,6 +11,7 @@
     "deepseek-v3-technical-report": ["DeepSeek", "预训练", "后训练"],
     "deepseek-r1-technical-report": ["DeepSeek", "后训练"],
     "deepseek-v4-technical-report": ["DeepSeek", "预训练", "后训练"],
+    "deepseek-v4-1-flash-technical-report": ["DeepSeek", "模型架构", "预训练", "后训练", "多模态", "MoE", "强化学习"],
     "kimi-k2-technical-report": ["Kimi", "预训练", "后训练"],
     "kimi-k2-5-technical-report": ["Kimi", "预训练", "后训练"],
     "kimi-k3-technical-report": ["Kimi", "预训练", "后训练"],

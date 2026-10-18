@@ -1,5 +1,17 @@
 # 示例论文的官方来源
 
+## DeepSeek V4.1 Flash
+
+核验日期：2026-10-17。根据用户本次明确收录要求，固定收录 DeepSeek-AI 的 *DeepSeek-V4.1-Flash: Pushing the Limits of KV Cache Compression*，[arXiv 2609.19969v1](https://arxiv.org/abs/2609.19969v1)，提交日期为 2026-09-17。本地 ID 为 `deepseek-v4-1-flash-technical-report`，与已有 V4 报告分开保存。
+
+正文采用[官方固定版英文 HTML](https://arxiv.org/html/2609.19969v1)，并在被 Git 忽略的工作目录保存[原始 PDF](https://arxiv.org/pdf/2609.19969v1)及官方摘要页。原始 HTML SHA-256 为 `673159286782f296f5761e66153147f099a9970b9ca695781f3bf06b3f2d61f5`，PDF SHA-256 为 `0cfdda19c8e1691b5226dd0d4949e2397051268e8a823c2fb61db94ea20c4ac0`。论文许可按来源记录为 [arXiv.org perpetual non-exclusive license](https://arxiv.org/licenses/nonexclusive-distrib/1.0/)。
+
+全文保留 384 个内容块、72 个目录项、263 个 MathML 公式、21 张表格（包括公式排版表）、18 个图表容器、13 个素材文件及 99 条参考文献。原始 HTML 中唯一未展开的 `reportnumber` 出版宏位于标题之前；报告编号 `001` 已保留，正文未发现未展开公式。9 个官方 `object` 图形转为本地 `img`，SVG 原件及净化后指纹分别保存。
+
+中文全文使用本机 LM Studio 中的 `qwen3.6-35b-a3b`（`mlx-community`，MLX 4bit），上下文 8192、最多四路请求，`temperature: 0.1`、`top_p: 0.9`、`seed: 42`，请求 `reasoning_effort: none`。实际模型身份、重试、定向术语修正、逐块指纹和模型报告的 token 用量均保留。中英正文完整导出为独立 `en.html`／`zh.html`，384 块一一对齐，1404 个可翻译片段通过数值、标识符和结构校验；所有译文仍标注 `humanReviewed: false`。
+
+最初仅获准本地收录；2026-10-19 用户明确批准将当前待提交内容发布到 GitHub／Vercel。先前 27B 试译和暂停的 Luna 任务均未纳入最终译文。纯架构名称 `HC`（原文将斜体 `m` 与 `HC` 分成两个文本节点）、`Engram`、`DSpark` 按固定版 2.4.1–2.4.3 节保留，不强制给名称添加中文解释；相关数值与名称仍受严格校验保护。
+
 ## 原生多模态缩放定律补充
 
 核验日期：2026-10-12。用户同意补充并发布 *Scaling Laws for Native Multimodal Models*，作者为 Mustafa Shukor、Enrico Fini、Victor Guilherme Turrisi da Costa、Matthieu Cord、Joshua Susskind、Alaaeldin El-Nouby。固定为 [arXiv 2504.07951v1](https://arxiv.org/abs/2504.07951v1)，正文来自 [官方 v1 HTML](https://arxiv.org/html/2504.07951v1)，没有改用后续修订版。论文许可为 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)；原始作者、英文标题、固定来源与许可记录随正文保留。
