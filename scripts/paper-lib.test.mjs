@@ -1155,6 +1155,20 @@ test('heading translation rejects untranslated labels and paragraph substitution
   assert.doesNotThrow(() => parse('Abstract', '摘要'))
 })
 
+test('DeepSeek V4.1 architecture labels survive split and numbered headings without exempting prose', () => {
+  for (const label of ['HC', 'Engram', 'DSpark']) {
+    assert.ok(isTechnicalLabelOnly(label))
+    assert.ok(isTechnicalLabelOnly(`2.4.3 ${label}`))
+    assert.doesNotThrow(() => parseUnitResponse(JSON.stringify({ translations: { heading: label } }), [{ id: 'heading', text: label, kind: 'heading' }]))
+    assert.throws(() => assertTranslationFidelity(label, 'Unknown'), /Technical identifier/)
+  }
+  assert.equal(isTechnicalLabelOnly('DSpark improves training efficiency.'), false)
+  assert.equal(isTechnicalLabelOnly('Engram stores token patterns.'), false)
+  assert.equal(isTechnicalLabelOnly('OtherArchitecture'), false)
+  const records = [{ id: 'fragment', text: 'The Engram component stores token patterns for the model.' }]
+  assert.throws(() => parseUnitResponse(JSON.stringify({ translations: { fragment: records[0].text } }), records), /No Chinese translation/)
+})
+
 test('letter-prefixed appendix section numbers are displayed once without changing original identifiers', () => {
   const en = '<h3><span class="ltx_tag">A.2.3 </span>Model Size</h3>'
   const zh = '<h3><span class="ltx_tag">A.2.3 </span>A.2.3 模型规模</h3>'

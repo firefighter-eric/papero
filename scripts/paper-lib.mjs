@@ -504,6 +504,10 @@ const modelPattern = new RegExp(String.raw`\b${gemmaModelFamilies}\b|\b${geminiM
 // text nodes (including Gemma 2 Table 17's PT / IT headings). Protect exact
 // labels without locking "it", "IT infrastructure", or "flash memory" prose.
 const isolatedModelLabel = /^(?:Gemini|Gemma|Ultra|Pro|Flash(?:-Lite)?|Nano(?:-\d+)?|PT|IT)$/
+// Architecture names observed in DeepSeek-V4.1-Flash v1, sections 2.4.1-2.4.3.
+// The source splits italic "m" from "HC" into separate heading text nodes.
+const isolatedArchitectureLabels = new Set(['HC', 'Engram', 'DSpark'])
+const architectureLabel = text => identifierText(text).trim().replace(/^\d+(?:\.\d+)*\.?\s+/, '')
 
 // Prose en/em dashes separate words; true identifier hyphens remain hyphens.
 const identifierText = (text) => text.normalize('NFKC').replace(/[\u2013\u2014\u2015]/g, ' ').replace(/[\u2010\u2011]/g, '-')
@@ -514,6 +518,7 @@ export const technicalIdentifiers = (text) => {
   const chessOpening = label.match(/^([A-E]\d{2}):/)
   if (chessOpening) identifiers.push(chessOpening[1])
   if (!identifiers.length && isolatedModelLabel.test(label)) identifiers.push(label)
+  if (isolatedArchitectureLabels.has(architectureLabel(text))) identifiers.push(architectureLabel(text))
   if (!identifiers.length && /^DoomTakeCover-v\d+$/.test(label)) identifiers.push(label)
   return identifiers
 }
@@ -542,6 +547,7 @@ export function isTechnicalLabelOnly(text) {
   if (isRlVerbatimLabel(text.replace(/^\s*\d+(?:\.\d+)*\.?\s+/, ''))) return true
   if (isPythonAssertion(text) || isSacreBleuSignature(text)) return true
   if (isolatedModelLabel.test(identifierText(text).trim())) return true
+  if (isolatedArchitectureLabels.has(architectureLabel(text))) return true
   if (isBenchmarkLanguageList(text) || isIsoBenchmarkLanguageList(text)) return true
   const residual = identifierText(text).replace(/(?<![A-Za-z0-9_])(?:C\+\+|C#|Python|JAVA|PHP|TypeScript|Bash|JavaScript|CoT|\d+-shot|MBPP-\d+shot)(?![A-Za-z0-9_])/gi, '').replace(modelPattern, '')
   return /[A-Za-z]/.test(text) && !/[A-Za-z\u3400-\u9fff]/.test(residual)
