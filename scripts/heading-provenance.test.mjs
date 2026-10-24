@@ -31,3 +31,9 @@ test('appendix numbering is separate from exact RL algorithm and benchmark label
   assert.throws(() => assertChineseHeadingCompleteness(paper), /changes an RL label/)
   assert.throws(() => assertChineseHeadingCompleteness(fixture('<span class="ltx_tag">A.2 </span>Learning from data')), /Untranslated heading/)
 })
+
+
+test('numbered headings recognize exact technical labels without exempting descriptive headings', () => {
+  assert.doesNotThrow(() => assertChineseHeadingCompleteness(fixture('<span class="ltx_tag">A.3 </span>FinOps')))
+  assert.throws(() => assertChineseHeadingCompleteness(fixture('<span class="ltx_tag">A.3 </span>FinOps analysis')), /Untranslated heading/)
+})

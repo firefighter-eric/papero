@@ -1,16 +1,20 @@
 import { createHash } from 'node:crypto'
 
+// A compact figure/equation pointer contains a real number, not a decimal
+// suffix. Keep version/checkpoint identifiers outside this normalization.
+export const normalizeScientificPointerSpacing = text => text.replace(/\b(Fig(?:ure)?|Eq(?:uation)?|Sec(?:tion)?|Tab(?:le)?)\.(?=\d)/gi, '$1. ')
+
 // Identifier versions are already protected as whole strings. Listing their
 // hyphenated suffixes as negative scores asks the model to duplicate them.
 export function sourceNumericTokens(text, identifiers = []) {
-  let prose = text.normalize('NFKC')
+  let prose = normalizeScientificPointerSpacing(text.normalize('NFKC'))
   for (const identifier of identifiers) prose = prose.replace(identifier, ' ')
   prose = prose.replace(/(?<=\d)-(?=\d)/g, ' ')
   return prose.match(/(?<![\w.])[+-]?\d+(?:,\d{3})*(?:\.\d+)?(?:[eE][+-]?\d+)?%?/g) || []
 }
 
 export function validateConcurrency(value) {
-  if (!Number.isInteger(value) || value < 1 || value > 4) throw new Error('Translation concurrency must be an integer from 1 to 4')
+  if (!Number.isInteger(value) || value < 1 || value > 8) throw new Error('Translation concurrency must be an integer from 1 to 8')
   return value
 }
 

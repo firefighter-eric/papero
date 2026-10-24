@@ -59,6 +59,21 @@ Chinchilla 也是独立系列，仅为 `chinchilla-training-compute-optimal` 显
 
 “预训练数据”“数据混合”“训练优化”可在研究类别中筛选。MoE、多模态和对比学习继续作为独立主题标签，可与系列和研究类别一起搜索。BERT、T5 与 Switch 的下游监督任务微调使用“监督训练”，与本文中指令／偏好对齐的“后训练”区分；GPT-2/3 和 CLIP 的零样本或上下文少样本评估不因此获得后训练标签。LLaMA 1、DeepSeekMoE 和 DCLM 的正文或附录确实训练了指令／对齐版本，因此同时标注后训练。
 
+## 评测基准的集中入口
+
+首页的“评测与 Benchmark”分类（`/?category=benchmarks`）按显式“评测基准”标签收拢相关论文，目前包括 [Artificial Analysis 收录清单](../paper-metadata/collections/artificial-analysis-benchmarks-22.json)中的 22 篇。阅读器检索栏的“研究主题”也可选择“评测基准”；搜索 benchmark、benchmarks、evaluation 或“能力评测”均支持对应标签。
+
+分类依据是已有的明确标签，不根据标题中提到 evaluation、模型报告包含评测实验或论文引用 benchmark 自动归类。代码、医疗、多语言等细分主题及 Artificial Analysis 来源标签仍用于描述论文，统一入口不再把它们拆成多个主页分类。
+
+## “全部系列”菜单分组
+
+首页和阅读器共用“系列与方向”菜单，默认保持“全部系列”。菜单按两组收拢，不再把每个算法或单篇方法列为默认系列选项：
+
+- 模型系列：Qwen、DeepSeek、Kimi、MiniMax、Gemini、Gemma、Chinchilla、Llama、OLMo、GPT、BERT、T5、Falcon。
+- 研究方向：Benchmark / 评测基准、训练与优化器、数据与语料、计算机视觉与多模态、自然语言处理、生成模型、强化学习、模型架构、缩放定律。
+
+研究方向直接复用首页分类的显式标签匹配规则；例如 `/?family=benchmarks` 汇集评测基准，`/?family=optimization` 汇集优化方法。具体算法标签和检索别名继续保留，选定强化学习后搜索 PPO、Dreamer 等仍能定位具体论文。已有的 `family=ViT` 等细分链接保持原有筛选精度，仅在打开这些链接时显示对应的“当前筛选”选项。
+
 ## 导入与发布
 
 `scripts/paper-tags.mjs` 在首次导入和公共导出时合并标签。导出先校验输入文件与正文指纹，再在导出副本的目录和 `paper.json` 上应用同一分类；已有独立 `en.html` / `zh.html` 直接复制，不重写正文、公式、翻译来源或模型参数。只有元数据文件的字节指纹会变化。

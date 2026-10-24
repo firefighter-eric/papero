@@ -5,7 +5,7 @@ import { safeId } from './paper-lib.mjs'
 import { translatePaper } from './translate-paper.mjs'
 
 export function concurrencyLimit(value) {
-  if (!/^[1-4]$/.test(String(value))) throw new Error('Translation concurrency must be an integer from 1 to 4')
+  if (!/^[1-8]$/.test(String(value))) throw new Error('Translation concurrency must be an integer from 1 to 8')
   return Number(value)
 }
 
@@ -140,7 +140,7 @@ export function parseLibraryArguments(args) {
 if (import.meta.url === pathToFileURL(process.argv[1] || '').href) {
   try {
     const options = parseLibraryArguments(process.argv.slice(2))
-    if (options.help) console.log('Usage: npm run library:translate -- [paper-id ...] [--concurrency 1..4] [--batch-characters 256..6000] [--model exact-api-id] [--allow-model-change] [--continue-on-paper-error]\nDefault: all locally registered papers, 2 concurrent local API requests, batches of 6000 source characters. Completed blocks are reused. An explicit model change preserves prior per-block provenance. One global request limit includes corrections and retries; each paper has one writer. --continue-on-paper-error drains a failed paper and continues the others, then exits unsuccessfully with incomplete paper IDs. SIGINT/SIGTERM drain accepted requests before exit. No downloads or uploads.')
+    if (options.help) console.log('Usage: npm run library:translate -- [paper-id ...] [--concurrency 1..8] [--batch-characters 256..6000] [--model exact-api-id] [--allow-model-change] [--continue-on-paper-error]\nDefault: all locally registered papers, 2 concurrent local API requests, batches of 6000 source characters. Completed blocks are reused. An explicit model change preserves prior per-block provenance. One global request limit includes corrections and retries; each paper has one writer. --continue-on-paper-error drains a failed paper and continues the others, then exits unsuccessfully with incomplete paper IDs. SIGINT/SIGTERM drain accepted requests before exit. No downloads or uploads.')
     else await translateLibrary({ ...options, handleSignals: true })
   } catch (error) {
     console.error(JSON.stringify({ type: 'library-translation-error', message: error.message }))

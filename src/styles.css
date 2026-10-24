@@ -311,13 +311,14 @@ a { color: var(--green); text-underline-offset: 3px; }
 :root[data-theme='dark'] .pdf-math { filter: invert(1); }
 .pdf-math.pdf-math-h3{height:0.3em}.pdf-math.pdf-math-h4{height:0.4em}.pdf-math.pdf-math-h5{height:0.5em}.pdf-math.pdf-math-h6{height:0.6em}.pdf-math.pdf-math-h7{height:0.7em}.pdf-math.pdf-math-h8{height:0.8em}.pdf-math.pdf-math-h9{height:0.9em}.pdf-math.pdf-math-h10{height:1.0em}.pdf-math.pdf-math-h11{height:1.1em}.pdf-math.pdf-math-h12{height:1.2em}.pdf-math.pdf-math-h13{height:1.3em}.pdf-math.pdf-math-h14{height:1.4em}.pdf-math.pdf-math-h15{height:1.5em}.pdf-math.pdf-math-h16{height:1.6em}.pdf-math.pdf-math-h17{height:1.7em}.pdf-math.pdf-math-h18{height:1.8em}.pdf-math.pdf-math-h19{height:1.9em}.pdf-math.pdf-math-h20{height:2.0em}.pdf-math.pdf-math-h21{height:2.1em}.pdf-math.pdf-math-h22{height:2.2em}.pdf-math.pdf-math-h23{height:2.3em}.pdf-math.pdf-math-h24{height:2.4em}.pdf-math.pdf-math-h25{height:2.5em}.pdf-math.pdf-math-h26{height:2.6em}.pdf-math.pdf-math-h27{height:2.7em}.pdf-math.pdf-math-h28{height:2.8em}.pdf-math.pdf-math-h29{height:2.9em}.pdf-math.pdf-math-h30{height:3.0em}.pdf-math.pdf-math-h31{height:3.1em}.pdf-math.pdf-math-h32{height:3.2em}.pdf-math.pdf-math-h33{height:3.3em}.pdf-math.pdf-math-h34{height:3.4em}.pdf-math.pdf-math-h35{height:3.5em}.pdf-math.pdf-math-h36{height:3.6em}.pdf-math.pdf-math-h37{height:3.7em}.pdf-math.pdf-math-h38{height:3.8em}.pdf-math.pdf-math-h39{height:3.9em}.pdf-math.pdf-math-h40{height:4.0em}.pdf-math.pdf-math-h41{height:4.1em}.pdf-math.pdf-math-h42{height:4.2em}.pdf-math.pdf-math-h43{height:4.3em}.pdf-math.pdf-math-h44{height:4.4em}.pdf-math.pdf-math-h45{height:4.5em}.pdf-math.pdf-math-h46{height:4.6em}.pdf-math.pdf-math-h47{height:4.7em}.pdf-math.pdf-math-h48{height:4.8em}.pdf-math.pdf-math-h49{height:4.9em}.pdf-math.pdf-math-h50{height:5.0em}.pdf-math.pdf-math-h51{height:5.1em}.pdf-math.pdf-math-h52{height:5.2em}.pdf-math.pdf-math-h53{height:5.3em}.pdf-math.pdf-math-h54{height:5.4em}.pdf-math.pdf-math-h55{height:5.5em}.pdf-math.pdf-math-h56{height:5.6em}.pdf-math.pdf-math-h57{height:5.7em}.pdf-math.pdf-math-h58{height:5.8em}.pdf-math.pdf-math-h59{height:5.9em}.pdf-math.pdf-math-h60{height:6.0em}.pdf-math.pdf-math-h61{height:6.1em}.pdf-math.pdf-math-h62{height:6.2em}.pdf-math.pdf-math-h63{height:6.3em}.pdf-math.pdf-math-h64{height:6.4em}.pdf-math.pdf-math-h65{height:6.5em}.pdf-math.pdf-math-h66{height:6.6em}.pdf-math.pdf-math-h67{height:6.7em}.pdf-math.pdf-math-h68{height:6.8em}.pdf-math.pdf-math-h69{height:6.9em}.pdf-math.pdf-math-h70{height:7.0em}.pdf-math.pdf-math-h71{height:7.1em}.pdf-math.pdf-math-h72{height:7.2em}.pdf-math.pdf-math-h73{height:7.3em}.pdf-math.pdf-math-h74{height:7.4em}.pdf-math.pdf-math-h75{height:7.5em}.pdf-math.pdf-math-h76{height:7.6em}.pdf-math.pdf-math-h77{height:7.7em}.pdf-math.pdf-math-h78{height:7.8em}.pdf-math.pdf-math-h79{height:7.9em}.pdf-math.pdf-math-h80{height:8.0em}
 .paper-block img { max-width: 100%; height: auto; vertical-align: middle; }
+.paper-block img[src*="assets/inline-"] { background: var(--figure-paper); }
 .paper-block figure img { object-fit: contain; max-height: 620px; background: var(--figure-paper); border-radius: 2px; }
 .paper-block figcaption { text-align: left; font-size: .84em; line-height: 1.6; color: var(--secondary-text); margin-top: 13px; }
 .paper-block .ltx_flex { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; }
 .paper-block .ltx_flex > * { min-width: 0; max-width: 100%; }
 .paper-block .ltx_flex > .ltx_figure { flex: 1 1 140px; }
 .paper-block .ltx_inline-block { max-width: 100%; }
-.block-table .block-html, .block-equation .block-html, .block-code .block-html { max-width: 100%; overflow-x: auto; scrollbar-width: thin; scrollbar-color: var(--scrollbar) var(--surface-bg); }
+.block-table .block-html, .block-equation .block-html, .block-code .block-html, .paper-block .block-html:has(table, pre) { max-width: 100%; overflow-x: auto; scrollbar-width: thin; scrollbar-color: var(--scrollbar) var(--surface-bg); }
 .paper-block code { font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace; font-size: .82em; background: var(--surface-bg); padding: .08em .2em; border-radius: 2px; }
 .paper-block[data-source-id="A6.F45"] span.ltx_verbatim { display: block; white-space: pre-wrap; font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace; font-size: .82em; }
 .paper-block pre { width: max-content; min-width: 100%; margin: 0; padding: 14px 16px; background: var(--surface-bg); border: 1px solid var(--border); border-radius: 4px; font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace; font-size: .72em; line-height: 1.6; white-space: pre; }
@@ -621,6 +622,15 @@ a { color: var(--green); text-underline-offset: 3px; }
 .research-prose .reference-list { font-size: .84em; }
 .research-prose .reference-list li { margin-bottom: 16px; }
 .research-prose .reference-list code { overflow-wrap: anywhere; }
+.research-prose .benchmark-example-set { margin: 32px 0; padding-top: 8px; border-top: 1px solid var(--border); }
+.research-prose .benchmark-example-set h4 { font-size: 1.05em; margin: 1em 0; }
+.research-prose .benchmark-example { margin: 20px 0; padding: 16px; border: 1px solid var(--border); border-radius: 6px; }
+.research-prose .benchmark-example h5 { font-size: 1em; margin: 0 0 14px; }
+.research-prose .benchmark-example pre { width: auto; min-width: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: .82em; line-height: 1.85; }
+.research-prose .benchmark-example summary { cursor: pointer; font-weight: 600; }
+.research-prose .benchmark-example details[open] summary { margin-bottom: 16px; }
+.research-prose .benchmark-example .table-scroll { margin: 12px 0; }
+.research-prose #examples-index { font-size: .85em; line-height: 2.1; }
 .research-font-controls { display: flex; gap: 2px; }
 .research-font-controls button { padding: 6px 9px; border: 1px solid var(--border); background: var(--surface-bg); border-radius: 4px; font-size: 12px; }
 .research-empty { padding: 40px; }

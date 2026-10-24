@@ -6,6 +6,15 @@ import path from 'node:path'
 import { tmpdir } from 'node:os'
 import { parsePaper, sanitizeHtml, sanitizeSvg, translationUnits, normalizeHeadingNumber, assertTranslationFidelity, technicalIdentifiers, isTechnicalLabelOnly, sha256, safeId, validArxivId, visibleProseText, scientificSignature, isLiteralChatTemplateNode, isLiteralFencedCodeNode } from './paper-lib.mjs'
 
+test('LaTeXML paragraph containers preserve narration around a nested semantic table', () => {
+  const html = '<article class="ltx_document"><h1 class="ltx_title_document">Example</h1><section id="s"><h2>Results</h2><div id="p" class="ltx_p">Before the table.<table id="t"><tr><td>Complete cell</td></tr></table>After the table.</div></section></article>'
+  const paper = parsePaper(html, { id: 'fixture', arxivId: '2501.00001v1', htmlUrl: 'https://arxiv.org/html/2501.00001v1', fetchedAt: '2026-10-24T00:00:00Z' })
+  const block = paper.blocks.find(b => b.sourceId === 'p')
+  assert.ok(block)
+  assert.deepEqual(translationUnits(block.en).units.map(u => u.text), ['Before the table.', 'Complete cell', 'After the table.'])
+  assert.equal(paper.blocks.filter(b => b.en.includes('Complete cell')).length, 1)
+})
+
 test('explicit LaTeXML verbatim table samples preserve split JSON lines while surrounding descriptions translate', () => {
   const html = '<table><tr><td>Data instance</td><td><span class="ltx_verbatim ltx_font_typewriter"><span>{</span></span><span class="ltx_verbatim ltx_font_typewriter"><span>"url": "http://example.com/24758",</span></span><span class="ltx_verbatim ltx_font_typewriter"><span>"text": "Original training sample."</span></span><span class="ltx_verbatim ltx_font_typewriter"><span>}</span></span><p>This sample comes from a web crawl.</p></td></tr></table>'
   const prepared = translationUnits(html, 'table')
@@ -14,6 +23,39 @@ test('explicit LaTeXML verbatim table samples preserve split JSON lines while su
   assert.deepEqual(scientificSignature(load(html, {}, false)), scientificSignature(load(translated, {}, false)))
   assert.ok(translated.includes('Original training sample.'))
   assert.ok(translated.includes('该样例来自网页抓取。'))
+})
+
+test('bibliographic names and venues remain metadata inside a larger list block', () => {
+  const html = '<ol><li class="ltx_bibitem"><span class="ltx_tag">[1]</span><span class="ltx_bibblock">Alice Example and Bob Example.</span><span class="ltx_bibblock">A scientific paper title.</span><span class="ltx_bibblock">Conference 2024.</span></li></ol>'
+  const prepared = translationUnits(html, 'list')
+  assert.deepEqual(prepared.units.map(u => u.text), ['A scientific paper title.'])
+  const zh = prepared.render(['科学论文题名。'])
+  assert.ok(zh.includes('Alice Example and Bob Example.'))
+  assert.ok(zh.includes('Conference 2024.'))
+})
+
+test('compact scientific pointers retain the number and row quantities retain their scale', () => {
+  assert.doesNotThrow(() => assertTranslationFidelity('See Fig.2 in Haldane (1988).', '参见 Haldane (1988) 的图2。'))
+  assert.throws(() => assertTranslationFidelity('See Fig.2 in Haldane (1988).', '参见 Haldane (1988) 的图3。'), /Numeric/)
+  assert.doesNotThrow(() => assertTranslationFidelity('Transform a 1-million-row CSV using fewer than 200 keystrokes.', '用少于200次击键转换包含100万行的CSV。'))
+  assert.throws(() => assertTranslationFidelity('Transform a 1-million-row CSV using fewer than 200 keystrokes.', '用少于200次击键转换包含1000万行的CSV。'), /Numeric/)
+})
+
+test('plural review stages share their label while retaining every referenced stage', () => {
+  const source = 'After stage 1, prioritize examples for stages 2 and 3.'
+  assert.doesNotThrow(() => assertTranslationFidelity(source, '第1阶段后，优先选取第2和3阶段的示例。'))
+  assert.doesNotThrow(() => assertTranslationFidelity(source, '阶段1后，优先选取阶段2和3的示例。'))
+  assert.throws(() => assertTranslationFidelity(source, '第1阶段后，优先选取第2和4阶段的示例。'), /Stage/)
+  assert.throws(() => assertTranslationFidelity(source, '第1阶段后，优先选取第2阶段的示例。'), /Stage/)
+})
+
+test('first-line occupational titles retain their ordinal without licensing changed line numbers', () => {
+  const source = '1st-Line Supervisors of Retail Sales Workers — $58.27B'
+  assert.doesNotThrow(() => assertTranslationFidelity(source, '零售销售工人一线主管 — 582.7亿美元'))
+  assert.doesNotThrow(() => assertTranslationFidelity('First-Line Supervisors — $2B; 1st-Line Supervisors — $3B', '一线主管 — 20亿美元；一线主管 — 30亿美元'))
+  assert.doesNotThrow(() => assertTranslationFidelity('First-Line Supervisors of Passenger Attendants', '一线乘务员主管'))
+  assert.throws(() => assertTranslationFidelity(source, '零售销售工人二线主管 — 582.7亿美元'), /First-line/)
+  assert.throws(() => assertTranslationFidelity(source, '零售销售工人一线主管、一线主管 — 582.7亿美元'), /added/)
 })
 
 test('unambiguous US slash dates retain calendar identity without licensing changed dates or extra scores', () => {
@@ -1326,6 +1368,132 @@ test('numbered agent followed by modal may retains its ID without inventing a Ma
   assert.throws(() => assertTranslationFidelity('Then agent 1 may store additional information.', '随后智能体2可以存储额外信息。'), /Numeric value/)
   assertTranslationFidelity('We met on 1 May.', '我们在5月1日见面。')
   assert.throws(() => assertTranslationFidelity('We met on 1 May.', '我们在5月2日见面。'), /Calendar date/)
+})
+
+test('evaluation-name headings preserve benchmark identity without exempting descriptive English', () => {
+  for (const label of ['ITBench', 'SciCode', 'AA-Omniscience', 'GDP.pdf', 'EnterpriseOps-Gym', 'IFTrain', 'HealthBench Professional']) {
+    assert.equal(isTechnicalLabelOnly(label), true)
+    assert.deepEqual(technicalIdentifiers(label), [label])
+    assert.doesNotThrow(() => parseUnitResponse(JSON.stringify({ translations: { heading: label } }), [{ id: 'heading', text: label, kind: 'heading' }]))
+    assert.throws(() => assertTranslationFidelity(label, 'OtherBenchmark'), /Technical identifier/)
+  }
+  assert.equal(isTechnicalLabelOnly('3 ITBench'), true)
+  for (const description of ['ITBench results', 'Evaluating SciCode', 'NotITBench', 'Benchmark']) {
+    assert.equal(isTechnicalLabelOnly(description), false)
+    assert.throws(() => parseUnitResponse(JSON.stringify({ translations: { heading: description } }), [{ id: 'heading', text: description, kind: 'heading' }]), /Chinese heading/)
+  }
+})
+
+test('pass metric labels retain the operator and trial count while descriptive headings translate', () => {
+  for (const label of ['Pass^8', 'pass@1']) {
+    assert.equal(isTechnicalLabelOnly(label), true)
+    assert.deepEqual(technicalIdentifiers(label), [label])
+    assert.doesNotThrow(() => parseUnitResponse(JSON.stringify({translations:{u:label}}), [{id:'u',text:label,kind:'heading'}]))
+  }
+  assert.throws(() => assertTranslationFidelity('Pass^8', 'Pass@8'), /Technical identifier/)
+  assert.throws(() => assertTranslationFidelity('Pass^8', 'Pass^9'), /Technical identifier/)
+  assert.equal(isTechnicalLabelOnly('Pass^8 results'), false)
+})
+
+test('observed service and scenario labels preserve identity without exempting prose', () => {
+  for (const label of ['Google Sheets', 'Slack.', 'Asana.', 'SRE-Agent', 'New-RHEL9-CIS-b-Ansible-OPA', 'paragraphs2']) {
+    assert.equal(isTechnicalLabelOnly(label), true)
+    assert.doesNotThrow(() => parseUnitResponse(JSON.stringify({translations:{u:label}}), [{id:'u',text:label,kind:'heading'}]))
+  }
+  assert.throws(() => assertTranslationFidelity('New-RHEL9-CIS-b-Ansible-OPA', 'New-RHEL8-CIS-b-Ansible-OPA'), /Technical identifier/)
+  assert.equal(isTechnicalLabelOnly('Google Sheets results'), false)
+  assert.doesNotThrow(() => parseUnitResponse('{"translations":{"u":"DPO"}}', [{id:'u',text:'DPO',kind:'heading'}]))
+})
+
+test('literal force-answer options remain data and cannot change values or units', () => {
+  const options = 'A. 3.12 kN B. 7.2 kN C. 5.02 kN D. 4.00 kN E. 6.75 kN\nF. 1.95 kN G. 2.86 kN H. 4.86 kN I. 5.5 kN J. 3.98 kN'
+  assert.equal(isTechnicalLabelOnly(options), true)
+  assert.doesNotThrow(() => parseUnitResponse(JSON.stringify({translations:{u:options}}), [{id:'u',text:options}]))
+  assert.throws(() => assertTranslationFidelity(options, options.replace('7.2', '7.3')), /option data/)
+  assert.throws(() => assertTranslationFidelity(options, options.replace('kN', 'N')), /option data/)
+  assert.equal(isTechnicalLabelOnly(options+' Explain the result.'), false)
+})
+
+test('rank ordinals preserve their actual value and success-rate asides retain positive percentages', () => {
+  assert.doesNotThrow(() => assertTranslationFidelity('It ranks seventh despite placing sixteenth overall.', '尽管总体排名第16位，它排名第7位。'))
+  assert.throws(() => assertTranslationFidelity('It ranks seventh despite placing sixteenth overall.', '尽管总体排名第17位，它排名第7位。'), /added/)
+  assert.doesNotThrow(() => assertTranslationFidelity('The success rate —35% in InsightBench.', '成功率——35% 在 InsightBench 中。'))
+  assert.throws(() => assertTranslationFidelity('The success rate -35% in InsightBench.', '成功率——35% 在 InsightBench 中。'), /Numeric/)
+  assert.throws(() => assertTranslationFidelity('The success rate —35% in InsightBench.', '成功率——36% 在 InsightBench 中。'), /Numeric/)
+})
+
+test('scientific dimensions bind the Chinese numeral to the actual dimension', () => {
+  assert.doesNotThrow(() => assertTranslationFidelity('Fusion rules in 2d conformal field theory.', '二维共形场论中的融合规则。'))
+  assert.doesNotThrow(() => assertTranslationFidelity('An index for 4 dimensional superconformal theories.', '四维超共形理论的指标。'))
+  assert.doesNotThrow(() => assertTranslationFidelity('A 3-dimensional plot.', '3 维图。'))
+  assert.doesNotThrow(() => assertTranslationFidelity('The 2D square Ising model problem.', '二维方格伊辛模型问题。'))
+  assert.doesNotThrow(() => assertTranslationFidelity('A surface plasmon mode in a 2D layered electron gas.', '二维分层电子气体中的表面等离子体激元模式。'))
+  assert.throws(() => assertTranslationFidelity('A mode in a 2D layered electron gas.', '三维分层电子气体中的模式。'), /dimension|Numeric/)
+  assert.doesNotThrow(() => assertTranslationFidelity('Fusion in 2d conformal theory.', '二维（2d）共形理论中的融合。'))
+  assert.doesNotThrow(() => assertTranslationFidelity('A three-dimensional encoder (MoonViT-3D).', '三维编码器（MoonViT-3D）。'))
+  assert.doesNotThrow(() => assertTranslationFidelity('Company L, 3d U.S. Artillery.', '美国第3炮兵团L连。'))
+  assert.throws(() => assertTranslationFidelity('Fusion in 2d conformal theory.', '二维（3d）共形理论中的融合。'), /dimension|Numeric/)
+  assert.throws(() => assertTranslationFidelity('Fusion rules in 2d conformal field theory.', '三维共形场论中的融合规则。'), /dimension|Numeric/)
+  assert.throws(() => assertTranslationFidelity('An index for 4 dimensional superconformal theories.', '理论指标为4。'), /dimension/)
+})
+
+test('equation arity retains the number expressed by a Chinese algebra term', () => {
+  assert.doesNotThrow(() => assertTranslationFidelity('complete solutions to 2-variable equations;', '二元方程的完整解；'))
+  assert.throws(() => assertTranslationFidelity('complete solutions to 2-variable equations;', '三元方程的完整解；'), /Numeric/)
+})
+
+test('yearless month intervals and month-end dates preserve endpoints without inferring years', () => {
+  assert.doesNotThrow(() => assertTranslationFidelity('Results (May-end)', '结果（5月末）'))
+  assert.doesNotThrow(() => assertTranslationFidelity('Problems released between May and February.', '5月至2月发布的问题。'))
+  assert.throws(() => assertTranslationFidelity('Results (May-end)', '结果（4月末）'), /Calendar/)
+  assert.throws(() => assertTranslationFidelity('Problems released between May and February.', '5月至3月发布的问题。'), /Calendar/)
+  assert.throws(() => assertTranslationFidelity('Problems released between May and February.', '2023年5月至2024年2月发布的问题。'), /Calendar/)
+  assert.doesNotThrow(() => assertTranslationFidelity('June to August, ending at the end of September.', '六月至八月，于九月底结束。'))
+})
+
+test('mega Btu retains its quantity and distinguishes a changed value or lower-case prefix', () => {
+  assert.doesNotThrow(() => assertTranslationFidelity('28.0 million Btu per short ton', '每短吨28.0 Mbtu'))
+  assert.throws(() => assertTranslationFidelity('28.0 million Btu per short ton', '每短吨28.1 Mbtu'), /Numeric/)
+  assert.throws(() => assertTranslationFidelity('28.0 million Btu per short ton', '每短吨28.0 mbtu'), /Numeric/)
+})
+
+test('versioned Claude API identifiers remain literal inside split headings and prose', () => {
+  for (const label of ['claude-sonnet-4-5', 'claude-opus-4-1-20250805', 'claude-haiku-4-5']) {
+    assert.equal(isTechnicalLabelOnly(label), true)
+    assert.deepEqual(technicalIdentifiers(label), [label])
+    assert.doesNotThrow(() => parseUnitResponse(JSON.stringify({ translations: { u: label } }), [{ id: 'u', text: label, kind: 'heading' }]))
+  }
+  assert.throws(() => assertTranslationFidelity('Using claude-sonnet-4-5.', '使用 claude-sonnet-4-6。'), /Technical identifier/)
+  assert.equal(isTechnicalLabelOnly('claude-sonnet-4-5 results'), false)
+  assert.equal(isTechnicalLabelOnly('FinOps'), true)
+})
+
+test('Data61 affiliation retains its branded numeral without treating it as an added score', () => {
+  assert.deepEqual(technicalIdentifiers('CSIRO’s Data61,'), ['Data61'])
+  assert.doesNotThrow(() => assertTranslationFidelity('CSIRO’s Data61,', 'CSIRO 的 Data61，'))
+  assert.throws(() => assertTranslationFidelity('CSIRO’s Data61,', 'CSIRO 的 Data62，'), /Technical identifier/)
+})
+
+test('whole benchmark tool traces preserve function names, arguments and identifiers', () => {
+  for (const trace of ['[unlock: close_debit_card_4721]', '[call: close_debit_card_4721(card_id=“card1”, reason=“lost”)]', '[KB_search: “lost wallet debit card”]']) {
+    assert.equal(isTechnicalLabelOnly(trace), true)
+    assert.deepEqual(technicalIdentifiers(trace), [trace])
+    assert.doesNotThrow(() => parseUnitResponse(JSON.stringify({ translations: { u: trace } }), [{ id: 'u', text: trace }]))
+    assert.throws(() => assertTranslationFidelity(trace, trace.replace('4721', '4722').replace('wallet', 'account')), /Technical identifier|Numeric/)
+  }
+  for (const prose of ['We use [unlock: close_debit_card_4721] next.', '[call: describe the workflow]', '[call: first()] then explain [call: second()]', 'The user asks about lost wallet debit cards.']) {
+    assert.equal(isTechnicalLabelOnly(prose), false)
+  }
+})
+
+test('Sept abbreviations retain date identity, UTC time and numeric fidelity', () => {
+  const source = 'Starting at 04:00 UTC on Sept 14, 2026, all requests will route to the new model.'
+  assert.doesNotThrow(() => assertTranslationFidelity(source, '自2026年9月14日04:00 UTC起，所有请求都将路由至新模型。'))
+  assert.doesNotThrow(() => assertTranslationFidelity('Sept. 10, 2026.', '2026年9月10日。'))
+  assert.doesNotThrow(() => assertTranslationFidelity('14 Sept. 2026.', '2026年9月14日。'))
+  assert.throws(() => assertTranslationFidelity(source, '自2026年9月15日04:00 UTC起，所有请求都将路由至新模型。'), /Calendar date/)
+  assert.throws(() => assertTranslationFidelity(source, '自2026年9月14日05:00 UTC起，所有请求都将路由至新模型。'), /Numeric/)
+  assert.throws(() => assertTranslationFidelity('Sept 14 with 2026 parameters.', '2026年9月14日，有参数。'), /Calendar date/)
 })
 
 

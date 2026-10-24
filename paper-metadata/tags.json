@@ -1,118 +1,816 @@
 {
   "schemaVersion": 1,
   "papers": {
-    "attention-is-all-you-need": ["Transformer", "模型架构", "监督训练"],
-    "qwen2-technical-report": ["Qwen", "预训练", "后训练"],
-    "qwen2-5-technical-report": ["Qwen", "预训练", "后训练"],
-    "qwen2-5-vl-technical-report": ["Qwen", "预训练", "后训练"],
-    "qwen3-technical-report": ["Qwen", "预训练", "后训练"],
-    "qwen3-vl-technical-report": ["Qwen", "预训练", "后训练"],
-    "qwen3-5-official-article": ["Qwen", "预训练", "后训练"],
-    "deepseek-v3-technical-report": ["DeepSeek", "预训练", "后训练"],
-    "deepseek-r1-technical-report": ["DeepSeek", "后训练"],
-    "deepseek-v4-technical-report": ["DeepSeek", "预训练", "后训练"],
-    "deepseek-v4-1-flash-technical-report": ["DeepSeek", "模型架构", "预训练", "后训练", "多模态", "MoE", "强化学习"],
-    "kimi-k2-technical-report": ["Kimi", "预训练", "后训练"],
-    "kimi-k2-5-technical-report": ["Kimi", "预训练", "后训练"],
-    "kimi-k3-technical-report": ["Kimi", "预训练", "后训练"],
-    "minimax-m3-technical-report": ["MiniMax", "模型架构", "预训练"],
-    "gemini-1-0-technical-report": ["Gemini", "预训练", "后训练"],
-    "gemini-1-5-technical-report": ["Gemini", "预训练", "后训练"],
-    "gemini-2-5-technical-report": ["Gemini", "预训练", "后训练"],
-    "gemma-1-technical-report": ["Gemma", "预训练", "后训练"],
-    "gemma-2-technical-report": ["Gemma", "预训练", "后训练"],
-    "gemma-3-technical-report": ["Gemma", "预训练", "后训练"],
-    "gemma-4-technical-report": ["Gemma", "预训练", "后训练"],
-    "chinchilla-training-compute-optimal": ["Chinchilla", "预训练", "缩放定律"],
-    "llama-3-technical-report": ["Llama", "预训练", "后训练", "缩放定律", "多模态"],
-    "olmo-2-technical-report": ["OLMo", "预训练", "后训练", "预训练数据", "数据混合", "训练优化"],
-    "fineweb-datasets": ["FineWeb", "预训练", "预训练数据"],
-    "datacomp-lm": ["DCLM", "预训练", "后训练", "预训练数据", "数据混合"],
-    "doremi-data-mixtures": ["DoReMi", "预训练", "数据混合", "训练优化"],
-    "scaling-laws-neural-language-models": ["Scaling Laws", "预训练", "缩放定律"],
-    "deepseek-moe": ["DeepSeek", "模型架构", "预训练", "后训练", "MoE"],
-    "tensor-programs-v-mup": ["μP", "预训练", "训练优化"],
-    "olmo-3-technical-report": ["OLMo", "预训练", "后训练", "预训练数据", "数据混合"],
-    "llama-1-technical-report": ["Llama", "预训练", "后训练"],
-    "llama-2-technical-report": ["Llama", "预训练", "后训练"],
-    "deepseek-llm": ["DeepSeek", "预训练", "后训练", "缩放定律"],
-    "gpt-2-technical-report": ["GPT", "预训练"],
-    "gpt-3-technical-report": ["GPT", "预训练"],
-    "bert-pretraining": ["BERT", "预训练", "监督训练"],
-    "t5-text-to-text-transformer": ["T5", "预训练", "监督训练", "预训练数据"],
-    "refinedweb-dataset": ["Falcon", "预训练", "预训练数据"],
-    "dolma-pretraining-corpus": ["Dolma", "预训练", "预训练数据", "数据混合"],
-    "switch-transformers": ["Switch Transformer", "模型架构", "预训练", "监督训练", "训练优化", "MoE"],
-    "clip-pretraining": ["CLIP", "预训练", "多模态", "对比学习"],
-    "scaling-laws-native-multimodal-models": ["Scaling Laws", "预训练", "缩放定律", "多模态", "模型架构"],
-    "adamw-decoupled-weight-decay": ["AdamW", "优化器", "训练优化"],
-    "muon-scalable-llm-training": ["Muon", "优化器", "训练优化", "预训练", "矩阵优化", "分布式训练"],
-    "muon-original-design": ["Muon", "优化器", "训练优化", "矩阵优化"],
-    "adam-stochastic-optimization": ["Adam", "优化器", "训练优化"],
-    "shampoo-tensor-optimization": ["Shampoo", "优化器", "训练优化", "矩阵优化"],
-    "soap-shampoo-adam": ["SOAP", "优化器", "训练优化", "预训练", "矩阵优化"],
-    "old-optimizer-new-norm": ["优化器", "训练优化", "矩阵优化"],
-    "soap-muon-pretraining-scales": ["SOAP", "Muon", "优化器", "训练优化", "预训练", "矩阵优化", "分布式训练"],
-    "polar-express-muon": ["Muon", "优化器", "训练优化", "矩阵优化"],
-    "adafactor-sublinear-memory": ["Adafactor", "优化器", "训练优化", "显存优化"],
-    "lion-symbolic-optimizer": ["Lion", "优化器", "训练优化", "显存优化"],
-    "dion-distributed-orthonormalized-updates": ["Dion", "优化器", "训练优化", "预训练", "矩阵优化", "显存优化", "分布式训练"],
-    "alexnet": ["AlexNet", "经典论文", "计算机视觉", "模型架构", "监督训练"],
-    "resnet": ["ResNet", "经典论文", "计算机视觉", "模型架构", "残差学习"],
-    "word2vec": ["Word2Vec", "经典论文", "自然语言处理", "词向量", "表示学习"],
-    "seq2seq": ["Seq2Seq", "经典论文", "自然语言处理", "模型架构", "机器翻译"],
-    "bahdanau-attention": ["Attention", "经典论文", "注意力机制", "机器翻译", "模型架构"],
-    "vae": ["VAE", "经典论文", "生成模型", "变分推断"],
-    "gan": ["GAN", "经典论文", "生成模型", "对抗学习"],
-    "ddpm": ["DDPM", "经典论文", "生成模型", "扩散模型"],
-    "vision-transformer": ["ViT", "经典论文", "计算机视觉", "Transformer", "模型架构"],
-    "dqn": ["DQN", "经典论文", "强化学习", "决策学习"],
-    "alphago": ["AlphaGo", "经典论文", "强化学习", "树搜索", "自博弈"],
-    "instructgpt": ["InstructGPT", "经典论文", "后训练", "指令微调", "RLHF"],
-    "td-learning": ["TD learning", "经典论文", "强化学习", "强化学习基础"],
-    "q-learning": ["Q-learning", "经典论文", "强化学习", "强化学习基础"],
-    "reinforce": ["REINFORCE", "经典论文", "强化学习", "强化学习基础"],
-    "dyna": ["Dyna", "经典论文", "强化学习", "强化学习基础"],
-    "policy-gradient-theorem": ["Policy Gradient Theorem", "经典论文", "强化学习", "强化学习基础", "策略梯度"],
-    "options": ["Options", "经典论文", "强化学习", "强化学习基础", "时间抽象", "层次强化学习"],
-    "double-dqn": ["Double DQN", "经典论文", "强化学习", "价值学习"],
-    "dueling-dqn": ["Dueling DQN", "经典论文", "强化学习", "价值学习"],
-    "prioritized-experience-replay": ["Prioritized Experience Replay", "经典论文", "强化学习", "价值学习"],
-    "rainbow": ["Rainbow", "经典论文", "强化学习", "价值学习", "回报分布"],
-    "c51": ["C51", "经典论文", "强化学习", "价值学习", "回报分布"],
-    "qr-dqn": ["QR-DQN", "经典论文", "强化学习", "价值学习", "回报分布"],
-    "iqn": ["IQN", "经典论文", "强化学习", "价值学习", "回报分布"],
-    "deterministic-policy-gradient": ["DPG", "经典论文", "强化学习", "策略梯度", "连续控制"],
-    "trpo": ["TRPO", "经典论文", "强化学习", "策略梯度", "连续控制"],
-    "gae": ["GAE", "经典论文", "强化学习", "策略梯度", "连续控制"],
-    "ppo": ["PPO", "经典论文", "强化学习", "策略梯度", "连续控制"],
-    "a3c": ["A3C", "经典论文", "强化学习", "策略梯度", "连续控制"],
-    "ddpg": ["DDPG", "经典论文", "强化学习", "策略梯度", "连续控制"],
-    "td3": ["TD3", "经典论文", "强化学习", "策略梯度", "连续控制"],
-    "sac": ["SAC", "经典论文", "强化学习", "策略梯度", "连续控制"],
-    "alphazero": ["AlphaZero", "经典论文", "强化学习", "规划", "树搜索"],
-    "muzero": ["MuZero", "经典论文", "强化学习", "世界模型", "规划"],
-    "world-models": ["World Models", "经典论文", "强化学习", "世界模型", "规划"],
-    "pets": ["PETS", "经典论文", "强化学习", "世界模型", "规划"],
-    "mbpo": ["MBPO", "经典论文", "强化学习", "世界模型", "规划"],
-    "dreamer": ["Dreamer", "经典论文", "强化学习", "世界模型", "规划"],
-    "dreamerv2": ["DreamerV2", "经典论文", "强化学习", "世界模型", "规划"],
-    "dreamerv3": ["DreamerV3", "经典论文", "强化学习", "世界模型", "规划"],
-    "bcq": ["BCQ", "经典论文", "强化学习", "离线强化学习"],
-    "cql": ["CQL", "经典论文", "强化学习", "离线强化学习"],
-    "iql": ["IQL", "经典论文", "强化学习", "离线强化学习"],
-    "decision-transformer": ["Decision Transformer", "经典论文", "强化学习", "离线强化学习"],
-    "icm": ["ICM", "经典论文", "强化学习", "探索", "稀疏奖励"],
-    "rnd": ["RND", "经典论文", "强化学习", "探索", "稀疏奖励"],
-    "hindsight-experience-replay": ["HER", "经典论文", "强化学习", "探索", "稀疏奖励"],
-    "option-critic": ["Option-Critic", "经典论文", "强化学习", "层次强化学习", "时间抽象"],
-    "maddpg": ["MADDPG", "经典论文", "强化学习", "多智能体"],
-    "vdn": ["VDN", "经典论文", "强化学习", "多智能体"],
-    "qmix": ["QMIX", "经典论文", "强化学习", "多智能体"],
-    "apprenticeship-learning-irl": ["Apprenticeship IRL", "经典论文", "模仿学习", "逆强化学习"],
-    "maximum-entropy-irl": ["Maximum Entropy IRL", "经典论文", "模仿学习", "逆强化学习"],
-    "gail": ["GAIL", "经典论文", "模仿学习", "逆强化学习", "强化学习"],
-    "deep-human-preferences": ["Deep RL from Human Preferences", "经典论文", "后训练", "偏好优化", "RLHF", "强化学习"],
-    "dpo": ["DPO", "经典论文", "后训练", "偏好优化", "RLHF"]
+    "attention-is-all-you-need": [
+      "Transformer",
+      "模型架构",
+      "监督训练"
+    ],
+    "qwen2-technical-report": [
+      "Qwen",
+      "预训练",
+      "后训练"
+    ],
+    "qwen2-5-technical-report": [
+      "Qwen",
+      "预训练",
+      "后训练"
+    ],
+    "qwen2-5-vl-technical-report": [
+      "Qwen",
+      "预训练",
+      "后训练"
+    ],
+    "qwen3-technical-report": [
+      "Qwen",
+      "预训练",
+      "后训练"
+    ],
+    "qwen3-vl-technical-report": [
+      "Qwen",
+      "预训练",
+      "后训练"
+    ],
+    "qwen3-5-official-article": [
+      "Qwen",
+      "预训练",
+      "后训练"
+    ],
+    "deepseek-v3-technical-report": [
+      "DeepSeek",
+      "预训练",
+      "后训练"
+    ],
+    "deepseek-r1-technical-report": [
+      "DeepSeek",
+      "后训练"
+    ],
+    "deepseek-v4-technical-report": [
+      "DeepSeek",
+      "预训练",
+      "后训练"
+    ],
+    "deepseek-v4-1-flash-technical-report": [
+      "DeepSeek",
+      "模型架构",
+      "预训练",
+      "后训练",
+      "多模态",
+      "MoE",
+      "强化学习"
+    ],
+    "kimi-k2-technical-report": [
+      "Kimi",
+      "预训练",
+      "后训练"
+    ],
+    "kimi-k2-5-technical-report": [
+      "Kimi",
+      "预训练",
+      "后训练"
+    ],
+    "kimi-k3-technical-report": [
+      "Kimi",
+      "预训练",
+      "后训练"
+    ],
+    "minimax-m3-technical-report": [
+      "MiniMax",
+      "模型架构",
+      "预训练"
+    ],
+    "gemini-1-0-technical-report": [
+      "Gemini",
+      "预训练",
+      "后训练"
+    ],
+    "gemini-1-5-technical-report": [
+      "Gemini",
+      "预训练",
+      "后训练"
+    ],
+    "gemini-2-5-technical-report": [
+      "Gemini",
+      "预训练",
+      "后训练"
+    ],
+    "gemma-1-technical-report": [
+      "Gemma",
+      "预训练",
+      "后训练"
+    ],
+    "gemma-2-technical-report": [
+      "Gemma",
+      "预训练",
+      "后训练"
+    ],
+    "gemma-3-technical-report": [
+      "Gemma",
+      "预训练",
+      "后训练"
+    ],
+    "gemma-4-technical-report": [
+      "Gemma",
+      "预训练",
+      "后训练"
+    ],
+    "chinchilla-training-compute-optimal": [
+      "Chinchilla",
+      "预训练",
+      "缩放定律"
+    ],
+    "llama-3-technical-report": [
+      "Llama",
+      "预训练",
+      "后训练",
+      "缩放定律",
+      "多模态"
+    ],
+    "olmo-2-technical-report": [
+      "OLMo",
+      "预训练",
+      "后训练",
+      "预训练数据",
+      "数据混合",
+      "训练优化"
+    ],
+    "fineweb-datasets": [
+      "FineWeb",
+      "预训练",
+      "预训练数据"
+    ],
+    "datacomp-lm": [
+      "DCLM",
+      "预训练",
+      "后训练",
+      "预训练数据",
+      "数据混合"
+    ],
+    "doremi-data-mixtures": [
+      "DoReMi",
+      "预训练",
+      "数据混合",
+      "训练优化"
+    ],
+    "scaling-laws-neural-language-models": [
+      "Scaling Laws",
+      "预训练",
+      "缩放定律"
+    ],
+    "deepseek-moe": [
+      "DeepSeek",
+      "模型架构",
+      "预训练",
+      "后训练",
+      "MoE"
+    ],
+    "tensor-programs-v-mup": [
+      "μP",
+      "预训练",
+      "训练优化"
+    ],
+    "olmo-3-technical-report": [
+      "OLMo",
+      "预训练",
+      "后训练",
+      "预训练数据",
+      "数据混合"
+    ],
+    "llama-1-technical-report": [
+      "Llama",
+      "预训练",
+      "后训练"
+    ],
+    "llama-2-technical-report": [
+      "Llama",
+      "预训练",
+      "后训练"
+    ],
+    "deepseek-llm": [
+      "DeepSeek",
+      "预训练",
+      "后训练",
+      "缩放定律"
+    ],
+    "gpt-2-technical-report": [
+      "GPT",
+      "预训练"
+    ],
+    "gpt-3-technical-report": [
+      "GPT",
+      "预训练"
+    ],
+    "bert-pretraining": [
+      "BERT",
+      "预训练",
+      "监督训练"
+    ],
+    "t5-text-to-text-transformer": [
+      "T5",
+      "预训练",
+      "监督训练",
+      "预训练数据"
+    ],
+    "refinedweb-dataset": [
+      "Falcon",
+      "预训练",
+      "预训练数据"
+    ],
+    "dolma-pretraining-corpus": [
+      "Dolma",
+      "预训练",
+      "预训练数据",
+      "数据混合"
+    ],
+    "switch-transformers": [
+      "Switch Transformer",
+      "模型架构",
+      "预训练",
+      "监督训练",
+      "训练优化",
+      "MoE"
+    ],
+    "clip-pretraining": [
+      "CLIP",
+      "预训练",
+      "多模态",
+      "对比学习"
+    ],
+    "scaling-laws-native-multimodal-models": [
+      "Scaling Laws",
+      "预训练",
+      "缩放定律",
+      "多模态",
+      "模型架构"
+    ],
+    "adamw-decoupled-weight-decay": [
+      "AdamW",
+      "优化器",
+      "训练优化"
+    ],
+    "muon-scalable-llm-training": [
+      "Muon",
+      "优化器",
+      "训练优化",
+      "预训练",
+      "矩阵优化",
+      "分布式训练"
+    ],
+    "muon-original-design": [
+      "Muon",
+      "优化器",
+      "训练优化",
+      "矩阵优化"
+    ],
+    "adam-stochastic-optimization": [
+      "Adam",
+      "优化器",
+      "训练优化"
+    ],
+    "shampoo-tensor-optimization": [
+      "Shampoo",
+      "优化器",
+      "训练优化",
+      "矩阵优化"
+    ],
+    "soap-shampoo-adam": [
+      "SOAP",
+      "优化器",
+      "训练优化",
+      "预训练",
+      "矩阵优化"
+    ],
+    "old-optimizer-new-norm": [
+      "优化器",
+      "训练优化",
+      "矩阵优化"
+    ],
+    "soap-muon-pretraining-scales": [
+      "SOAP",
+      "Muon",
+      "优化器",
+      "训练优化",
+      "预训练",
+      "矩阵优化",
+      "分布式训练"
+    ],
+    "polar-express-muon": [
+      "Muon",
+      "优化器",
+      "训练优化",
+      "矩阵优化"
+    ],
+    "adafactor-sublinear-memory": [
+      "Adafactor",
+      "优化器",
+      "训练优化",
+      "显存优化"
+    ],
+    "lion-symbolic-optimizer": [
+      "Lion",
+      "优化器",
+      "训练优化",
+      "显存优化"
+    ],
+    "dion-distributed-orthonormalized-updates": [
+      "Dion",
+      "优化器",
+      "训练优化",
+      "预训练",
+      "矩阵优化",
+      "显存优化",
+      "分布式训练"
+    ],
+    "alexnet": [
+      "AlexNet",
+      "经典论文",
+      "计算机视觉",
+      "模型架构",
+      "监督训练"
+    ],
+    "resnet": [
+      "ResNet",
+      "经典论文",
+      "计算机视觉",
+      "模型架构",
+      "残差学习"
+    ],
+    "word2vec": [
+      "Word2Vec",
+      "经典论文",
+      "自然语言处理",
+      "词向量",
+      "表示学习"
+    ],
+    "seq2seq": [
+      "Seq2Seq",
+      "经典论文",
+      "自然语言处理",
+      "模型架构",
+      "机器翻译"
+    ],
+    "bahdanau-attention": [
+      "Attention",
+      "经典论文",
+      "注意力机制",
+      "机器翻译",
+      "模型架构"
+    ],
+    "vae": [
+      "VAE",
+      "经典论文",
+      "生成模型",
+      "变分推断"
+    ],
+    "gan": [
+      "GAN",
+      "经典论文",
+      "生成模型",
+      "对抗学习"
+    ],
+    "ddpm": [
+      "DDPM",
+      "经典论文",
+      "生成模型",
+      "扩散模型"
+    ],
+    "vision-transformer": [
+      "ViT",
+      "经典论文",
+      "计算机视觉",
+      "Transformer",
+      "模型架构"
+    ],
+    "dqn": [
+      "DQN",
+      "经典论文",
+      "强化学习",
+      "决策学习"
+    ],
+    "alphago": [
+      "AlphaGo",
+      "经典论文",
+      "强化学习",
+      "树搜索",
+      "自博弈"
+    ],
+    "instructgpt": [
+      "InstructGPT",
+      "经典论文",
+      "后训练",
+      "指令微调",
+      "RLHF"
+    ],
+    "td-learning": [
+      "TD learning",
+      "经典论文",
+      "强化学习",
+      "强化学习基础"
+    ],
+    "q-learning": [
+      "Q-learning",
+      "经典论文",
+      "强化学习",
+      "强化学习基础"
+    ],
+    "reinforce": [
+      "REINFORCE",
+      "经典论文",
+      "强化学习",
+      "强化学习基础"
+    ],
+    "dyna": [
+      "Dyna",
+      "经典论文",
+      "强化学习",
+      "强化学习基础"
+    ],
+    "policy-gradient-theorem": [
+      "Policy Gradient Theorem",
+      "经典论文",
+      "强化学习",
+      "强化学习基础",
+      "策略梯度"
+    ],
+    "options": [
+      "Options",
+      "经典论文",
+      "强化学习",
+      "强化学习基础",
+      "时间抽象",
+      "层次强化学习"
+    ],
+    "double-dqn": [
+      "Double DQN",
+      "经典论文",
+      "强化学习",
+      "价值学习"
+    ],
+    "dueling-dqn": [
+      "Dueling DQN",
+      "经典论文",
+      "强化学习",
+      "价值学习"
+    ],
+    "prioritized-experience-replay": [
+      "Prioritized Experience Replay",
+      "经典论文",
+      "强化学习",
+      "价值学习"
+    ],
+    "rainbow": [
+      "Rainbow",
+      "经典论文",
+      "强化学习",
+      "价值学习",
+      "回报分布"
+    ],
+    "c51": [
+      "C51",
+      "经典论文",
+      "强化学习",
+      "价值学习",
+      "回报分布"
+    ],
+    "qr-dqn": [
+      "QR-DQN",
+      "经典论文",
+      "强化学习",
+      "价值学习",
+      "回报分布"
+    ],
+    "iqn": [
+      "IQN",
+      "经典论文",
+      "强化学习",
+      "价值学习",
+      "回报分布"
+    ],
+    "deterministic-policy-gradient": [
+      "DPG",
+      "经典论文",
+      "强化学习",
+      "策略梯度",
+      "连续控制"
+    ],
+    "trpo": [
+      "TRPO",
+      "经典论文",
+      "强化学习",
+      "策略梯度",
+      "连续控制"
+    ],
+    "gae": [
+      "GAE",
+      "经典论文",
+      "强化学习",
+      "策略梯度",
+      "连续控制"
+    ],
+    "ppo": [
+      "PPO",
+      "经典论文",
+      "强化学习",
+      "策略梯度",
+      "连续控制"
+    ],
+    "a3c": [
+      "A3C",
+      "经典论文",
+      "强化学习",
+      "策略梯度",
+      "连续控制"
+    ],
+    "ddpg": [
+      "DDPG",
+      "经典论文",
+      "强化学习",
+      "策略梯度",
+      "连续控制"
+    ],
+    "td3": [
+      "TD3",
+      "经典论文",
+      "强化学习",
+      "策略梯度",
+      "连续控制"
+    ],
+    "sac": [
+      "SAC",
+      "经典论文",
+      "强化学习",
+      "策略梯度",
+      "连续控制"
+    ],
+    "alphazero": [
+      "AlphaZero",
+      "经典论文",
+      "强化学习",
+      "规划",
+      "树搜索"
+    ],
+    "muzero": [
+      "MuZero",
+      "经典论文",
+      "强化学习",
+      "世界模型",
+      "规划"
+    ],
+    "world-models": [
+      "World Models",
+      "经典论文",
+      "强化学习",
+      "世界模型",
+      "规划"
+    ],
+    "pets": [
+      "PETS",
+      "经典论文",
+      "强化学习",
+      "世界模型",
+      "规划"
+    ],
+    "mbpo": [
+      "MBPO",
+      "经典论文",
+      "强化学习",
+      "世界模型",
+      "规划"
+    ],
+    "dreamer": [
+      "Dreamer",
+      "经典论文",
+      "强化学习",
+      "世界模型",
+      "规划"
+    ],
+    "dreamerv2": [
+      "DreamerV2",
+      "经典论文",
+      "强化学习",
+      "世界模型",
+      "规划"
+    ],
+    "dreamerv3": [
+      "DreamerV3",
+      "经典论文",
+      "强化学习",
+      "世界模型",
+      "规划"
+    ],
+    "bcq": [
+      "BCQ",
+      "经典论文",
+      "强化学习",
+      "离线强化学习"
+    ],
+    "cql": [
+      "CQL",
+      "经典论文",
+      "强化学习",
+      "离线强化学习"
+    ],
+    "iql": [
+      "IQL",
+      "经典论文",
+      "强化学习",
+      "离线强化学习"
+    ],
+    "decision-transformer": [
+      "Decision Transformer",
+      "经典论文",
+      "强化学习",
+      "离线强化学习"
+    ],
+    "icm": [
+      "ICM",
+      "经典论文",
+      "强化学习",
+      "探索",
+      "稀疏奖励"
+    ],
+    "rnd": [
+      "RND",
+      "经典论文",
+      "强化学习",
+      "探索",
+      "稀疏奖励"
+    ],
+    "hindsight-experience-replay": [
+      "HER",
+      "经典论文",
+      "强化学习",
+      "探索",
+      "稀疏奖励"
+    ],
+    "option-critic": [
+      "Option-Critic",
+      "经典论文",
+      "强化学习",
+      "层次强化学习",
+      "时间抽象"
+    ],
+    "maddpg": [
+      "MADDPG",
+      "经典论文",
+      "强化学习",
+      "多智能体"
+    ],
+    "vdn": [
+      "VDN",
+      "经典论文",
+      "强化学习",
+      "多智能体"
+    ],
+    "qmix": [
+      "QMIX",
+      "经典论文",
+      "强化学习",
+      "多智能体"
+    ],
+    "apprenticeship-learning-irl": [
+      "Apprenticeship IRL",
+      "经典论文",
+      "模仿学习",
+      "逆强化学习"
+    ],
+    "maximum-entropy-irl": [
+      "Maximum Entropy IRL",
+      "经典论文",
+      "模仿学习",
+      "逆强化学习"
+    ],
+    "gail": [
+      "GAIL",
+      "经典论文",
+      "模仿学习",
+      "逆强化学习",
+      "强化学习"
+    ],
+    "deep-human-preferences": [
+      "Deep RL from Human Preferences",
+      "经典论文",
+      "后训练",
+      "偏好优化",
+      "RLHF",
+      "强化学习"
+    ],
+    "dpo": [
+      "DPO",
+      "经典论文",
+      "后训练",
+      "偏好优化",
+      "RLHF"
+    ],
+    "gdp-pdf": [
+      "评测基准",
+      "Artificial Analysis",
+      "大语言模型评测"
+    ],
+    "gpqa": [
+      "评测基准",
+      "Artificial Analysis",
+      "大语言模型评测"
+    ],
+    "automationbench": [
+      "评测基准",
+      "Artificial Analysis",
+      "智能体评测"
+    ],
+    "math-dataset": [
+      "评测基准",
+      "Artificial Analysis",
+      "数学推理"
+    ],
+    "apex-agents": [
+      "评测基准",
+      "Artificial Analysis",
+      "智能体评测"
+    ],
+    "healthbench": [
+      "评测基准",
+      "Artificial Analysis",
+      "医疗评测"
+    ],
+    "tau-knowledge": [
+      "评测基准",
+      "Artificial Analysis",
+      "大语言模型评测"
+    ],
+    "global-mmlu": [
+      "评测基准",
+      "Artificial Analysis",
+      "多语言评测"
+    ],
+    "mmlu-pro": [
+      "评测基准",
+      "Artificial Analysis",
+      "大语言模型评测"
+    ],
+    "itbench": [
+      "评测基准",
+      "Artificial Analysis",
+      "智能体评测"
+    ],
+    "critpt": [
+      "评测基准",
+      "Artificial Analysis",
+      "大语言模型评测"
+    ],
+    "healthbench-professional": [
+      "评测基准",
+      "Artificial Analysis",
+      "医疗评测"
+    ],
+    "gdpval": [
+      "评测基准",
+      "Artificial Analysis",
+      "智能体评测"
+    ],
+    "enterpriseops-gym": [
+      "评测基准",
+      "Artificial Analysis",
+      "智能体评测"
+    ],
+    "terminal-bench": [
+      "评测基准",
+      "Artificial Analysis",
+      "智能体评测"
+    ],
+    "humanitys-last-exam": [
+      "评测基准",
+      "Artificial Analysis",
+      "大语言模型评测"
+    ],
+    "mmmu-pro": [
+      "评测基准",
+      "Artificial Analysis",
+      "多模态评测"
+    ],
+    "livecodebench": [
+      "评测基准",
+      "Artificial Analysis",
+      "智能体评测"
+    ],
+    "ifbench": [
+      "评测基准",
+      "Artificial Analysis",
+      "智能体评测"
+    ],
+    "scicode": [
+      "评测基准",
+      "Artificial Analysis",
+      "大语言模型评测"
+    ],
+    "aa-omniscience": [
+      "评测基准",
+      "Artificial Analysis",
+      "大语言模型评测"
+    ],
+    "tau2-bench": [
+      "评测基准",
+      "Artificial Analysis",
+      "智能体评测"
+    ]
   }
 }

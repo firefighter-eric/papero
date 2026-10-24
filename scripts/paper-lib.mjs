@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto'
 import { load } from 'cheerio'
 import { mergePaperTags } from './paper-tags.mjs'
+import { normalizeScientificPointerSpacing } from './translation-workers.mjs'
 
 export const sha256 = (text) => createHash('sha256').update(text).digest('hex')
 export const safeId = (value) => /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value)
@@ -401,7 +402,7 @@ export function parsePaper(html, { id, arxivId, htmlUrl, fetchedAt = new Date().
     if (element.is('ul,ol') && !element.hasClass('ltx_biblist')) { add(node, 'list'); return }
     if (element.is('dl')) { add(node, 'list'); return }
     if (element.is('math')) { add(node, 'equation'); return }
-    if (element.is('p,.ltx_authors,pre,blockquote,.ltx_listing')) { add(node, 'paragraph'); return }
+    if (element.is('p,.ltx_p,.ltx_authors,pre,blockquote,.ltx_listing')) { add(node, 'paragraph'); return }
     element.children().each((_, child) => walk(child))
   }
   article.children().each((_, node) => walk(node))
@@ -446,7 +447,7 @@ export function translationUnits(html, kind = 'paragraph') {
       const item = $(node)
       if (item.is('math,code,pre,.ltx_listing.ltx_lstlisting,.ltx_personname,.ltx_note_mark,.ltx_note_type') || isLiteralCodeSpanNode(node)) return
       // Bibliographic author names and venues are original metadata. Translate only the paper title.
-      if (kind === 'reference' && item.hasClass('ltx_bibblock') && item.index() !== 2) return
+      if (item.hasClass('ltx_bibblock') && (kind === 'reference' || item.parents('.ltx_bibitem').length) && item.index() !== 2) return
     }
     for (const child of node.children ?? []) walk(child)
   }
@@ -495,30 +496,75 @@ const gemmaModelFamilies = String.raw`Gemma${gemmaSeparator}?(?:${gemmaSize}(?:$
 // "8B and 70B Llama 3" may translate naturally as "Llama 3 8B 和 70B".
 // Hyphenated checkpoint identifiers still retain their full size/suffix.
 const pretrainingModelFamilies = String.raw`(?:(?:Mistral|Mixtral|OPT)[-_\s]?\d+(?:[xX]\d+)?(?:\.\d+)?B(?:[-_][A-Za-z0-9.]+)*|(?:Llama|LLaMA|OLMo)[-_\s]?\d+(?:\.\d+)*(?:B|[-_]\d+(?:\.\d+)?B)?(?:[-_][A-Za-z0-9.]+)*)`
-const rlAlgorithmIdentifiers = String.raw`(?:Dreamer(?:V?[23])?|SimPLe|Decision Transformer|DoomRNN|DoomTakeCover-v0|(?:Double |Dueling )?DQN|C51|Rainbow|IMPALA|DPG|GAE|Option-Critic|QR-DQN(?:-[01])?|IQN|ICM|RND|HER|DDPG|TD3|SAC|PPO|TRPO|A3C|BCQ|CQL|IQL|MBPO|PETS|QMIX|VDN|MADDPG|GAIL|REINFORCE|MuZero|AlphaZero)`
+const rlAlgorithmIdentifiers = String.raw`(?:Dreamer(?:V?[23])?|SimPLe|Decision Transformer|DoomRNN|DoomTakeCover-v0|(?:Double |Dueling )?DQN|C51|Rainbow|IMPALA|DPG|GAE|Option-Critic|QR-DQN(?:-[01])?|IQN|ICM|RND|HER|DDPG|TD3|SAC|PPO|DPO|TRPO|A3C|BCQ|CQL|IQL|MBPO|PETS|QMIX|VDN|MADDPG|GAIL|REINFORCE|MuZero|AlphaZero)`
 const rlAlgorithmLabel = new RegExp(`^${rlAlgorithmIdentifiers}$`, 'i')
 const rlBenchmarkLabel = /^(?:Atari|OpenAI Gym|MuJoCo|Minecraft|Transformers?)$/i
 export const isRlVerbatimLabel = text => rlAlgorithmLabel.test(identifierText(text).trim()) || rlBenchmarkLabel.test(identifierText(text).trim())
-const modelPattern = new RegExp(String.raw`\b${gemmaModelFamilies}\b|\b${geminiModelFamilies}\b|\b${reportModelFamilies}\b|\b${pretrainingModelFamilies}\b|${legacyModelPattern.source}`, 'gi')
+const anthropicApiModel = String.raw`claude-(?:sonnet|opus|haiku)-\d+(?:-\d+)*`
+const modelPattern = new RegExp(String.raw`\b${anthropicApiModel}\b|\b${gemmaModelFamilies}\b|\b${geminiModelFamilies}\b|\b${reportModelFamilies}\b|\b${pretrainingModelFamilies}\b|${legacyModelPattern.source}`, 'gi')
 // These report tables split brand, tier and training stage into separate
 // text nodes (including Gemma 2 Table 17's PT / IT headings). Protect exact
 // labels without locking "it", "IT infrastructure", or "flash memory" prose.
 const isolatedModelLabel = /^(?:Gemini|Gemma|Ultra|Pro|Flash(?:-Lite)?|Nano(?:-\d+)?|PT|IT)$/
+const isolatedPassMetric = /^Pass(?:@|\^)\d+$/i
 // Architecture names observed in DeepSeek-V4.1-Flash v1, sections 2.4.1-2.4.3.
 // The source splits italic "m" from "HC" into separate heading text nodes.
 const isolatedArchitectureLabels = new Set(['HC', 'Engram', 'DSpark'])
+// Exact product labels appearing in the ITBench benchmark examples.
+const isolatedProductLabels = new Set(['Google Sheets', 'Slack', 'Asana', 'SRE-Agent', 'New-K8s-CIS-b-Kyverno', 'New-K8s-CIS-b-OPARego',
+  'New-RHEL9-CIS-b-Ansible-OPA', 'Update-K8s-CIS-b-Kyverno'])
+const productLabel = text => identifierText(text).trim().replace(/[.。:：]+$/, '')
+function isNumericForceOptions(text) {
+  const value = text.trim()
+  if (!/^(?:[A-J]\.\s*[+-]?\d+(?:\.\d+)?\s*kN\s*){2,10}$/.test(value)) return false
+  const labels = [...value.matchAll(/([A-J])\./g)].map(m => m[1])
+  return labels.every((label, i) => label === String.fromCharCode(65 + i))
+}
 const architectureLabel = text => identifierText(text).trim().replace(/^\d+(?:\.\d+)*\.?\s+/, '')
 
 // Prose en/em dashes separate words; true identifier hyphens remain hyphens.
 const identifierText = (text) => text.normalize('NFKC').replace(/[\u2013\u2014\u2015]/g, ' ').replace(/[\u2010\u2011]/g, '-')
+// These are proper evaluation names from the fixed AA intake, not English
+// descriptions. Preserve a name-only heading without inventing explanatory
+// Chinese words; descriptive headings still have to be translated in full.
+const isolatedEvaluationLabels = new Set([
+  'GDPval', 'AutomationBench', 'Terminal-Bench', 'SciCode', 'AA-Omniscience', 'GDP.pdf',
+  "Humanity's Last Exam", 'Humanity’s Last Exam', 'HLE', 'CritPt', 'APEX-Agents',
+  'EnterpriseOps-Gym', 'ITBench', 'IFBench', 'IFTrain', 'IF-RLVR', 'Global-MMLU Lite', 'HealthBench', 'HealthBench Professional',
+  'MMMU-Pro', 'Global MMLU', 'Global-MMLU', 'GPQA', 'τ-Knowledge', 'τ2-Bench',
+  'MMLU-Pro', 'LiveCodeBench', 'MATH', 'FinOps', 'paragraphs2',
+])
+function isolatedEvaluationLabel(text) {
+  const label = identifierText(text).trim().replace(/^\d+(?:\.\d+)*\.?\s+/, '').replace(/\s+/g, ' ')
+  return isolatedEvaluationLabels.has(label) ? label : null
+}
+// Literal tool traces in benchmark examples are executable syntax, even when
+// LaTeXML uses italic prose spans. Match a whole trace, never adjacent narrative.
+function isolatedToolTrace(text) {
+  const value = text.trim()
+  if ((value.match(/\[(?:call|unlock|KB_search):/g) || []).length !== 1) return null
+  if (/^\[unlock:\s*[A-Za-z_]\w*\]$/.test(value)) return value
+  if (/^\[call:\s*[A-Za-z_]\w*(?:\([\s\S]*\)|\s+\d+)\]$/.test(value)) return value
+  if (/^\[KB_search:\s*(?:“[^”]*”|"[^"]*"|'[^']*')\]$/.test(value)) return value
+  return null
+}
 export const technicalIdentifiers = (text) => {
+  const trace = isolatedToolTrace(text)
+  if (trace) return [trace]
   const normalized = identifierText(text)
   const identifiers = (normalized.match(modelPattern) || []).map(value => value.replace(/-(?:level|scale|sized|based|like)$/i, ''))
+  // CSIRO's organisation name contains a numeral, not a separate statistic.
+  // Keep that brand intact when translating the surrounding affiliation.
+  if (/\bData61\b/.test(normalized)) identifiers.push('Data61')
   const label = normalized.trim()
   const chessOpening = label.match(/^([A-E]\d{2}):/)
   if (chessOpening) identifiers.push(chessOpening[1])
   if (!identifiers.length && isolatedModelLabel.test(label)) identifiers.push(label)
+  if (!identifiers.length && isolatedPassMetric.test(label)) identifiers.push(label)
   if (isolatedArchitectureLabels.has(architectureLabel(text))) identifiers.push(architectureLabel(text))
+  if (isolatedProductLabels.has(productLabel(text))) identifiers.push(productLabel(text))
+  const evaluation = isolatedEvaluationLabel(text)
+  if (!identifiers.length && evaluation) identifiers.push(evaluation)
   if (!identifiers.length && /^DoomTakeCover-v\d+$/.test(label)) identifiers.push(label)
   return identifiers
 }
@@ -537,6 +583,7 @@ function isBenchmarkLanguageList(text) {
 }
 
 export function isTechnicalLabelOnly(text) {
+  if (isolatedToolTrace(text)) return true
   // Preserve the original publisher's copyright/PII notice as bibliographic metadata.
   if (/^0004-3702\/99\/\$\s*[–-]\s*see front matter © 1999 Published by Elsevier Science B\.V\. All rights reserved\. PII: S0004-3702\(99\)[\d\s-]+$/.test(text.trim())) return true
   // Author-year credits embedded in theorem headings are bibliography, not descriptive English headings.
@@ -547,7 +594,11 @@ export function isTechnicalLabelOnly(text) {
   if (isRlVerbatimLabel(text.replace(/^\s*\d+(?:\.\d+)*\.?\s+/, ''))) return true
   if (isPythonAssertion(text) || isSacreBleuSignature(text)) return true
   if (isolatedModelLabel.test(identifierText(text).trim())) return true
+  if (isolatedPassMetric.test(identifierText(text).trim())) return true
   if (isolatedArchitectureLabels.has(architectureLabel(text))) return true
+  if (isolatedProductLabels.has(productLabel(text))) return true
+  if (isNumericForceOptions(text)) return true
+  if (isolatedEvaluationLabel(text)) return true
   if (isBenchmarkLanguageList(text) || isIsoBenchmarkLanguageList(text)) return true
   const residual = identifierText(text).replace(/(?<![A-Za-z0-9_])(?:C\+\+|C#|Python|JAVA|PHP|TypeScript|Bash|JavaScript|CoT|\d+-shot|MBPP-\d+shot)(?![A-Za-z0-9_])/gi, '').replace(modelPattern, '')
   return /[A-Za-z]/.test(text) && !/[A-Za-z\u3400-\u9fff]/.test(residual)
@@ -555,7 +606,8 @@ export function isTechnicalLabelOnly(text) {
 
 function calendarDates(text) {
   const names = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-  const monthPattern = names.map(name => `${name}|${name.slice(0, 3)}\\.?`).join('|')
+  const monthPattern = names.map(name => name === 'September'
+    ? 'September|Sept\\.?|Sep\\.?' : `${name}|${name.slice(0, 3)}\\.?`).join('|')
   const dates = []
   const replace = (whole, year, month, day) => {
     const y = Number(year), m = Number(month), d = day === undefined ? null : Number(day)
@@ -642,6 +694,19 @@ function calendarDates(text) {
     .replace(new RegExp(`\\b(${monthPattern})\\s+(\\d{1,2})(?:st|nd|rd|th)?(?!\\w|\\.\\d)(?!\\s*,?\\s*(?:19|20)\\d{2}\\b)`, 'gi'), (whole, month, day) => yearlessDate(whole, monthNumber(month), day))
     .replace(new RegExp(`(?<![\\w.])(\\d{1,2})(?:st|nd|rd|th)?\\s+(${monthPattern})(?!\\w|\\.\\d)(?!\\s*,?\\s*(?:19|20)\\d{2}\\b)`, 'gi'), (whole, day, month) => yearlessDate(whole, monthNumber(month), day))
     .replace(/(?<![\w.])(?<!\d\s*[A-Za-z]?\s*年\s*)(\d{1,2})\s*月\s*(\d{1,2})\s*[日号](?!\d)/g, (whole, month, day) => yearlessDate(whole, month, day))
+  const chineseMonth = value => ({ 一: 1, 二: 2, 三: 3, 四: 4, 五: 5, 六: 6, 七: 7, 八: 8, 九: 9, 十: 10, 十一: 11, 十二: 12 })[value] ?? Number(value)
+  const monthOnly = (whole, first, last) => {
+    if (![first, ...(last === undefined ? [] : [last])].every(n => Number.isInteger(n) && n >= 1 && n <= 12)) throw new Error(`Invalid yearless month: ${whole}`)
+    dates.push(last === undefined ? `month-end:${first}` : `month-range:${first}..${last}`)
+    return ' '
+  }
+  clean = clean
+    .replace(new RegExp(`(?:\\bbetween\\s+|介于\\s*)(${monthPattern})\\s*(?:and|和|与)\\s*(${monthPattern})(?!\\s+(?:19|20)\\d{2})\\b`, 'gi'), (whole, first, last) => monthOnly(whole, monthNumber(first), monthNumber(last)))
+    .replace(new RegExp(`\\b(${monthPattern})\\s*(?:to|through|至|到|[-\\u2010-\\u2015])\\s*(${monthPattern})\\b`, 'gi'), (whole, first, last) => monthOnly(whole, monthNumber(first), monthNumber(last)))
+    .replace(new RegExp(`\\b(${monthPattern})[- ]end\\b`, 'gi'), (whole, month) => monthOnly(whole, monthNumber(month)))
+    .replace(new RegExp(`\\bend\\s+of\\s+(${monthPattern})\\b`, 'gi'), (whole, month) => monthOnly(whole, monthNumber(month)))
+    .replace(/([一二三四五六七八九十\d]{1,3})\s*月\s*(?:至|到|[-\u2010-\u2015])\s*([一二三四五六七八九十\d]{1,3})\s*月/g, (whole, first, last) => monthOnly(whole, chineseMonth(first), chineseMonth(last)))
+    .replace(/([一二三四五六七八九十\d]{1,3})\s*月[底末]/g, (whole, month) => monthOnly(whole, chineseMonth(month)))
   return { clean, dates }
 }
 
@@ -650,6 +715,9 @@ export function assertTranslationFidelity(source, translated) {
   if (isSacreBleuSignature(source) && source.trim() !== translated.trim()) throw new Error('Literal SacreBLEU signature changed')
   const normalize = (text) => text.normalize('NFKC').replace(/\u00a0/g, ' ')
   const normalizeNumbers = (text) => text.normalize('NFKC').replace(/[\u2010\u2011]/g, '-')
+    // The success-rate aside "success rate —35% in ..." is positive; a
+    // real minus sign or a hyphenated negative score remains signed.
+    .replace(/(\bsuccess rate\s*)\u2014(?=\d+(?:\.\d+)?%)/gi, '$1 ')
     // Chinese uses two em dashes for an aside; it is not a negative sign.
     .replace(/\u2014\u2014(?=\s*\d)/g, ' ')
     .replace(new RegExp(`(?:${modelPattern.source})[\\u2013\\u2014\\u2015]`, 'gi'), ' ').replace(modelPattern, '')
@@ -658,6 +726,7 @@ export function assertTranslationFidelity(source, translated) {
     .replace(/(\d+(?:\.\d+)?\s*[×x])\s*[\u2013\u2014]\s*(?=\d+(?:\.\d+)?\s*[×x])/g, '$1 to ')
     .replace(/[\u2010-\u2015\u2212]/g, '-').replace(/\u00a0/g, ' ')
   const en = normalize(source), zh = normalize(translated)
+  if (isNumericForceOptions(en) && en.replace(/\s/g, '') !== zh.replace(/\s/g, '')) throw new Error('Numeric answer-option data changed')
   const contextMarkers = /⟪FORMULA:[^⟫]*⟫|⟪CODE_PRESERVED⟫|⟦\/?[A-Za-z0-9_.-]+:\d+⟧/gi
   const remainingContextMarkers = [...(zh.match(contextMarkers) || [])]
   for (const marker of en.match(contextMarkers) || []) {
@@ -707,13 +776,13 @@ export function assertTranslationFidelity(source, translated) {
   if (remainingDates.length) throw new Error(`Calendar dates added to translation: ${remainingDates.join(', ')}`)
   const unitScale = { billion: 1e9, million: 1e6, trillion: 1e12, thousand: 1e3, B: 1e9, M: 1e6, T: 1e12, K: 1e3, k: 1e3, 千: 1e3, 万: 1e4, 百万: 1e6, 十亿: 1e9, 亿: 1e8, 万亿: 1e12 }
   const quantityNumber = '[+-]?\\d+(?:,\\d{3}(?!\\d))*(?:\\.\\d+)?'
-  const quantityUnit = '(?:[Bb]illion|[Mm]illion|[Tt]rillion|[Tt]housand|百万|十亿|万亿|亿|万|千|[BMTKk]\\b)'
+  const quantityUnit = '(?:[Bb]illion|[Mm]illion|[Tt]rillion|[Tt]housand|百万|十亿|万亿|亿|万|千|M(?=(?:Btu|BTU|btu)\\b)|[BMTKk]\\b)'
   const canonicalQuantity = (value, unit) => String(Number((Number(value.replace(/,/g, '')) * (unitScale[unit] || unitScale[unit.toLowerCase()])).toPrecision(15)))
   // Report compound modifiers bind a number to its scale: "1-million-token",
   // "2.8-trillion-parameter", and "15-trillion token". Match complete standalone compounds before
   // dash normalization so identifier/range hyphens and mathematical minus
   // connectors cannot be reinterpreted as quantity separators.
-  const compoundQuantity = new RegExp(`(?<![\\w.+\\-\\u2010-\\u2015\\u2212])(${quantityNumber})-([Bb]illion|[Mm]illion|[Tt]rillion)(?:-|\\s+)(?=(?:tokens?|parameters?)\\b)`, 'g')
+  const compoundQuantity = new RegExp(`(?<![\\w.+\\-\\u2010-\\u2015\\u2212])(${quantityNumber})-([Bb]illion|[Mm]illion|[Tt]rillion)(?:-|\\s+)(?=(?:tokens?|parameters?|rows?)\\b)`, 'g')
   const numbers = (text) => {
     // In the observed relationship prompt, paired [26 F] / [22 M]
     // brackets denote ages and gender. M is not a million multiplier there.
@@ -721,7 +790,7 @@ export function assertTranslationFidelity(source, translated) {
     if (/\b(?:girl|boy|woman|man|relationship|girlfriend|boyfriend)\b/i.test(en) && /\[\s*\d{1,3}\s*F\s*\]/.test(en) && /\[\s*\d{1,3}\s*\??\s*M\s*\]/.test(en)) {
       text = text.replace(/\[\s*(\d{1,3})\s*(\?)?\s*[MF]\s*\]/g, '[$1$2]')
     }
-    let normalized = normalizeNumbers(text.normalize('NFKC').replace(compoundQuantity, (_, value, unit) => `${canonicalQuantity(value, unit)} `))
+    let normalized = normalizeNumbers(normalizeScientificPointerSpacing(text.normalize('NFKC')).replace(compoundQuantity, (_, value, unit) => `${canonicalQuantity(value, unit)} `))
     // Bibliography suffixes such as "Wang et al., 2024k" denote a year,
     // whereas "32k tokens" is a quantity. Never multiply a citation year.
     normalized = normalized.replace(/\b((?:19|20)\d{2})k\b/g, '$1_citation')
@@ -731,6 +800,29 @@ export function assertTranslationFidelity(source, translated) {
     return normalized.match(/(?<![\w.])[+-]?\d+(?:,\d{3}(?!\d))*(?:\.\d+)?(?:[eE][+-]?\d+)?\s*%?/g)?.map(value => value.replace(/[,\s]/g, '')) || []
   }
   let sourceNumericText = sourceCalendar.clean, targetNumericText = targetCalendar.clean
+  // Bind small scientific dimensionalities to their own numeric meaning.
+  // An unrelated score cannot stand in for a missing or changed dimension.
+  const dimensionalContext = /\b[1-9]d\s+(?:conformal|statistical|square\s+Ising|layered\s+electron\s+gas)\b|\b[1-9][- ]dimensional\s+super\s*conformal\b/i.test(sourceNumericText)
+  if (dimensionalContext) {
+    if (!/[一二三四五六七八九1-9]\s*维|\b[1-9]d\b|\b[1-9][- ]dimensional\b/i.test(targetNumericText)) throw new Error('Scientific dimension omitted')
+    targetNumericText = targetNumericText.replace(/([一二三四五六七八九])\s*维/g,
+      (_, value) => `${({ 一: 1, 二: 2, 三: 3, 四: 4, 五: 5, 六: 6, 七: 7, 八: 8, 九: 9 })[value]}维`)
+      .replace(/([1-9])维\s*[（(]\s*\1d\s*[）)]/gi, '$1维')
+  }
+  if (/\b[1-9][- ]variable\s+equations?\b/i.test(en)) {
+    targetNumericText = targetNumericText.replace(/([一二三四五六七八九])元(?=方程)/g,
+      (_, value) => `${({ 一: 1, 二: 2, 三: 3, 四: 4, 五: 5, 六: 6, 七: 7, 八: 8, 九: 9 })[value]}元`)
+  }
+  // The occupational title "1st-Line Supervisors" means 一线主管. Match that
+  // explicit title before counting; unrelated uses of 一 do not license 1.
+  const firstLineSupervisor = /\b(?:1st|First)[- ]Line\s+Supervisors?\b/gi
+  if (/\b(?:1st|First)[- ]Line\s+Supervisors?\b/i.test(en)) {
+    const roles = (sourceNumericText.match(firstLineSupervisor) || []).length
+    const translatedRoles = /\b(?:1st|First)[- ]Line\s+Supervisors?\b|(?:第?1线|第一线|一线|基层)[\u3400-\u9fff]{0,24}?主管/gi
+    if ((targetNumericText.match(translatedRoles) || []).length !== roles) throw new Error('First-line supervisory role omitted, added or changed')
+    sourceNumericText = sourceNumericText.replace(firstLineSupervisor, ' ')
+    targetNumericText = targetNumericText.replace(translatedRoles, ' ')
+  }
   // "3rd-party" is the lexical third-party relationship, not a count of
   // three. Match its own occurrences before checking the remaining numbers;
   // an unrelated score or a different ordinal cannot stand in for it.
@@ -750,8 +842,12 @@ export function assertTranslationFidelity(source, translated) {
   }
   // Stage and Phase both translate as 阶段. An explicit shared label such as
   // "Phase 4 and 5" supplies two references, not an unrelated free score.
-  const expandStageLists = text => text.replace(/\b(Stage|Phase)\s+(\d+)(?![\d.])((?:\s*(?:,\s*(?:and\s+)?|and\s+|&\s*)\d+\b(?!\.))+)(?=\s*(?:[.,);:]|$))/gi,
-    (_, label, first, rest) => `${label} ${first} ${rest.replace(/\d+/g, value => `${label} ${value}`)}`)
+  const expandStageLists = text => text.replace(/\b(Stages?|Phases?)\s+(\d+)(?![\d.])((?:\s*(?:,\s*(?:and\s+)?|and\s+|&\s*)\d+\b(?!\.\d))+)(?=\s*(?:[.,);:]|$))/gi,
+    (_, label, first, rest) => { const singular = label.replace(/s$/i, ''); return `${singular} ${first} ${rest.replace(/\d+/g, value => `${singular} ${value}`)}` })
+    .replace(/第\s*([零〇一二三四五六七八九十\d]+)((?:\s*[、，和及]\s*[零〇一二三四五六七八九十\d]+)+)\s*阶段/g,
+      (_, first, rest) => `第${first}阶段 ${rest.replace(/[零〇一二三四五六七八九十\d]+/g, value => `第${value}阶段`)}`)
+    .replace(/阶段\s*(\d+)((?:\s*[、，和及]\s*\d+)+)/g,
+      (_, first, rest) => `阶段${first} ${rest.replace(/\d+/g, value => `阶段${value}`)}`)
   sourceNumericText = expandStageLists(sourceNumericText)
   targetNumericText = expandStageLists(targetNumericText)
   const stagePattern = /\b(?:Stage|Phase)\s+(\d+)\b/gi
@@ -788,7 +884,10 @@ export function assertTranslationFidelity(source, translated) {
   // The presence of "eight" must never license an unrelated invented score.
   const cardinalValues = { zero: 0, one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, eleven: 11, twelve: 12, thirteen: 13, fourteen: 14, fifteen: 15, sixteen: 16, seventeen: 17, eighteen: 18, nineteen: 19, twenty: 20, thirty: 30, forty: 40, fifty: 50, sixty: 60, seventy: 70, eighty: 80, ninety: 90 }
   const cardinalPattern = /\b(?:zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety)(?:[- ](?:one|two|three|four|five|six|seven|eight|nine))?(?:\s+(?:hundred|thousand|million|billion|trillion))?\b/gi
-  const lexicalNumbers = [...en.matchAll(cardinalPattern)].map(match => {
+  const ordinalValues = { first: 1, second: 2, third: 3, fourth: 4, fifth: 5, sixth: 6, seventh: 7, eighth: 8, ninth: 9, tenth: 10, eleventh: 11, twelfth: 12, thirteenth: 13, fourteenth: 14, fifteenth: 15, sixteenth: 16, seventeenth: 17, eighteenth: 18, nineteenth: 19, twentieth: 20 }
+  const ordinalPattern = new RegExp(`\\b(?:${Object.keys(ordinalValues).join('|')})\\b`, 'gi')
+  const lexicalNumbers = [...sourceNumericText.matchAll(cardinalPattern), ...sourceNumericText.matchAll(ordinalPattern)].map(match => {
+    if (ordinalValues[match[0].toLowerCase()] !== undefined) return String(ordinalValues[match[0].toLowerCase()])
     const words = match[0].toLowerCase().split(/[- ]+/)
     let value = 0
     for (const word of words) value = cardinalValues[word] === undefined ? (value || 1) * ({ hundred: 100, thousand: 1000, million: 1e6, billion: 1e9, trillion: 1e12 }[word] || 1) : value + cardinalValues[word]

@@ -1,5 +1,6 @@
 import type { CatalogPaper } from '../types'
 import { paperAuthors } from './paper-bibliography'
+import { PAPER_CATEGORIES } from './paper-categories'
 
 export const PAPER_FAMILIES = [
   'Qwen', 'DeepSeek', 'Kimi', 'MiniMax', 'Gemini', 'Gemma', 'Chinchilla', 'Transformer',
@@ -11,10 +12,28 @@ export const PAPER_FAMILIES = [
   'DPG', 'TRPO', 'GAE', 'PPO', 'A3C', 'DDPG', 'TD3', 'SAC', 'AlphaZero', 'MuZero', 'World Models', 'PETS', 'MBPO', 'Dreamer', 'DreamerV2', 'DreamerV3',
   'BCQ', 'CQL', 'IQL', 'Decision Transformer', 'ICM', 'RND', 'HER', 'Option-Critic', 'MADDPG', 'VDN', 'QMIX', 'GAIL', 'DPO',
 ] as const
-export const RESEARCH_TAGS = ['预训练', '后训练', '模型架构', '监督训练', '缩放定律', '预训练数据', '数据混合', '训练优化', '优化器', '矩阵优化', '显存优化', '分布式训练', '经典论文', '计算机视觉', '自然语言处理', '生成模型', '强化学习', '强化学习基础', '价值学习', '回报分布', '策略梯度', '连续控制', '世界模型', '规划', '离线强化学习', '探索', '稀疏奖励', '层次强化学习', '多智能体', '模仿学习', '逆强化学习', '偏好优化', 'RLHF'] as const
+export const RESEARCH_TAGS = ['预训练', '后训练', '评测基准', '模型架构', '监督训练', '缩放定律', '预训练数据', '数据混合', '训练优化', '优化器', '矩阵优化', '显存优化', '分布式训练', '经典论文', '计算机视觉', '自然语言处理', '生成模型', '强化学习', '强化学习基础', '价值学习', '回报分布', '策略梯度', '连续控制', '世界模型', '规划', '离线强化学习', '探索', '稀疏奖励', '层次强化学习', '多智能体', '模仿学习', '逆强化学习', '偏好优化', 'RLHF'] as const
 
 export function tagLabel(tag: string): string {
   return tag === 'Qwen' ? 'Qwen / 千问' : tag
+}
+
+const MODEL_FAMILY_FILTERS = ['Qwen', 'DeepSeek', 'Kimi', 'MiniMax', 'Gemini', 'Gemma', 'Chinchilla', 'Llama', 'OLMo', 'GPT', 'BERT', 'T5', 'Falcon'] as const
+const DIRECTION_FILTERS = ['benchmarks', 'optimization', 'data', 'vision', 'nlp', 'generative', 'reinforcement-learning', 'architecture', 'scaling']
+  .map(id => PAPER_CATEGORIES.find(category => category.id === id)!)
+
+export function paperFamilyFilterGroups(papers: CatalogPaper[], selected = '') {
+  const tags = new Set(papers.flatMap(paper => paper.tags))
+  const groups = [
+    { label: '模型系列', options: MODEL_FAMILY_FILTERS.filter(tag => tags.has(tag)).map(value => ({ value: String(value), label: tagLabel(value) })) },
+    { label: '研究方向', options: DIRECTION_FILTERS.filter(category => category.tags.some(tag => tags.has(tag)))
+      .map(category => ({ value: String(category.id), label: category.id === 'benchmarks' ? 'Benchmark / 评测基准' : category.title })) },
+  ].filter(group => group.options.length)
+  // Keep an existing shared link precise without restoring the long method menu.
+  if (selected && tags.has(selected) && !groups.some(group => group.options.some(option => option.value === selected))) {
+    groups.push({ label: '当前筛选', options: [{ value: selected, label: tagLabel(selected) }] })
+  }
+  return groups
 }
 
 export function classificationTags(tags: string[]): string[] {
@@ -67,6 +86,7 @@ const searchAliases: Record<string, string> = {
   强化学习: 'reinforcement learning',
   预训练: 'pretraining pre-training',
   后训练: 'posttraining post-training',
+  评测基准: 'benchmark benchmarks evaluation evaluations 测评 基准评测 能力评测',
   模型架构: 'architecture',
   监督训练: 'supervised training',
   缩放定律: 'scaling laws scaling-laws',
@@ -80,7 +100,8 @@ const searchAliases: Record<string, string> = {
 }
 
 export function matchesPaperFilters(paper: CatalogPaper, query: string, family: string, research: string): boolean {
-  if (family && !paper.tags.includes(family)) return false
+  const direction = DIRECTION_FILTERS.find(category => category.id === family)
+  if (family && !(direction ? direction.tags.some(tag => paper.tags.includes(tag)) : paper.tags.includes(family))) return false
   if (research && !paper.tags.includes(research)) return false
   const searchText = [paper.title, paper.titleZh, ...paperAuthors(paper), ...paper.authors, ...paper.tags,
     ...paper.tags.map(tag => searchAliases[tag] ?? ''), paper.arxivId, paper.year]

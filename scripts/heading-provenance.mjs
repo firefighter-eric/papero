@@ -16,7 +16,7 @@ export function assertChineseHeadingCompleteness(paper) {
       if (identity(label) !== identity(translatedLabel)) throw Error(`Translated heading changes an RL label: ${paper.id}/${block.id}.`)
       continue
     }
-    if (!/[A-Za-z]{2}/.test(source) || /[\u3400-\u9fff]/.test(target) || isTechnicalLabelOnly(source)) continue
+    if (!/[A-Za-z]{2}/.test(source) || /[\u3400-\u9fff]/.test(target) || isTechnicalLabelOnly(label)) continue
     const review = reviews.get(block.id)
     if (review?.decision !== 'preserve-label' || review.model !== 'gpt-6-luna' || review.provider !== 'Codex subagent'
       || review.reasoningEffort !== 'low' || review.humanReviewed !== false || !review.reason?.trim()
