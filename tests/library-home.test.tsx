@@ -84,7 +84,7 @@ describe('category home navigation', () => {
     expect(host.querySelector<HTMLInputElement>('.home-search input')?.value).toBe('transformer')
     expect(Array.from(host.querySelectorAll('select')).map(select => select.value)).toEqual(['ViT', 'year'])
     expect(fetcher).toHaveBeenCalledTimes(2)
-    await act(() => { const family = host.querySelector<HTMLSelectElement>('select')!; family.value = 'AlexNet'; family.dispatchEvent(new Event('change', { bubbles: true })) })
+    await act(() => { const family = host.querySelector<HTMLSelectElement>('select')!; family.value = 'Qwen'; family.dispatchEvent(new Event('change', { bubbles: true })) })
     expect(host.textContent).toContain('没有找到匹配的论文')
     await act(() => link('.home-no-results a').click())
     expect(titles()).toHaveLength(3)

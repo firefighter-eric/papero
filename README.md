@@ -4,13 +4,15 @@
 
 [在线阅读器](https://papero-omega.vercel.app) · [GitHub 仓库](https://github.com/firefighter-eric/papero)
 
-默认打开分类主页，点击 Papero 标识也可返回主页。按经典论文、大语言模型、视觉与多模态、自然语言处理、生成模型、后训练与强化学习、模型架构、数据与语料、缩放定律、训练与优化器浏览，再结合模型系列、搜索和年份排序寻找论文。分类根据现有标签汇总，计数可重叠；`/?category=vision` 等分类链接可直接分享，`/?paper=<id>` 仍直接打开全文。阅读器顶部的主页按钮返回原分类及筛选，浏览器前进、后退也保留对应路径；主页只加载目录，进入文章时才请求全文。
+默认打开分类主页，点击 Papero 标识也可返回主页。按经典论文、大语言模型、评测与 Benchmark、视觉与多模态、自然语言处理、生成模型、后训练与强化学习、模型架构、数据与语料、缩放定律、训练与优化器浏览，再结合模型系列、搜索和年份排序寻找论文。分类根据现有标签汇总，计数可重叠；`/?category=vision` 等分类链接可直接分享，`/?paper=<id>` 仍直接打开全文。阅读器顶部的主页按钮返回原分类及筛选，浏览器前进、后退也保留对应路径；主页只加载目录，进入文章时才请求全文。
 
 支持多篇论文、标题与作者搜索、章节目录、中英双栏、交换左右、单语言阅读、双向段落同步滚动、字号调整和阅读位置保存。最左侧论文检索栏与本文目录栏可分别拖动调整宽度，支持键盘操作并保存设置；检索栏可折叠，目录子章节可展开。拖动任意正文栏都能带动另一栏；也可关闭同步，分别阅读。工具栏位于顶部，阅读向下滚动时标题区收起。提供白色、黑色和淡橙色三种主题，主题与阅读设置会保存在当前浏览器。公式、图表和参考文献随论文保留。移动端分别提供论文检索与目录抽屉。
 
 论文列表与标题区显示模型系列和研究标签，可组合筛选 Qwen／千问、DeepSeek、Kimi、MiniMax、Gemini、Gemma、Chinchilla，以及预训练、后训练、缩放定律等研究标签。搜索“千问”也能匹配 Qwen，“Google／谷歌”可检索 Gemini、Gemma 和 Chinchilla，各自保持独立系列；“Chillchila”作为 Chinchilla 的检索别名。报告覆盖多个阶段时保留多个标签。分类依据与维护方式见 [论文标签](docs/paper-tags.md)。
 
 ## 本地运行
+
+2026-10-24 新增研究产出《Benchmark 选型地图》：35 项 AA 具体评测与 25 个基础／版本对照，按知识、推理、代码、Agent、多模态等方向说明重要性、难度和评分边界，关联本库全部 22 篇基准论文。可在“研究产出”中打开；范围与来源见 [研究产出记录](docs/research-publications.md#benchmark-选型地图)。v2 每项附 2 个自拟教学示例，共 120 个，含可展开的参考回答与判分说明；这是 AI 综合研究，未经人工审校，未运行本次模型评测。
 
 新增独立的“研究产出”栏目，用于根据论文与官方资料形成中文调研和综述。首篇简述 LLM vision 的三条路线：分开预训练后连接、原生多模态预训练、Gemma 4 12B ViT-free；开头提供 TL;DR，附 7 个来源及版本定位。研究正文为独立 `zh.html`，与论文及其译文分别维护；支持目录、引用回查、关联论文和 HTML 下载。数据格式与核验方式见 [研究产出](docs/research-publications.md)。
 
@@ -25,11 +27,14 @@ DATA_DIR=paper-data npm run dev
 
 阅读器通过 `/paper-data` 加载目录。全文条目的英文与中文正文分别保存为 `en.html` 和 `zh.html`，可以单独打开；公式优先使用原生 MathML；Adam v9 的 PDF 数学表达使用原始字形矢量，图表与正文放在一起。小型 `paper.json` 只保存标题、目录、段落定位和来源记录，不保存正文字符串。阅读器按相同段落标记对齐两份 HTML。仅来源条目提供官方原文与摘要页链接，不加载正文。
 
-公开处理库 `paper-data/` 包含 **55 个中英全文条目**（53 篇论文、Qwen3.5 官方文章及 Muon 作者文章），共 **19510 个对齐内容块、1651 个正文素材、1817 个论文处理文件**，另有 1 篇中文研究报告的 3 个文件。本轮按用户明确要求补充 *Scaling Laws for Native Multimodal Models* `2504.07951v1` 并发布视觉路线综述；原有 54 个条目的正文、元数据和素材文件保持 SHA-256 一致。
+公开处理库 `paper-data/` 的历史发布快照包含 **55 个中英全文条目**（53 篇论文、Qwen3.5 官方文章及 Muon 作者文章），共 **19510 个对齐内容块、1651 个正文素材、1817 个论文处理文件**，另有 1 篇中文研究报告的 3 个文件。本轮按用户明确要求补充 *Scaling Laws for Native Multimodal Models* `2504.07951v1` 并发布视觉路线综述；原有 54 个条目的正文、元数据和素材文件保持 SHA-256 一致。
+
+2026-10-24 本次正式处理库共有 **135 个中英全文条目**，包括本次批准并发布的 **22 篇 Artificial Analysis 基准相关论文**。新增论文均有完整英文和中文 HTML，共 5,254 个对齐内容块和 360 个正文素材；主译及修正均使用实际本地 Qwen3.6-35B-A3B，译文未经人工审校。本次按用户明确指令通过 GitHub/Vercel 发布，其他本地待发布内容未混入。固定版本、失败恢复与验证记录见 [Artificial Analysis 收录记录](docs/artificial-analysis-benchmark-intake-2026-10-24.md)。使用上面的 `DATA_DIR=paper-data npm run dev` 阅读完整本地库。
 
 已有报告涵盖 Attention、Qwen、DeepSeek、Kimi、MiniMax、Gemini、Gemma 和 Chinchilla。上一轮预训练扩展包括 Llama 1／2／3、OLMo 2／3、FineWeb、DataComp-LM、DoReMi、Scaling Laws、DeepSeekMoE、DeepSeek LLM、μP、GPT-2／3、BERT、T5、RefinedWeb、Dolma、Switch Transformers 和 CLIP。固定版本、来源及各系列记录见 [论文来源](docs/paper-sources.md)。Qwen3.5 明确标注为官方文章；GPT-2 来自官方 PDF，转换为完整英文 HTML 后翻译，标注为官方论文。
 
 经典论文扩展包括 AlexNet、ResNet、Word2Vec、Seq2Seq、Bahdanau Attention、VAE、GAN、DDPM、ViT、DQN、AlphaGo 和 InstructGPT。固定版本与 PDF／OCR／翻译记录见 [经典 AI 论文](docs/classic-papers.md)。
+
 
 新增论文保留已验收的本机 Qwen3.6 35B A3B 译文，缺失部分由实际 GPT-6 Luna（低思考）任务补齐；每块记录实际贡献及来源指纹。Llama 3、OLMo 3、μP 和 GPT-2 使用 Luna；Llama 1 和 Scaling Laws 使用 Qwen 并保留定向辅助修正记录；其余新增论文逐块记录两个模型的贡献。全部译文标记为机器翻译、`humanReviewed: false`，未经全篇人工审校。有限抽查发现的限定词遗漏、数值和公式衔接问题已经定向修正。
 
@@ -104,6 +109,8 @@ npm run paper:benchmark -- --concurrency 1,2,4 --iterations 4
 
 ```sh
 npm run library:translate -- --concurrency 2
+# LM Studio 已配置 8 个并发槽时，可显式使用 8；所有论文及重试共享这个上限。
+npm run library:translate -- --concurrency 8
 # 也可只选择几篇；已完成的内容会复用。
 npm run library:translate -- qwen3-technical-report qwen3-5-official-article --concurrency 2
 ```

@@ -3,6 +3,7 @@ import type { CatalogPaper } from '../types'
 export const PAPER_CATEGORIES = [
   { id: 'classics', title: '经典论文', description: '从基础方法读起，回看 AI 的关键进展。', tags: ['经典论文'] },
   { id: 'language-models', title: '大语言模型', description: '模型系列、技术报告与训练方法。', tags: ['Qwen', 'DeepSeek', 'Kimi', 'MiniMax', 'Gemini', 'Gemma', 'Llama', 'OLMo', 'GPT', 'BERT', 'T5', 'Chinchilla', 'Switch Transformer'] },
+  { id: 'benchmarks', title: '评测与 Benchmark', description: '集中阅读知识、推理、代码、智能体及专业领域的评测基准。', tags: ['评测基准'] },
   { id: 'vision', title: '计算机视觉与多模态', description: '从图像识别到视觉语言模型。', tags: ['计算机视觉', '多模态', '视觉语言模型', 'CLIP'] },
   { id: 'nlp', title: '自然语言处理', description: '词向量、序列建模与机器翻译。', tags: ['自然语言处理', '机器翻译', '词向量', 'BERT', 'T5'] },
   { id: 'generative', title: '生成模型', description: '变分自编码器、对抗学习与扩散模型。', tags: ['生成模型'] },

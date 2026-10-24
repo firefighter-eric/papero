@@ -9,6 +9,7 @@ import { assertAuthorArticleProvenance } from './author-article-lib.mjs'
 import { assertChineseHeadingCompleteness } from './heading-provenance.mjs'
 import { publicationAuthors } from './publication-bibliography.mjs'
 import { sourceAssetMetadata } from './publication-assets.mjs'
+import { sourceStructureHistoryCounts } from './source-structure-provenance.mjs'
 import { assertTranslationFidelity, catalogEntry, sanitizeHtml, sanitizeSvg, sha256, translationUnits, validArxivId, visibleProseText, scientificSignature } from './paper-lib.mjs'
 
 const fingerprint = value => typeof value === 'string' && /^[a-f0-9]{64}$/.test(value)
@@ -60,7 +61,7 @@ export function assertLocalResponseReplay(paper, block) {
 }
 
 export function historicalBlockCounts(paper) {
-  const counts = new Set([paper.blocks.length])
+  const counts = new Set([paper.blocks.length, ...sourceStructureHistoryCounts(paper)])
   for (const repair of paper.source.repairs || []) {
     if (repair.method !== 'separate-title-publication-notes-into-frontmatter') continue
     const added = paper.blocks.find(block => block.id === repair.addedBlockId)

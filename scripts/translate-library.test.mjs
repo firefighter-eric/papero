@@ -18,7 +18,8 @@ test('one shared queue limits concurrent requests from independent papers and re
   assert.deepEqual(results, Array.from({ length: 12 }, (_, index) => index))
   assert.equal(peak, 2)
   assert.equal(gate.stats().completed, 12)
-  for (const value of [0, 5, '2.5', undefined]) assert.throws(() => concurrencyLimit(value), /1 to 4/)
+  for (const value of [0, 9, '2.5', undefined]) assert.throws(() => concurrencyLimit(value), /1 to 8/)
+  assert.equal(concurrencyLimit('8'), 8)
   assert.deepEqual(parseLibraryArguments(['paper-a', '--concurrency', '4']).ids, ['paper-a'])
   assert.deepEqual(parseLibraryArguments(['--model', 'qwen3.6-35b-a3b', '--allow-model-change']),
     { ids: [], concurrency: 2, help: false, model: 'qwen3.6-35b-a3b', allowModelChange: true })
@@ -26,6 +27,27 @@ test('one shared queue limits concurrent requests from independent papers and re
   assert.equal(parseLibraryArguments(['--batch-characters', '3000']).batchCharacters, 3000)
   assert.equal(parseLibraryArguments(['--continue-on-paper-error']).continueOnPaperError, true)
   for (const value of ['255', '6001', '3.5', undefined]) assert.throws(() => parseLibraryArguments(['--batch-characters', value]), /256 to 6000/)
+})
+
+test('eight model slots remain shared by normal requests, corrections and retries', async () => {
+  const gate = createRequestGate(8)
+  let release
+  const held = new Promise(resolve => { release = resolve })
+  const started = []
+  const jobs = Array.from({ length: 24 }, (_, index) => gate(async () => {
+    started.push(index)
+    if (index < 8) await held
+    return index
+  }))
+  await Promise.resolve()
+  assert.deepEqual(started, Array.from({ length: 8 }, (_, index) => index))
+  assert.equal(gate.stats().active, 8)
+  assert.equal(gate.stats().queued, 16)
+  release()
+  assert.deepEqual(await Promise.all(jobs), Array.from({ length: 24 }, (_, index) => index))
+  assert.equal(gate.stats().peak, 8)
+  assert.equal(gate.stats().completed, 24)
+  assert.equal(parseLibraryArguments(['--concurrency', '8']).concurrency, 8)
 })
 
 test('signal shutdown drains accepted checkpoints, stops queued work and removes both handlers', async () => {

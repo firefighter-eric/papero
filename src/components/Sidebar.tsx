@@ -2,7 +2,7 @@ import { Database, PanelLeftClose, PanelLeftOpen, Search, X } from 'lucide-react
 import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type { CatalogPaper, ResearchEntry } from '../types'
 import { PaperTags } from './PaperTags'
-import { matchesPaperFilters, PAPER_FAMILIES, RESEARCH_TAGS, tagLabel } from '../lib/paper-tags'
+import { matchesPaperFilters, paperFamilyFilterGroups, RESEARCH_TAGS } from '../lib/paper-tags'
 import { useNavigationDrawer } from '../hooks/useNavigationDrawer'
 import { shortPaperAuthors } from '../lib/paper-bibliography'
 import { paperSourceName } from '../lib/paper-source'
@@ -48,7 +48,7 @@ export function Sidebar({ papers, selectedId, mobile, open, collapsed, remoteDat
     if (sort === 'title') result.sort((a, b) => a.title.localeCompare(b.title))
     return result
   }, [papers, query, family, research, sort])
-  const families = PAPER_FAMILIES.filter(tag => papers.some(paper => paper.tags.includes(tag)))
+  const families = paperFamilyFilterGroups(papers, family)
   const researchTypes = RESEARCH_TAGS.filter(tag => papers.some(paper => paper.tags.includes(tag)))
   const reportMatches = reports.filter(r => `${r.title} ${r.summary} ${r.tags.join(' ')}`.toLowerCase().includes(query.trim().toLowerCase()))
 
@@ -75,11 +75,13 @@ export function Sidebar({ papers, selectedId, mobile, open, collapsed, remoteDat
           <input type="search" placeholder={view === 'research' ? '搜索研究报告…' : '搜索论文…'} value={query} onChange={(event) => setQuery(event.target.value)} />
         </label>
         {view === 'papers' && <div className="library-filters" role="group" aria-label="论文标签筛选">
-          <label><span>模型系列</span><select value={family} onChange={event => setFamily(event.target.value)}>
+          <label><span>系列与方向</span><select aria-label="系列与方向" value={family} onChange={event => setFamily(event.target.value)}>
             <option value="">全部系列</option>
-            {families.map(tag => <option key={tag} value={tag}>{tagLabel(tag)}</option>)}
+            {families.map(group => <optgroup key={group.label} label={group.label}>
+              {group.options.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
+            </optgroup>)}
           </select></label>
-          <label><span>研究阶段</span><select value={research} onChange={event => setResearch(event.target.value)}>
+          <label><span>研究主题</span><select aria-label="研究主题" value={research} onChange={event => setResearch(event.target.value)}>
             <option value="">全部类型</option>
             {researchTypes.map(tag => <option key={tag} value={tag}>{tag}</option>)}
           </select></label>

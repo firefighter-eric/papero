@@ -4,11 +4,16 @@ import { mkdtemp, mkdir, writeFile, readFile, readdir, rm } from 'node:fs/promis
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { createServer } from 'node:http'
-import { createRequestGate, runBoundedTasks, createSerialWriter, extractCompletionText, translationRequestBudget, protectSourceDelimiters, normalizeProseRequestWhitespace, sourceNumericTokens } from './translation-workers.mjs'
+import { createRequestGate, runBoundedTasks, createSerialWriter, validateConcurrency, extractCompletionText, translationRequestBudget, protectSourceDelimiters, normalizeProseRequestWhitespace, sourceNumericTokens } from './translation-workers.mjs'
 import { parsePaper, sha256, technicalIdentifiers, assertTranslationFidelity } from './paper-lib.mjs'
 import { translatePaper, assertCompletionResponse, translateWithSplitting, compactRequestContexts, parseUnitResponse } from './translate-paper.mjs'
 
 const pause = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds))
+
+test('translation workers accept the configured eight slots and reject larger limits', () => {
+  assert.equal(validateConcurrency(8), 8)
+  for (const value of [0, 9, 2.5, NaN]) assert.throws(() => validateConcurrency(value), /1 to 8/)
+})
 
 test('prose request copies collapse bibliography layout whitespace without mutating source receipts or literal tokens', () => {
   const records = [{id:'reference:1',text:'\n'.repeat(5000)+'Deep Kalman\nFilters.\u000b',mustPreserve:['Kalman']}, {id:'example:0',text:'Use <think>\n then </think>.'}]
@@ -21,6 +26,7 @@ test('prose request copies collapse bibliography layout whitespace without mutat
 })
 
 test('numeric transport keeps scores and signs separate from immutable model versions', () => {
+  assert.deepEqual(sourceNumericTokens('See Fig.2 and Eq.3, using GPT-4o.' , ['GPT-4o']), ['2', '3'])
   const source = 'Phi-3 and GPT-3 score -3.5% and +10% on 9 tasks, with 15.6T tokens.'
   assert.deepEqual(technicalIdentifiers(source), ['Phi-3', 'GPT-3'])
   assert.deepEqual(sourceNumericTokens(source, technicalIdentifiers(source)), ['-3.5%', '+10%', '9', '15.6'])

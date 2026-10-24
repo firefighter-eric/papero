@@ -1,5 +1,9 @@
 # 示例论文的官方来源
 
+## Artificial Analysis Benchmark 论文
+
+2026-10-24 发布 22 篇固定版本的基准论文及完整中英文 HTML。标题、作者、官方链接和版本见 [收录清单](../paper-metadata/collections/artificial-analysis-benchmarks-22.json)；正文、实际翻译模型、失败恢复与验证记录见 [本次收录及发布记录](artificial-analysis-benchmark-intake-2026-10-24.md)。
+
 ## DeepSeek V4.1 Flash
 
 核验日期：2026-10-17。根据用户本次明确收录要求，固定收录 DeepSeek-AI 的 *DeepSeek-V4.1-Flash: Pushing the Limits of KV Cache Compression*，[arXiv 2609.19969v1](https://arxiv.org/abs/2609.19969v1)，提交日期为 2026-09-17。本地 ID 为 `deepseek-v4-1-flash-technical-report`，与已有 V4 报告分开保存。

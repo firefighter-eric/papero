@@ -4,7 +4,7 @@ import type { ReactNode } from 'react'
 import type { CatalogPaper, ResearchEntry } from '../types'
 import type { ReaderPreferences } from '../hooks/usePreferences'
 import { PAPER_CATEGORIES, browseHref, matchesPaperCategory } from '../lib/paper-categories'
-import { matchesPaperFilters, PAPER_FAMILIES, tagLabel } from '../lib/paper-tags'
+import { matchesPaperFilters, paperFamilyFilterGroups } from '../lib/paper-tags'
 import { shortPaperAuthors } from '../lib/paper-bibliography'
 import { AppLink } from './AppLink'
 import { PaperTags } from './PaperTags'
@@ -47,7 +47,7 @@ export function LibraryHome({ papers, reports, params, theme, onTheme, onNavigat
     return result
   }, [papers, category, query, family, sort])
   const categories = PAPER_CATEGORIES.map(item => ({ ...item, count: papers.filter(paper => matchesPaperCategory(paper, item.id)).length })).filter(item => item.count > 0)
-  const families = PAPER_FAMILIES.filter(tag => papers.some(paper => paper.tags.includes(tag)))
+  const families = paperFamilyFilterGroups(papers, family)
   const update = (patch: Record<string, string | null>, replace = false) => onNavigate(browseHref(params, patch), replace)
   const showHome = () => {
     scrollPositions.set('', 0)
@@ -85,7 +85,12 @@ export function LibraryHome({ papers, reports, params, theme, onTheme, onNavigat
             {filtered && <AppLink href="/" onNavigate={onNavigate} className="home-reset"><ArrowLeft size={15} aria-hidden="true" />全部论文</AppLink>}
           </div>
           <div className="home-filters">
-            <label>模型与方法<select aria-label="模型与方法" value={family} onChange={event => update({ family: event.target.value || null })}><option value="">全部系列</option>{families.map(tag => <option key={tag} value={tag}>{tagLabel(tag)}</option>)}</select></label>
+            <label>系列与方向<select aria-label="系列与方向" value={family} onChange={event => update({ family: event.target.value || null })}>
+              <option value="">全部系列</option>
+              {families.map(group => <optgroup key={group.label} label={group.label}>
+                {group.options.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
+              </optgroup>)}
+            </select></label>
             <label>排序<select aria-label="排序" value={sort} onChange={event => update({ sort: event.target.value === 'catalog' ? null : event.target.value }, true)}><option value="catalog">默认顺序</option><option value="year">年份从新到旧</option><option value="oldest">年份从旧到新</option><option value="title">标题 A–Z</option></select></label>
             {current && <p>{current.description}</p>}
           </div>
